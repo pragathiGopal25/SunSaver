@@ -25,10 +25,7 @@ import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.extension.compose.style.MapStyle
 import no.uio.ifi.in2000.team54.ui.theme.Team54Theme
 
-/**
- * Example to showcase usage of PolygonAnnotation with Jetpack Compose.
- */
-public class MainActivity : ComponentActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -58,7 +55,7 @@ public class MainActivity : ComponentActivity() {
                             }
                         },
                         style = {
-                            MapStyle(style = Style.LIGHT)
+                            MapStyle(style = Style.STANDARD)
                         },
                     ) {
                         PolygonAnnotation(
@@ -92,8 +89,8 @@ public class MainActivity : ComponentActivity() {
     }
 
     private companion object {
-        const val ZOOM: Double = 5.0
-        val CAMERA_CENTER: Point = Point.fromLngLat(-88.90136, 25.04579)
+        const val ZOOM: Double = 18.0 // Perfekt zoom
+        val CAMERA_CENTER: Point = Point.fromLngLat(11.362084, 59.506741)
         val POLYGON_POINTS = listOf(
             listOf(
                 Point.fromLngLat(-89.857177734375, 24.51713945052515),
