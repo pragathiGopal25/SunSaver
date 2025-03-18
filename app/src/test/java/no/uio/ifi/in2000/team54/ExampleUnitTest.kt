@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.alexanpw.team54
+package no.uio.ifi.in2000.team54
 
 import org.junit.Test
 

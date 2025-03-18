@@ -15,7 +15,7 @@
     <activity
       android:exported="true"
       android:label="@string/app_name"
-      android:name=".MainActivity"
+      android:name="no.uio.ifi.in2000.team54.MainActivity"
       android:theme="@style/Theme.Team54">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />

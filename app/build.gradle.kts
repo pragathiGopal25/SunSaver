@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "no.uio.ifi.in2000.alexanpw.team54"
+    namespace = "no.uio.ifi.in2000.team54"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "no.uio.ifi.in2000.alexanpw.team54"
+        applicationId = "no.uio.ifi.in2000.team54"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -53,4 +53,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.mapbox)
+    implementation(libs.maps.compose)
 }
