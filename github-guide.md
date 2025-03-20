@@ -8,12 +8,13 @@ Make sure that you are working in a repository that is up to date
 - `git pull`
 
 And then switch to the branch that you are working in 
-- `git switch branch_name`
-    - This will also create a new branch if you instead write `git switch -c new_branch_name`
+- `git switch branch-name`
+    - This will also create a new branch if you instead write `git switch -c new-branch-name`
     - If you use this to create a new branch, it will depend on the branch you're currently working in. In most cases when you create a new branch, you want to branch from main.
+    - Always run a `git pull` after switching branch to make sure that you're up to date
 
 To check what branch you're in, you can do
-- `git checkout`
+- `git status`
 
 ### When done working
 Make sure that you add your files before commiting
@@ -27,7 +28,7 @@ You can commit several times before you finally push the commit(s) to Github
 - `git push`
 
 If the branch is new, you instead use
-- `git push -u origin new_branch_name`
+- `git push -u origin new-branch-name`
 
 ## Conventions
 ### Commit conventions
@@ -43,7 +44,7 @@ We want our commits to reflect the work we've done as effectively as possible, a
 
 ### Branch conventions
 Always create a new branch when starting to work on something new. Every commit in a branch should be to further the goal of that branch. Branches can have the same `types` as commits, however, the structure is slightly different:
-- [type]/[branch_name]
+- [type]/[branch-name]
 
 ## Example: When I work on a new feature
 
@@ -53,7 +54,7 @@ While working I  made a change to the readme file, and I added a new feature in 
 ```
 git switch main //Here I make sure that I'm in the main branch to start
 git pull //Make sure that my local repo is up to date
-git switch -c feat/InfoPage //Here I create a new branch where I will put my new feature
+git switch -c feat/info-page //Here I create a new branch where I will put my new feature
 
 ---- write some code and make changes as described ----
 
@@ -61,7 +62,7 @@ git add README.md //Add readme to commit
 git commit -m "chore: Rewrote some sentences that were unclear" //Commit the readme file with clear message
 git add . //All other files were related to the new feature so I can add them all at the same time
 git commit -m "feat: Added an info page where user can read about solar panels" //Commit the changed code files with clear message
-git push -u origin feat/InfoPage //Push both commits to the branch
+git push -u origin feat/info-page //Push both commits to the branch
 ```
 
 After this, if the feature is done, the branch can be merged into main. This can be done with a pull request that requires another or several members to look through the changes. 
