@@ -11,8 +11,10 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -29,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
@@ -40,6 +44,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -118,11 +123,22 @@ fun ArraySettingsMenu(mapState: MapViewportState) {
                 .anchoredDraggable(draggableState, Orientation.Vertical)
         ) {
             Column(
+                verticalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(10.dp)
             ) {
                 SearchField(mapState, draggableState)
+                Button(
+                    onClick = {},
+                    modifier = Modifier
+                        .padding(horizontal = 40.dp)
+                        .padding(bottom = 100.dp)
+                        .fillMaxWidth()
+
+                ) {
+                    Text("Lagre")
+                }
             }
         }
     }
@@ -205,29 +221,34 @@ fun SearchField(mapState: MapViewportState, draggableState: AnchoredDraggableSta
         )
 
         if (showSuggestions) {
-            Column(
-                modifier = Modifier
-                    .padding(top = 10.dp)
+            Popup(
+                Alignment.TopStart,
+                onDismissRequest = { showSuggestions = false }
             ) {
-                suggestions.value.forEach { suggestion ->
-                    if (suggestion.formattedAddress == null) {
-                        return
-                    }
+                Column(
+                    modifier = Modifier
+                        .padding(top = 60.dp)
+                ) {
+                    suggestions.value.forEach { suggestion ->
+                        if (suggestion.formattedAddress == null) {
+                            return@forEach
+                        }
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.White)
-                            .padding(10.dp)
-                            .clickable {
-                                keyboardController?.hide()
-                                focusManager.clearFocus()
-                                selectSuggestion(suggestion)
-                            },
-                    ) {
-                        Text(
-                            text = suggestion.formattedAddress!!
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White)
+                                .padding(10.dp)
+                                .clickable {
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
+                                    selectSuggestion(suggestion)
+                                },
+                        ) {
+                            Text(
+                                text = suggestion.formattedAddress!!
+                            )
+                        }
                     }
                 }
             }
