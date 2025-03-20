@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.alexanpw.team54.ui.theme
+package no.uio.ifi.in2000.team54.ui.theme
 
 import android.app.Activity
 import android.os.Build

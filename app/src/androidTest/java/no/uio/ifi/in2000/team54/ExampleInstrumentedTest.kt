@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.alexanpw.team54
+package no.uio.ifi.in2000.team54
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("no.uio.ifi.in2000.alexanpw.team54", appContext.packageName)
+        assertEquals("no.uio.ifi.in2000.team54", appContext.packageName)
     }
 }

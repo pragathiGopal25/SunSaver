@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.alexanpw.team54.ui.theme
+package no.uio.ifi.in2000.team54.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
