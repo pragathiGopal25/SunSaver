@@ -53,6 +53,13 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
     implementation(libs.mapbox)
     implementation(libs.maps.compose)
+    implementation("com.mapbox.search:autofill:2.8.0-rc.1")
+    implementation("com.mapbox.search:discover:2.8.0-rc.1")
+    implementation("com.mapbox.search:place-autocomplete:2.8.0-rc.1")
+    implementation("com.mapbox.search:offline:2.8.0-rc.1")
+    implementation("com.mapbox.search:mapbox-search-android:2.8.0-rc.1")
+    implementation("com.mapbox.search:mapbox-search-android-ui:2.8.0-rc.1")
 }
