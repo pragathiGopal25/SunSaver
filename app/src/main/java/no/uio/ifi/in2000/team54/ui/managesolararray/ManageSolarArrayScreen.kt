@@ -17,15 +17,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +52,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -57,7 +65,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 private val placeAutocomplete = PlaceAutocomplete.create()
-private const val zoom: Double = 18.0
 
 enum class ArraySettingsMenuAnchors { Bottom, Center, Top }
 
@@ -65,7 +72,8 @@ enum class ArraySettingsMenuAnchors { Bottom, Center, Top }
 fun ManageSolarArrayScreen() {
     val mapState = rememberMapViewportState {
         setCameraOptions {
-            zoom(zoom)
+            center(Point.fromLngLat( 10.7522, 59.9139))
+            zoom(10.0)
         }
     }
 
@@ -91,12 +99,12 @@ fun ArraySettingsMenu(mapState: MapViewportState) {
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
     val anchors = DraggableAnchors {
         ArraySettingsMenuAnchors.Bottom at screenSizePx - 500f
-        ArraySettingsMenuAnchors.Center at screenSizePx / 2
+        //ArraySettingsMenuAnchors.Center at screenSizePx / 2
         ArraySettingsMenuAnchors.Top at 250f
     }
     val draggableState = remember {
         AnchoredDraggableState(
-            initialValue = ArraySettingsMenuAnchors.Center,
+            initialValue = ArraySettingsMenuAnchors.Bottom,
             anchors = anchors,
             positionalThreshold = { it },
             velocityThreshold = { 0f },
@@ -119,18 +127,33 @@ fun ArraySettingsMenu(mapState: MapViewportState) {
                 }
                 .size(screenSizeDp)
                 .clip(shape = RoundedCornerShape(25.dp, 25.dp, 0.dp, 0.dp))
-                .background(Color.Gray)
+                .background(MaterialTheme.colorScheme.primary)
                 .anchoredDraggable(draggableState, Orientation.Vertical)
         ) {
             Column(
                 verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(10.dp)
             ) {
-                SearchField(mapState, draggableState)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(modifier = Modifier
+                        .padding(bottom = 8.dp)
+                        .width(50.dp)
+                        .height(5.dp)
+                        .clip(shape = RoundedCornerShape(100.dp))
+                        .background(Color.Gray)
+                    )
+                    SearchField(mapState, draggableState)
+                }
                 Button(
                     onClick = {},
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary
+                    ),
                     modifier = Modifier
                         .padding(horizontal = 40.dp)
                         .padding(bottom = 100.dp)
@@ -166,6 +189,7 @@ fun SearchField(mapState: MapViewportState, draggableState: AnchoredDraggableSta
                 mapState.easeTo(
                     CameraOptions.Builder()
                         .center(result.coordinate)
+                        .zoom(18.0)
                         .build()
                 )
             }.onError { e ->
@@ -206,8 +230,13 @@ fun SearchField(mapState: MapViewportState, draggableState: AnchoredDraggableSta
 
                 selectSuggestion(suggestion)
             }),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
+                focusedContainerColor = MaterialTheme.colorScheme.secondary
+            ),
             modifier = Modifier
                 .fillMaxWidth()
+                .height(50.dp)
                 .clip(shape = RoundedCornerShape(100.dp))
                 .onFocusChanged {
                     showSuggestions = it.isFocused
