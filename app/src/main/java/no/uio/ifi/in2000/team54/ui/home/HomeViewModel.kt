@@ -1,4 +1,8 @@
 package no.uio.ifi.in2000.team54.ui.home
 
-class HomeViewModel {
+import androidx.lifecycle.ViewModel
+
+class HomeViewModel : ViewModel(){
+
 }
+

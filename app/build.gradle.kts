@@ -55,4 +55,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.mapbox)
     implementation(libs.maps.compose)
+
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
+
 }
