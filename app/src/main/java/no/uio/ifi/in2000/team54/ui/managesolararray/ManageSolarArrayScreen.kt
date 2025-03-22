@@ -11,6 +11,7 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,14 +20,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -193,7 +197,7 @@ private fun ArraySettingsContent(
             .fillMaxSize()
             .padding(10.dp)
     ) {
-        ArraySettingsHeader(
+        ArraySettingsMainSection(
             mapState = mapState,
             draggableState = draggableState,
             roofs = roofs
@@ -204,7 +208,7 @@ private fun ArraySettingsContent(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ArraySettingsHeader(
+private fun ArraySettingsMainSection(
     mapState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
     roofs: SnapshotStateList<RoofState>
@@ -219,9 +223,7 @@ private fun ArraySettingsHeader(
         RoofList(roofs)
         AddRoofComponent(
             onAdd = {
-                if (roofs.size < 4) {
-                    roofs.add(it)
-                }
+                roofs.add(it)
             }
         )
     }
@@ -241,11 +243,17 @@ private fun DragHandle() {
 
 @Composable
 private fun RoofList(roofs: SnapshotStateList<RoofState>) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(5.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
     ) {
-        roofs.forEachIndexed { index, roof ->
-            RoofItem(index = index, onRemove = { roofs.remove(roof) })
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            roofs.forEachIndexed { index, roof ->
+                RoofItem(index = index, onRemove = { roofs.remove(roof) })
+            }
         }
     }
 }
@@ -254,7 +262,8 @@ private fun RoofList(roofs: SnapshotStateList<RoofState>) {
 private fun RoofItem(index: Int, onRemove: () -> Unit) {
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .width(100.dp)
+            .height(100.dp)
             .clip(shape = RoundedCornerShape(15.dp))
             .background(Color.White)
             .padding(10.dp)
@@ -273,7 +282,7 @@ private fun SaveButton() {
         ),
         modifier = Modifier
             .width(200.dp)
-            .padding(bottom = 100.dp)
+            .padding(bottom = 100.dp, top = 20.dp)
             .fillMaxWidth()
     ) {
         Text("Lagre")
@@ -506,8 +515,13 @@ private fun HeaderText(text: String) {
 
 @Composable
 private fun AddRoofButton(onClick: () -> Unit) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Button(
-        onClick = onClick,
+        onClick = {
+            onClick()
+            keyboardController?.hide()
+        },
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.secondary
         ),
