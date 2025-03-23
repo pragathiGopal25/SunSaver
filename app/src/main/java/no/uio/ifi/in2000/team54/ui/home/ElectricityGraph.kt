@@ -71,7 +71,7 @@ fun TestGraphs() { // just for demo, delete later
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         ElectricityGraph()
-        ElectrisityGraph2()
+        ElectricityGraph2()
     }
 }
 
@@ -96,21 +96,23 @@ fun ElectricityGraph (modifier: Modifier = Modifier){
                     titleComponent = TextComponent()
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
-                    title = "Tid",
+                    title = "Tid (Måneder)",
                     titleComponent = TextComponent(),
                     valueFormatter = monthFormatter
-                )
+                ),
+                marker = rememberMarker()
             ),
             modelProducer,
-            modifier = modifier.padding(16.dp),
-            scrollState = rememberVicoScrollState(scrollEnabled = false) // disabled so it fits the box
+            modifier = modifier.padding(10.dp).height(250.dp),
+            scrollState = rememberVicoScrollState(scrollEnabled = false), // disabled so it fits the box
+
         )
     }
 }
 
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
 @Composable
-fun ElectrisityGraph2(modifier: Modifier = Modifier) {
+fun ElectricityGraph2(modifier: Modifier = Modifier) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
     LaunchedEffect(Unit) {
@@ -143,7 +145,7 @@ fun ElectrisityGraph2(modifier: Modifier = Modifier) {
                 titleComponent = TextComponent()
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
-                title = "Tid",
+                title = "Tid (Måneder)",
                 titleComponent = TextComponent(),
                 valueFormatter = monthFormatter
             ),
@@ -161,11 +163,11 @@ fun ElectrisityGraph2(modifier: Modifier = Modifier) {
                         )
                     }
                 },
-                padding = insets(top = 16.dp),
+                padding = insets(top = 10.dp),
             ),
         ),
         modelProducer,
-        modifier.height(300.dp),
+        modifier.padding(10.dp).height(300.dp),
         rememberVicoScrollState(scrollEnabled = false),
     )
 }
@@ -210,7 +212,7 @@ fun rememberMarker(
                         front = indicatorFrontComponent,
                         padding = insets(5.dp),
                     ),
-                    padding = insets(10.dp),
+                    padding = insets(16.dp),
                 )
             }
         } else {
