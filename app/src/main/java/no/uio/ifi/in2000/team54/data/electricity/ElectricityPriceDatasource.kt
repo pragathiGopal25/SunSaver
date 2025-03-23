@@ -32,13 +32,11 @@ class ElectricityPriceDatasource {
 
     suspend fun getElectricityPrices(
         area: String,
-        year: String,
-        month: String,
-        day: String
+        date: String
     ): List<ElectricityPriceInfo> {
 
         val response: List<ElectricityPriceInfo> =
-            client.get("https://www.hvakosterstrommen.no/api/v1/prices/$year/$month-${day}_$area.json")
+            client.get("https://www.hvakosterstrommen.no/api/v1/prices/${date}_$area.json")
                 .body()
 
         return response
