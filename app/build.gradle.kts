@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+    kotlin("plugin.serialization") version "2.1.20"
 }
 
 android {
@@ -62,4 +64,10 @@ dependencies {
     implementation("com.mapbox.search:offline:2.8.0-rc.1")
     implementation("com.mapbox.search:mapbox-search-android:2.8.0-rc.1")
     implementation("com.mapbox.search:mapbox-search-android-ui:2.8.0-rc.1")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+    implementation("io.ktor:ktor-client-core:3.1.1")
+    implementation("io.ktor:ktor-client-cio:3.1.1")
+    implementation("io.ktor:ktor-client-content-negotiation:3.1.1")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.1.1")
 }

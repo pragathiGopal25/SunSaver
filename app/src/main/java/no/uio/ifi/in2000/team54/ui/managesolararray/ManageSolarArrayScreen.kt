@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,7 +29,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -41,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -68,67 +67,95 @@ import androidx.compose.ui.window.Popup
 import androidx.core.text.isDigitsOnly
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
+import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
+import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
+import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
+import com.mapbox.maps.extension.compose.rememberMapState
 import com.mapbox.maps.extension.compose.style.MapStyle
 import com.mapbox.search.autocomplete.PlaceAutocomplete
 import com.mapbox.search.autocomplete.PlaceAutocompleteSuggestion
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
+import no.uio.ifi.in2000.team54.model.building.Pos
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
 import no.uio.ifi.in2000.team54.ui.state.RoofState
 import kotlin.math.roundToInt
 
+
 private val placeAutocomplete = PlaceAutocomplete.create()
+private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
 
 enum class ArraySettingsMenuAnchors { Bottom, Top }
 
 @Composable
-fun ManageSolarArrayScreen() {
-    val mapState = rememberMapViewportState {
+fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel) {
+    val mapViewportState = rememberMapViewportState {
         setCameraOptions {
-            center(Point.fromLngLat(10.7522, 59.9139))
+            center(osloCenter)
             zoom(10.0)
         }
     }
-
+    val mapState = rememberMapState {}
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Map(mapState)
+        Map(mapState, mapViewportState, viewModel)
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            ArraySettingsMenu(mapState)
+            ArraySettingsMenu(mapState, mapViewportState, viewModel)
         }
     }
 }
 
 @Composable
-private fun Map(mapState: MapViewportState) {
+private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewModel: ManageSolarArrayViewModel) {
+    val scope = rememberCoroutineScope()
+    val roofSections by viewModel.roofSections.collectAsState()
+
     MapboxMap(
         Modifier
             .fillMaxSize(),
-        mapViewportState = mapState,
+        mapState = mapState,
+        mapViewportState = mapViewportState,
         style = {
-            MapStyle(style = Style.STANDARD)
+            MapStyle(style = Style.SATELLITE)
         },
-    ) {}
+    ) {
+        val color = MaterialTheme.colorScheme.secondary
+        roofSections.roofSections.forEach { roofSection ->
+            val points = roofSection.geometry.coordinates.get(0).map {
+                Point.fromLngLat(it[0], it[1])
+            }
+
+            PolygonAnnotation(listOf(points)) {
+                fillColor = color
+                fillOpacity = 0.9
+            }
+            PolylineAnnotation(points) {
+                lineColor = Color.Black
+                lineWidth = 3.0
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ArraySettingsMenu(mapState: MapViewportState) {
+private fun ArraySettingsMenu(mapState: MapState, mapViewportState: MapViewportState, viewModel: ManageSolarArrayViewModel) {
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
 
     val anchors = DraggableAnchors {
         ArraySettingsMenuAnchors.Bottom at screenSizePx - 500f
-        ArraySettingsMenuAnchors.Top at 250f
+        ArraySettingsMenuAnchors.Top at 150f
     }
 
     val draggableState = remember {
@@ -150,8 +177,10 @@ private fun ArraySettingsMenu(mapState: MapViewportState) {
         ) {
             ArraySettingsContent(
                 mapState,
+                mapViewportState,
                 draggableState,
-                roofs
+                roofs,
+                viewModel
             )
         }
     }
@@ -186,9 +215,11 @@ private fun DraggableBox(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ArraySettingsContent(
-    mapState: MapViewportState,
+    mapState: MapState,
+    mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
-    roofs: SnapshotStateList<RoofState>
+    roofs: SnapshotStateList<RoofState>,
+    viewModel: ManageSolarArrayViewModel
 ) {
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
@@ -198,27 +229,31 @@ private fun ArraySettingsContent(
             .padding(10.dp)
     ) {
         ArraySettingsMainSection(
-            mapState = mapState,
-            draggableState = draggableState,
-            roofs = roofs
+            mapState,
+            mapViewportState,
+            draggableState,
+            roofs,
+            viewModel
         )
         SaveButton()
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, MapboxExperimental::class)
 @Composable
 private fun ArraySettingsMainSection(
-    mapState: MapViewportState,
+    mapState: MapState,
+    mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
-    roofs: SnapshotStateList<RoofState>
+    roofs: SnapshotStateList<RoofState>,
+    viewModel: ManageSolarArrayViewModel
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DragHandle()
-        SearchField(mapState, draggableState)
+        SearchField(mapState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
         RoofList(roofs)
         AddRoofComponent(
@@ -226,6 +261,7 @@ private fun ArraySettingsMainSection(
                 roofs.add(it)
             }
         )
+        //RoofTopComponent(selectedBuilding)
     }
 }
 
@@ -282,7 +318,7 @@ private fun SaveButton() {
         ),
         modifier = Modifier
             .width(200.dp)
-            .padding(bottom = 100.dp, top = 20.dp)
+            .padding(bottom = 60.dp, top = 20.dp)
             .fillMaxWidth()
     ) {
         Text("Lagre")
@@ -292,8 +328,10 @@ private fun SaveButton() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun SearchField(
-    mapState: MapViewportState,
-    draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>
+    mapState: MapState,
+    mapViewportState: MapViewportState,
+    draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
+    viewModel: ManageSolarArrayViewModel
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -310,7 +348,9 @@ private fun SearchField(
                 draggableState.animateTo(ArraySettingsMenuAnchors.Bottom, 0F)
                 val selectionResponse = placeAutocomplete.select(suggestion)
                 selectionResponse.onValue { result ->
-                    mapState.easeTo(
+                    viewModel.setPos(Pos.fromPoint(result.coordinate))
+
+                    mapViewportState.easeTo(
                         CameraOptions.Builder()
                             .center(result.coordinate)
                             .zoom(18.0)
@@ -440,10 +480,12 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
             .background(Color.White)
             .padding(horizontal = 15.dp, vertical = 10.dp)
     ) {
-        HeaderText("Takflate")
-
+        Text(
+            text = "Takflate",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.size(10.dp))
-
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth()
@@ -467,7 +509,6 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
                     .weight(1f)
             )
         }
-
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth()
@@ -488,9 +529,7 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
                     .weight(1f),
             )
         }
-
         Spacer(modifier = Modifier.size(10.dp))
-
         AddRoofButton {
             onAdd(
                 RoofState(
@@ -502,15 +541,6 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
             )
         }
     }
-}
-
-@Composable
-private fun HeaderText(text: String) {
-    Text(
-        text = text,
-        fontSize = 20.sp,
-        fontWeight = FontWeight.Bold
-    )
 }
 
 @Composable
@@ -580,6 +610,41 @@ private fun SolarPanelTypeDropdown(
         }
     }
 }
+
+/*@OptIn(MapboxExperimental::class)
+@Composable
+private fun RoofTopComponent(selectedBuilding: FeaturesetFeature<FeatureState>?) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .clip(shape = RoundedCornerShape(15.dp))
+            .background(Color.White)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(20.dp)
+                .drawWithCache {
+                    val path = Path()
+                    if (selectedBuilding != null) {
+                        println((selectedBuilding.geometry as? Polygon)?.coordinates()?.toList())
+
+                        path.moveTo(0f, 0f)
+                        path.lineTo(100f, 0f)
+                        path.lineTo(100f, 100f)
+                        path.lineTo(0f, 100f)
+                        path.close()
+                    }
+
+                    onDrawBehind {
+                        drawPath(path, Color.Blue) // Draw the path with Blue color
+                    }
+                }
+        )
+    }
+}*/
 
 @Composable
 private fun NumberInputField(
