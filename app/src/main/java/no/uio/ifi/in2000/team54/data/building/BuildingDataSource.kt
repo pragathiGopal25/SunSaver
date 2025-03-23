@@ -29,7 +29,7 @@ class BuildingDataSource {
                 "data", """
                 [out:json];
                 (
-                  way["building"]["ref:bygningsnr"](around:10, $lat, $lng);
+                  way["building"]["ref:bygningsnr"](around:20, $lat, $lng);
                 );
                 out geom;
             """.trimIndent()
@@ -44,9 +44,9 @@ class BuildingDataSource {
         return Json.parseToJsonElement(response.bodyAsText()).jsonObject
     }
 
-    suspend fun getRoofSections(buildingIds: List<Long>): List<RoofSection> {
+    suspend fun getRoofSections(buildingId: Long): List<RoofSection> {
         val response = this.httpClient.get("https://sol-api.fjordkraft.no/roof-information/query-by-buildings") {
-            parameter("buildingIds", buildingIds.joinToString(","))
+            parameter("buildingIds", buildingId)
         }
 
         return response.body<RoofResponse>().roofSections
