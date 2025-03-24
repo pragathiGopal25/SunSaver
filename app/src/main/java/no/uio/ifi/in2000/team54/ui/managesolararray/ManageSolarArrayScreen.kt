@@ -117,7 +117,6 @@ fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel) {
 
 @Composable
 private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewModel: ManageSolarArrayViewModel) {
-    val scope = rememberCoroutineScope()
     val roofSections by viewModel.roofSections.collectAsState()
 
     MapboxMap(
@@ -126,8 +125,12 @@ private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewMode
         mapState = mapState,
         mapViewportState = mapViewportState,
         style = {
-            MapStyle(style = Style.SATELLITE)
+            MapStyle(style = Style.MAPBOX_STREETS)
         },
+        onMapClickListener = { point ->
+            viewModel.setPos(Pos.fromPoint(point))
+            false
+        }
     ) {
         val color = MaterialTheme.colorScheme.secondary
         roofSections.roofSections.forEach { roofSection ->
