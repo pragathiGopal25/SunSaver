@@ -3,8 +3,10 @@ package no.uio.ifi.in2000.team54.ui.managesolararray
 
 import android.util.Log
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
@@ -29,15 +31,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -67,7 +72,6 @@ import androidx.compose.ui.window.Popup
 import androidx.core.text.isDigitsOnly
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.MapboxExperimental
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.MapboxMap
@@ -125,7 +129,7 @@ private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewMode
         mapState = mapState,
         mapViewportState = mapViewportState,
         style = {
-            MapStyle(style = Style.MAPBOX_STREETS)
+            MapStyle(style = Style.STANDARD)
         },
         onMapClickListener = { point ->
             viewModel.setPos(Pos.fromPoint(point))
@@ -134,7 +138,7 @@ private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewMode
     ) {
         val color = MaterialTheme.colorScheme.secondary
         roofSections.roofSections.forEach { roofSection ->
-            val points = roofSection.geometry.coordinates.get(0).map {
+            val points = roofSection.geometry.coordinates[0].map {
                 Point.fromLngLat(it[0], it[1])
             }
 
@@ -242,7 +246,7 @@ private fun ArraySettingsContent(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, MapboxExperimental::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ArraySettingsMainSection(
     mapState: MapState,
@@ -264,7 +268,6 @@ private fun ArraySettingsMainSection(
                 roofs.add(it)
             }
         )
-        //RoofTopComponent(selectedBuilding)
     }
 }
 
@@ -273,10 +276,10 @@ private fun DragHandle() {
     Box(
         modifier = Modifier
             .padding(bottom = 8.dp)
-            .width(50.dp)
-            .height(5.dp)
+            .width(85.dp)
+            .height(7.dp)
             .clip(shape = RoundedCornerShape(100.dp))
-            .background(Color.Gray)
+            .background(MaterialTheme.colorScheme.secondary)
     )
 }
 
@@ -317,14 +320,14 @@ private fun SaveButton() {
     Button(
         onClick = { },
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondary
+            containerColor = MaterialTheme.colorScheme.tertiary
         ),
         modifier = Modifier
             .width(200.dp)
             .padding(bottom = 60.dp, top = 20.dp)
             .fillMaxWidth()
     ) {
-        Text("Lagre")
+        Text("Lagre", color = Color.Black)
     }
 }
 
@@ -414,21 +417,57 @@ private fun SearchTextField(
     onDone: () -> Unit,
     onFocusChanged: (Boolean) -> Unit
 ) {
-    TextField(
-        value = address,
-        onValueChange = onAddressChange,
-        label = { Text("Søk adresse") },
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-        keyboardActions = KeyboardActions(onDone = { onDone() }),
-        colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-            focusedContainerColor = MaterialTheme.colorScheme.secondary
-        ),
+    BasicTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .height(50.dp)
-            .clip(shape = RoundedCornerShape(100.dp))
-            .onFocusChanged { onFocusChanged(it.isFocused) }
+            .clip(RoundedCornerShape(100.dp))
+            .background(
+                MaterialTheme.colorScheme.tertiary,
+                MaterialTheme.shapes.small
+            )
+            .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(100.dp))
+            .padding(start = 30.dp)
+            .onFocusChanged { onFocusChanged(it.isFocused) },
+        value = address,
+        onValueChange = onAddressChange,
+        singleLine = true,
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
+        textStyle = LocalTextStyle.current.copy(
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 15.sp
+        ),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { onDone() }),
+        decorationBox = { innerTextField ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Box {
+                    if (address.isEmpty()) {
+                        Text(
+                            text = "Søk addresse",
+                            style = LocalTextStyle.current.copy(
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                fontSize = 15.sp
+                            )
+                        )
+                    }
+                    innerTextField()
+                }
+                Icon(
+                    Icons.Rounded.Search,
+                    contentDescription = "Søk adresser",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .width(40.dp)
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(100.dp))
+                        .background(MaterialTheme.colorScheme.secondary)
+                        .padding(7.dp)
+                )
+            }
+        }
     )
 }
 
@@ -443,7 +482,12 @@ private fun SuggestionsPopup(
         onDismissRequest = onDismissRequest
     ) {
         Column(
-            modifier = Modifier.padding(top = 60.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 60.dp, start = 10.dp, end = 10.dp)
+                .clip(RoundedCornerShape(15.dp))
+                .background(MaterialTheme.colorScheme.tertiary)
+                .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(15.dp))
         ) {
             suggestions.forEach { suggestion ->
                 if (suggestion.formattedAddress != null) {
@@ -462,7 +506,6 @@ private fun SuggestionItem(suggestion: PlaceAutocompleteSuggestion, onClick: () 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
             .padding(10.dp)
             .clickable { onClick() }
     ) {
@@ -480,7 +523,8 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
     Column(
         modifier = Modifier
             .clip(shape = RoundedCornerShape(15.dp))
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.tertiary)
+            .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(15.dp))
             .padding(horizontal = 15.dp, vertical = 10.dp)
     ) {
         Text(
@@ -556,11 +600,12 @@ private fun AddRoofButton(onClick: () -> Unit) {
             keyboardController?.hide()
         },
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondary
+            containerColor = MaterialTheme.colorScheme.tertiary
         ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
         modifier = Modifier.width(150.dp)
     ) {
-        Text("Legg til")
+        Text("Legg til", color = Color.Black)
     }
 }
 
@@ -613,41 +658,6 @@ private fun SolarPanelTypeDropdown(
         }
     }
 }
-
-/*@OptIn(MapboxExperimental::class)
-@Composable
-private fun RoofTopComponent(selectedBuilding: FeaturesetFeature<FeatureState>?) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .clip(shape = RoundedCornerShape(15.dp))
-            .background(Color.White)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .padding(20.dp)
-                .drawWithCache {
-                    val path = Path()
-                    if (selectedBuilding != null) {
-                        println((selectedBuilding.geometry as? Polygon)?.coordinates()?.toList())
-
-                        path.moveTo(0f, 0f)
-                        path.lineTo(100f, 0f)
-                        path.lineTo(100f, 100f)
-                        path.lineTo(0f, 100f)
-                        path.close()
-                    }
-
-                    onDrawBehind {
-                        drawPath(path, Color.Blue) // Draw the path with Blue color
-                    }
-                }
-        )
-    }
-}*/
 
 @Composable
 private fun NumberInputField(

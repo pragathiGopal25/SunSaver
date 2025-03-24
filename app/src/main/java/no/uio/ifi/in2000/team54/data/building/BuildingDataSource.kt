@@ -39,7 +39,6 @@ class BuildingDataSource {
         if (response.status != HttpStatusCode.OK) {
             return null
         }
-        println(response.request.url.toString())
 
         return Json.parseToJsonElement(response.bodyAsText()).jsonObject
     }
