@@ -55,4 +55,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.mapbox)
     implementation(libs.maps.compose)
+    implementation(libs.google.accompanist.pager)
+    implementation(libs.accompanist.pager.indicators)
 }
