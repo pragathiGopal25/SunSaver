@@ -31,7 +31,7 @@ class BuildingDataSource {
                 (
                   way["building"]["ref:bygningsnr"](around:20, $lat, $lng);
                 );
-                out geom;
+                out tags;
             """.trimIndent()
             )
         }
