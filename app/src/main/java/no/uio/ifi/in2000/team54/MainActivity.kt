@@ -12,7 +12,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Team54Theme {
                 //ManageSolarArrayScreen()
-                TestGraphs()
+                //TestGraphs()
             }
         }
     }
