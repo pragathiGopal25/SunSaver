@@ -33,6 +33,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -42,6 +43,8 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -88,7 +91,14 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Pos
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
-import no.uio.ifi.in2000.team54.ui.state.RoofState
+import no.uio.ifi.in2000.team54.ui.state.RoofSection
+import no.uio.ifi.in2000.team54.ui.theme.Beige
+import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
+import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
+import no.uio.ifi.in2000.team54.ui.theme.Light
+import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
+import no.uio.ifi.in2000.team54.ui.theme.Red
 import kotlin.math.roundToInt
 
 private val placeAutocomplete = PlaceAutocomplete.create()
@@ -131,6 +141,7 @@ private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewMode
         style = {
             MapStyle(style = Style.STANDARD)
         },
+        scaleBar = {},
         onMapClickListener = { point ->
             viewModel.setPos(Pos.fromPoint(point))
             false
@@ -184,7 +195,15 @@ private fun ArraySettingsMenu(mapState: MapState, mapViewportState: MapViewportS
         )
     }
 
-    val roofs = remember { mutableStateListOf<RoofState>() }
+    val roofs = remember { mutableStateListOf<RoofSection>() }
+    roofs.add(
+        RoofSection(
+            80.0,
+            35.0,
+            300.0,
+            SolarPanelType.PREMIUM
+        )
+    )
 
     Column {
         DraggableBox(
@@ -221,7 +240,7 @@ private fun DraggableBox(
             }
             .size(screenSizeDp)
             .clip(shape = RoundedCornerShape(25.dp, 25.dp, 0.dp, 0.dp))
-            .background(MaterialTheme.colorScheme.primary)
+            .background(LightestYellow)
             .anchoredDraggable(draggableState, Orientation.Vertical)
     ) {
         content()
@@ -234,7 +253,7 @@ private fun ArraySettingsContent(
     mapState: MapState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
-    roofs: SnapshotStateList<RoofState>,
+    roofs: SnapshotStateList<RoofSection>,
     viewModel: ManageSolarArrayViewModel
 ) {
     Column(
@@ -261,22 +280,27 @@ private fun ArraySettingsMainSection(
     mapState: MapState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
-    roofs: SnapshotStateList<RoofState>,
+    roofs: SnapshotStateList<RoofSection>,
     viewModel: ManageSolarArrayViewModel
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(5.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DragHandle()
         SearchField(mapState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
-        RoofList(roofs)
-        AddRoofComponent(
-            onAdd = {
-                roofs.add(it)
-            }
-        )
+        Column (
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ){
+            AddRoofSectionCard(
+                onAdd = {
+                    roofs.add(it)
+                }
+            )
+            RoofSectionsList(roofs)
+        }
     }
 }
 
@@ -288,55 +312,115 @@ private fun DragHandle() {
             .width(85.dp)
             .height(7.dp)
             .clip(shape = RoundedCornerShape(100.dp))
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(BrightYellow)
     )
 }
 
 @Composable
-private fun RoofList(roofs: SnapshotStateList<RoofState>) {
+private fun RoofSectionsList(roofSections: SnapshotStateList<RoofSection>) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            roofs.forEachIndexed { index, roof ->
-                RoofItem(index = index, onRemove = { roofs.remove(roof) })
+            roofSections.forEachIndexed { index, section ->
+                RoofSectionCard(section, index, { roofSections.remove(section) })
             }
         }
     }
 }
 
 @Composable
-private fun RoofItem(index: Int, onRemove: () -> Unit) {
+private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Unit) {
     Box(
         modifier = Modifier
-            .width(100.dp)
-            .height(100.dp)
-            .clip(shape = RoundedCornerShape(15.dp))
-            .background(Color.White)
-            .padding(10.dp)
-            .clickable { onRemove() }
+            .width(180.dp)
+            .clip(RoundedCornerShape(15.dp))
+            .background(Light)
+            .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
+            .padding(15.dp)
     ) {
-        Text("Tak #${index + 1}")
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Takflate ${index + 1}",
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = DarkYellow
+                )
+                Icon(
+                    Icons.Rounded.Delete,
+                    contentDescription = "Slett takflate",
+                    tint = Red,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            onRemove()
+                        }
+                )
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                RoofSectionRow("Areal", "${section.area}m²")
+                RoofSectionRow("Helning", "${section.angle}°")
+                RoofSectionRow("Paneltype", "${section.solarPanelType.watt}W")
+                RoofSectionRow("Paneler", "1")
+            }
+        }
+    }
+}
+
+@Composable
+private fun RoofSectionRow(name: String, value: String) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = name,
+            fontWeight = FontWeight.Medium,
+            fontSize = 17.sp
+        )
+        Text(
+            text = value,
+            fontWeight = FontWeight.Medium,
+            fontSize = 15.sp
+        )
     }
 }
 
 @Composable
 private fun SaveButton() {
-    Button(
+    OutlinedButton(
         onClick = { },
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.tertiary
+            containerColor = Light
         ),
+        border = BorderStroke(1.dp, DarkYellow),
         modifier = Modifier
-            .width(200.dp)
+            .width(250.dp)
             .padding(bottom = 60.dp, top = 20.dp)
-            .fillMaxWidth()
     ) {
-        Text("Lagre", color = Color.Black)
+        Text(
+            "Lagre",
+            color = Color.Black,
+            fontSize = 18.sp
+        )
     }
 }
 
@@ -431,10 +515,10 @@ private fun SearchTextField(
             .fillMaxWidth()
             .clip(RoundedCornerShape(100.dp))
             .background(
-                MaterialTheme.colorScheme.tertiary,
+                Light,
                 MaterialTheme.shapes.small
             )
-            .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(100.dp))
+            .border(1.dp, DarkYellow, shape = RoundedCornerShape(100.dp))
             .padding(start = 30.dp)
             .onFocusChanged { onFocusChanged(it.isFocused) },
         value = address,
@@ -472,7 +556,7 @@ private fun SearchTextField(
                         .width(40.dp)
                         .height(40.dp)
                         .clip(RoundedCornerShape(100.dp))
-                        .background(MaterialTheme.colorScheme.secondary)
+                        .background(BrightYellow)
                         .padding(7.dp)
                 )
             }
@@ -523,7 +607,7 @@ private fun SuggestionItem(suggestion: PlaceAutocompleteSuggestion, onClick: () 
 }
 
 @Composable
-private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
+private fun AddRoofSectionCard(onAdd: (RoofSection) -> Unit) {
     var area by remember { mutableStateOf("") }
     var angle by remember { mutableStateOf("") }
     var direction by remember { mutableStateOf("") }
@@ -532,14 +616,15 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
     Column(
         modifier = Modifier
             .clip(shape = RoundedCornerShape(15.dp))
-            .background(MaterialTheme.colorScheme.tertiary)
-            .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(15.dp))
+            .background(Light)
+            .border(1.dp, DarkYellow, shape = RoundedCornerShape(15.dp))
             .padding(horizontal = 15.dp, vertical = 10.dp)
     ) {
         Text(
-            text = "Takflate",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
+            text = "Legg til takflate",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = DarkYellow
         )
         Spacer(modifier = Modifier.size(10.dp))
         Row(
@@ -549,7 +634,7 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
             NumberInputField(
                 value = area,
                 onValueChange = { area = it },
-                label = "Areal (m²)",
+                label = "Areal",
                 placeholder = "Areal i kvadratmeter",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -558,7 +643,7 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
             NumberInputField(
                 value = angle,
                 onValueChange = { angle = it },
-                label = "Helning (grader°)",
+                label = "Helning",
                 placeholder = "Helning i grader",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -572,7 +657,7 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
             NumberInputField(
                 value = direction,
                 onValueChange = { direction = it },
-                label = "Retning (grader°)",
+                label = "Retning",
                 placeholder = "Retning i grader",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -588,7 +673,7 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
         Spacer(modifier = Modifier.size(10.dp))
         AddRoofButton {
             onAdd(
-                RoofState(
+                RoofSection(
                     area.toDouble(),
                     angle.toDouble(),
                     direction.toDouble(),
@@ -609,12 +694,16 @@ private fun AddRoofButton(onClick: () -> Unit) {
             keyboardController?.hide()
         },
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.tertiary
+            containerColor = Light
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
+        border = BorderStroke(1.dp, DarkBeige),
         modifier = Modifier.width(150.dp)
     ) {
-        Text("Legg til", color = Color.Black)
+        Text(
+            "Legg til",
+            color = Color.Black,
+            fontSize = 18.sp
+        )
     }
 }
 
@@ -632,7 +721,7 @@ private fun SolarPanelTypeDropdown(
         modifier = modifier
             .fillMaxWidth()
     ) {
-        Text("Solcellepaneltype")
+        Text("Paneltype", fontWeight = FontWeight.Bold)
         ExposedDropdownMenuBox(
             expanded = dropdownExpanded,
             onExpandedChange = { dropdownExpanded = it }
@@ -641,12 +730,15 @@ private fun SolarPanelTypeDropdown(
                 value = selectedType.nameWithWatt(),
                 readOnly = true,
                 onValueChange = {},
+                textStyle = LocalTextStyle.current.copy(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize
+                ),
                 modifier = Modifier
-                    .menuAnchor()
-                    .background(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.shapes.small,
-                    )
+                    .menuAnchor(MenuAnchorType.PrimaryEditable, true)
+                    .clip(RoundedCornerShape(15))
+                    .background(Beige)
+                    .border(1.dp, DarkBeige, RoundedCornerShape(15))
                     .fillMaxWidth()
                     .padding(10.dp)
             )

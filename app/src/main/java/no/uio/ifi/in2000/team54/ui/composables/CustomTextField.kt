@@ -1,10 +1,12 @@
 package no.uio.ifi.in2000.team54.ui.composables
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,10 +16,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import no.uio.ifi.in2000.team54.ui.theme.Beige
+import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
 
 @Composable
 fun CustomTextField(
@@ -35,13 +41,12 @@ fun CustomTextField(
     Column(
         modifier = containerModifier
     ) {
-        Text(label)
+        Text(label, fontWeight = FontWeight.Bold)
         BasicTextField(
             modifier = modifier
-                .background(
-                    MaterialTheme.colorScheme.primary,
-                    MaterialTheme.shapes.small,
-                )
+                .clip(RoundedCornerShape(15))
+                .background(Beige)
+                .border(1.dp, DarkBeige, RoundedCornerShape(15))
                 .padding(10.dp),
             value = value,
             onValueChange = onValueChange,
@@ -67,7 +72,7 @@ fun CustomTextField(
                             Text(
                                 text = placeholder,
                                 style = LocalTextStyle.current.copy(
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                                     fontSize = fontSize
                                 )
                             )
