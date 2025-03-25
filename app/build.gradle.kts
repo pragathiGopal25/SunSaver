@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    kotlin("plugin.serialization") version "2.1.10"
+    kotlin("plugin.serialization") version "2.1.20"
 }
 
 android {
@@ -54,11 +54,19 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.mapbox)
-    implementation(libs.maps.compose)
+
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.kotlinx.serialization.json)
+    
+    implementation(libs.mapbox)
+    implementation(libs.maps.compose)
+    implementation("com.mapbox.search:autofill:2.8.0-rc.1")
+    implementation("com.mapbox.search:discover:2.8.0-rc.1")
+    implementation("com.mapbox.search:place-autocomplete:2.8.0-rc.1")
+    implementation("com.mapbox.search:offline:2.8.0-rc.1")
+    implementation("com.mapbox.search:mapbox-search-android:2.8.0-rc.1")
+    implementation("com.mapbox.search:mapbox-search-android-ui:2.8.0-rc.1")
 }
