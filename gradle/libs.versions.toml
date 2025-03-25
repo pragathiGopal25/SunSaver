@@ -1,5 +1,7 @@
 [versions]
-agp = "8.8.0"
+accompanistPager = "0.32.0"
+accompanistPagerIndicators = "0.32.0"
+agp = "8.8.2"
 mapbox = "11.10.2"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -14,12 +16,17 @@ composeBom = "2024.04.01"
 mapsCompose = "11.10.2"
 
 [libraries]
+
+accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPagerIndicators" }
+google-accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
+
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCore" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientCore" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCore" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorClientCore" }
 mapbox = { module = "com.mapbox.maps:android", version.ref = "mapbox" }
+
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
