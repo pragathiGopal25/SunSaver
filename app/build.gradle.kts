@@ -38,7 +38,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -47,11 +46,14 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
     testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
@@ -62,17 +64,14 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     
     implementation(libs.mapbox)
-    implementation(libs.maps.compose)
-    
+    implementation(libs.mapbox.compose)
+    implementation(libs.search.mapbox.autofill)
+    implementation(libs.search.mapbox.discover)
+    implementation(libs.search.mapbox.place.autocomplete)
+    implementation(libs.search.mapbox.offline)
+    implementation(libs.search.mapbox.search.android)
+    implementation(libs.search.mapbox.search.android.ui)
+
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)
-
-
-    implementation("com.mapbox.search:autofill:2.8.0-rc.1")
-    implementation("com.mapbox.search:discover:2.8.0-rc.1")
-    implementation("com.mapbox.search:place-autocomplete:2.8.0-rc.1")
-    implementation("com.mapbox.search:offline:2.8.0-rc.1")
-    implementation("com.mapbox.search:mapbox-search-android:2.8.0-rc.1")
-    implementation("com.mapbox.search:mapbox-search-android-ui:2.8.0-rc.1")
-
 }

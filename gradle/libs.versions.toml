@@ -1,7 +1,6 @@
 [versions]
-accompanistPager = "0.32.0"
-accompanistPagerIndicators = "0.32.0"
 agp = "8.8.2"
+mapbox-search = "2.8.0-rc.1"
 mapbox = "11.10.2"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -19,17 +18,19 @@ vico = "2.1.0"
 
 [libraries]
 
-
-accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanistPagerIndicators" }
-google-accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanistPager" }
-
+mapbox = { module = "com.mapbox.maps:android", version.ref = "mapbox" }
+mapbox-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
+search-mapbox-place-autocomplete = { module = "com.mapbox.search:place-autocomplete", version.ref = "mapbox-search" }
+search-mapbox-offline = { module = "com.mapbox.search:offline", version.ref = "mapbox-search" }
+search-mapbox-discover = { module = "com.mapbox.search:discover", version.ref = "mapbox-search" }
+search-mapbox-autofill = { module = "com.mapbox.search:autofill", version.ref = "mapbox-search" }
+search-mapbox-search-android = { module = "com.mapbox.search:mapbox-search-android", version.ref = "mapbox-search" }
+search-mapbox-search-android-ui = { module = "com.mapbox.search:mapbox-search-android-ui", version.ref = "mapbox-search" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCore" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientCore" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCore" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorClientCore" }
-mapbox = { module = "com.mapbox.maps:android", version.ref = "mapbox" }
-
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -44,11 +45,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
-
-# For Jetpack Compose.
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
-# For Material 3 theming in Jetpack Compose.
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 
 

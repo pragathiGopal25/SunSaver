@@ -3,6 +3,7 @@ package no.uio.ifi.in2000.team54.ui.managesolararray
 
 import android.util.Log
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -90,7 +91,6 @@ import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
 import no.uio.ifi.in2000.team54.ui.state.RoofState
 import kotlin.math.roundToInt
 
-
 private val placeAutocomplete = PlaceAutocomplete.create()
 private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
 
@@ -165,13 +165,22 @@ private fun ArraySettingsMenu(mapState: MapState, mapViewportState: MapViewportS
         ArraySettingsMenuAnchors.Top at 150f
     }
 
+    val decayAnimation = rememberSplineBasedDecay<Float>()
     val draggableState = remember {
-        AnchoredDraggableState(
+        /*AnchoredDraggableState(
             initialValue = ArraySettingsMenuAnchors.Bottom,
             anchors = anchors,
             positionalThreshold = { it },
             velocityThreshold = { 0f },
             animationSpec = tween(durationMillis = 100),
+        )*/
+        AnchoredDraggableState(
+            initialValue = ArraySettingsMenuAnchors.Bottom,
+            anchors = anchors,
+            positionalThreshold = { it },
+            velocityThreshold = { 0f },
+            snapAnimationSpec = tween(durationMillis = 100),
+            decayAnimationSpec = decayAnimation,
         )
     }
 
@@ -351,7 +360,7 @@ private fun SearchField(
         { suggestion ->
             address = suggestion.formattedAddress ?: address
             scope.launch {
-                draggableState.animateTo(ArraySettingsMenuAnchors.Bottom, 0F)
+                draggableState.animateTo(ArraySettingsMenuAnchors.Bottom)
                 val selectionResponse = placeAutocomplete.select(suggestion)
                 selectionResponse.onValue { result ->
                     viewModel.setPos(Pos.fromPoint(result.coordinate))
@@ -390,7 +399,7 @@ private fun SearchField(
                 showSuggestions = isFocused
                 if (isFocused) {
                     scope.launch {
-                        draggableState.animateTo(ArraySettingsMenuAnchors.Top, 0F)
+                        draggableState.animateTo(ArraySettingsMenuAnchors.Top)
                     }
                 }
             }
