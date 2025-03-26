@@ -65,12 +65,13 @@ dependencies {
     
     implementation(libs.mapbox)
     implementation(libs.mapbox.compose)
+    implementation(libs.mapbox.sdk.turf)
     implementation(libs.search.mapbox.autofill)
     implementation(libs.search.mapbox.discover)
     implementation(libs.search.mapbox.place.autocomplete)
     implementation(libs.search.mapbox.offline)
-    implementation(libs.search.mapbox.search.android)
-    implementation(libs.search.mapbox.search.android.ui)
+    implementation(libs.search.mapbox.android)
+    implementation(libs.search.mapbox.android.ui)
 
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)

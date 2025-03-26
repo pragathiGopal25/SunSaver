@@ -7,7 +7,8 @@ import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonIgnoreUnknownKeys
-data class RoofSection(
+data class MapRoofSection(
+    val id: String,
     val incline: Double,
     val direction: Double,
     val length: Double,

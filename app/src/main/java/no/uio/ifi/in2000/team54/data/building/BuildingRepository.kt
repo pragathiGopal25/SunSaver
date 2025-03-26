@@ -4,7 +4,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
-import no.uio.ifi.in2000.team54.model.building.RoofSection
+import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 
 class BuildingRepository {
     private val dataSource = BuildingDataSource()
@@ -20,8 +20,8 @@ class BuildingRepository {
             .toList()
     }
 
-    suspend fun getRoofSections(lat: Double, lng: Double): List<RoofSection> {
-        val buildingIds = this.getNorwayBuildingId(lat, lng)
+    suspend fun getRoofSections(lat: Double, lng: Double): List<MapRoofSection> {
+        val buildingIds = listOf(80211163L)//getNorwayBuildingId(lat, lng)
         if (buildingIds.isEmpty()) {
             return emptyList()
         }
@@ -29,7 +29,7 @@ class BuildingRepository {
         return buildingIds.flatMap { dataSource.getRoofSections(it) }.toList()
     }
 
-    suspend fun getRoofSections(buildingId: Long): List<RoofSection> {
+    suspend fun getRoofSections(buildingId: Long): List<MapRoofSection> {
         return dataSource.getRoofSections(buildingId)
     }
 }

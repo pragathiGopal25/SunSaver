@@ -7,14 +7,13 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsText
-import io.ktor.client.statement.request
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
-import no.uio.ifi.in2000.team54.model.building.RoofSection
+import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 
 class BuildingDataSource {
     private val httpClient = HttpClient(CIO) {
@@ -29,7 +28,7 @@ class BuildingDataSource {
                 "data", """
                 [out:json];
                 (
-                  way["building"]["ref:bygningsnr"](around:20, $lat, $lng);
+                  way["building"]["ref:bygningsnr"](around:10, $lat, $lng);
                 );
                 out tags;
             """.trimIndent()
@@ -43,7 +42,7 @@ class BuildingDataSource {
         return Json.parseToJsonElement(response.bodyAsText()).jsonObject
     }
 
-    suspend fun getRoofSections(buildingId: Long): List<RoofSection> {
+    suspend fun getRoofSections(buildingId: Long): List<MapRoofSection> {
         val response = this.httpClient.get("https://sol-api.fjordkraft.no/roof-information/query-by-buildings") {
             parameter("buildingIds", buildingId)
         }
@@ -53,4 +52,4 @@ class BuildingDataSource {
 }
 
 @Serializable
-data class RoofResponse(val roofSections: List<RoofSection>)
+data class RoofResponse(val roofSections: List<MapRoofSection>)

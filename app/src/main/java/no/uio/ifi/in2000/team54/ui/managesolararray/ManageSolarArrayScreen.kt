@@ -74,17 +74,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.core.text.isDigitsOnly
+import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.Style
+import com.mapbox.maps.ViewAnnotationOptions
 import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
 import com.mapbox.maps.extension.compose.rememberMapState
 import com.mapbox.maps.extension.compose.style.MapStyle
+import com.mapbox.maps.viewannotation.geometry
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import com.mapbox.search.autocomplete.PlaceAutocomplete
 import com.mapbox.search.autocomplete.PlaceAutocompleteSuggestion
 import kotlinx.coroutines.launch
@@ -97,6 +103,7 @@ import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
+import no.uio.ifi.in2000.team54.ui.theme.LightYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.Red
 import kotlin.math.roundToInt
@@ -108,6 +115,8 @@ enum class ArraySettingsMenuAnchors { Bottom, Top }
 
 @Composable
 fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel) {
+    val roofSections = remember { mutableStateListOf<RoofSection>() }
+
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             center(osloCenter)
@@ -119,19 +128,24 @@ fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Map(mapState, mapViewportState, viewModel)
+        Map(mapState, mapViewportState, viewModel, roofSections)
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            ArraySettingsMenu(mapState, mapViewportState, viewModel)
+            ArraySettingsMenu(mapState, mapViewportState, viewModel, roofSections)
         }
     }
 }
 
 @Composable
-private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewModel: ManageSolarArrayViewModel) {
-    val roofSections by viewModel.roofSections.collectAsState()
+private fun Map(
+    mapState: MapState,
+    mapViewportState: MapViewportState,
+    viewModel: ManageSolarArrayViewModel,
+    roofSections: SnapshotStateList<RoofSection>
+) {
+    val roofSectionsState by viewModel.roofSections.collectAsState()
 
     MapboxMap(
         Modifier
@@ -143,23 +157,47 @@ private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewMode
         },
         scaleBar = {},
         onMapClickListener = { point ->
-            viewModel.setPos(Pos.fromPoint(point))
+            val targetRoofSection = roofSectionsState.roofSections.find {
+                it.geometry.contains(point)
+            }
+
+            if (targetRoofSection != null) {
+                if (!roofSections.removeIf { it.mapId == targetRoofSection.id }) {
+                    roofSections.add(
+                        RoofSection(
+                            targetRoofSection.width * targetRoofSection.length,
+                            targetRoofSection.incline,
+                            targetRoofSection.direction,
+                            SolarPanelType.PREMIUM,
+                            targetRoofSection.id
+                        )
+                    )
+                }
+            }
+
+            //viewModel.setPos(Pos.fromPoint(point))
             false
         }
     ) {
-        val color = MaterialTheme.colorScheme.secondary
-        roofSections.roofSections.forEach { roofSection ->
-            val points = roofSection.geometry.coordinates[0].map {
-                Point.fromLngLat(it[0], it[1])
-            }
+        roofSectionsState.roofSections.forEach { roofSection ->
+            val points = roofSection.geometry.toPoints()
+            val localRoofSection = roofSections.find { it.mapId == roofSection.id }
 
             PolygonAnnotation(listOf(points)) {
-                fillColor = color
+                fillColor = if (localRoofSection == null) LightYellow else DarkYellow
                 fillOpacity = 0.9
             }
             PolylineAnnotation(points) {
                 lineColor = Color.Black
                 lineWidth = 3.0
+            }
+
+            ViewAnnotation(
+                options = viewAnnotationOptions {
+                    geometry(Polygon.fromLngLats(listOf(points)))
+                }
+            ) {
+                Text("Flate 1")
             }
         }
     }
@@ -167,12 +205,17 @@ private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewMode
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ArraySettingsMenu(mapState: MapState, mapViewportState: MapViewportState, viewModel: ManageSolarArrayViewModel) {
+private fun ArraySettingsMenu(
+    mapState: MapState,
+    mapViewportState: MapViewportState,
+    viewModel: ManageSolarArrayViewModel,
+    roofSections: SnapshotStateList<RoofSection>
+) {
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
 
     val anchors = DraggableAnchors {
-        ArraySettingsMenuAnchors.Bottom at screenSizePx - 500f
+        ArraySettingsMenuAnchors.Bottom at screenSizePx - 750f
         ArraySettingsMenuAnchors.Top at 150f
     }
 
@@ -195,16 +238,6 @@ private fun ArraySettingsMenu(mapState: MapState, mapViewportState: MapViewportS
         )
     }
 
-    val roofs = remember { mutableStateListOf<RoofSection>() }
-    roofs.add(
-        RoofSection(
-            80.0,
-            35.0,
-            300.0,
-            SolarPanelType.PREMIUM
-        )
-    )
-
     Column {
         DraggableBox(
             screenSizeDp = screenSizeDp,
@@ -214,7 +247,7 @@ private fun ArraySettingsMenu(mapState: MapState, mapViewportState: MapViewportS
                 mapState,
                 mapViewportState,
                 draggableState,
-                roofs,
+                roofSections,
                 viewModel
             )
         }
@@ -253,7 +286,7 @@ private fun ArraySettingsContent(
     mapState: MapState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
-    roofs: SnapshotStateList<RoofSection>,
+    roofSections: SnapshotStateList<RoofSection>,
     viewModel: ManageSolarArrayViewModel
 ) {
     Column(
@@ -267,7 +300,7 @@ private fun ArraySettingsContent(
             mapState,
             mapViewportState,
             draggableState,
-            roofs,
+            roofSections,
             viewModel
         )
         SaveButton()
@@ -280,7 +313,7 @@ private fun ArraySettingsMainSection(
     mapState: MapState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
-    roofs: SnapshotStateList<RoofSection>,
+    roofSections: SnapshotStateList<RoofSection>,
     viewModel: ManageSolarArrayViewModel
 ) {
     Column(
@@ -290,16 +323,17 @@ private fun ArraySettingsMainSection(
         DragHandle()
         SearchField(mapState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
-        Column (
+        Column(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-        ){
+        ) {
+            RoofSectionsList(roofSections)
             AddRoofSectionCard(
                 onAdd = {
-                    roofs.add(it)
+                    roofSections.add(it)
                 }
             )
-            RoofSectionsList(roofs)
+            PriceSummaryCard()
         }
     }
 }
@@ -357,7 +391,7 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
                     text = "Takflate ${index + 1}",
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
-                    color = DarkYellow
+                    color = BrightYellow
                 )
                 Icon(
                     Icons.Rounded.Delete,
@@ -375,8 +409,8 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                RoofSectionRow("Areal", "${section.area}m²")
-                RoofSectionRow("Helning", "${section.angle}°")
+                RoofSectionRow("Areal", "%.1fm²".format(section.area))
+                RoofSectionRow("Helning", "%.1f°".format(section.incline))
                 RoofSectionRow("Paneltype", "${section.solarPanelType.watt}W")
                 RoofSectionRow("Paneler", "1")
             }
@@ -401,6 +435,20 @@ private fun RoofSectionRow(name: String, value: String) {
             fontWeight = FontWeight.Medium,
             fontSize = 15.sp
         )
+    }
+}
+
+@Composable
+private fun PriceSummaryCard() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(15.dp))
+            .background(Light)
+            .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
+            .padding(15.dp)
+    ) {
+
     }
 }
 
@@ -452,7 +500,7 @@ private fun SearchField(
                     mapViewportState.easeTo(
                         CameraOptions.Builder()
                             .center(result.coordinate)
-                            .zoom(18.0)
+                            .zoom(19.0)
                             .build()
                     )
                 }.onError { e ->
@@ -677,7 +725,8 @@ private fun AddRoofSectionCard(onAdd: (RoofSection) -> Unit) {
                     area.toDouble(),
                     angle.toDouble(),
                     direction.toDouble(),
-                    solarPanelType
+                    solarPanelType,
+                    mapId = null,
                 )
             )
         }

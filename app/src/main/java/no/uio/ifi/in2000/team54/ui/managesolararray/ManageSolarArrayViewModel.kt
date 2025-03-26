@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
 import no.uio.ifi.in2000.team54.model.building.Pos
-import no.uio.ifi.in2000.team54.model.building.RoofSection
+import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 
 class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
@@ -29,12 +29,12 @@ class ManageSolarArrayViewModel : ViewModel() {
         .filter { state -> state.pos != null }
         .mapLatest { state ->
             val roofSections = repository.getRoofSections(state.pos!!.lat, state.pos.lng)
-            RoofState(roofSections)
+            RoofSectionsState(roofSections)
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = RoofState(emptyList())
+            initialValue = RoofSectionsState(emptyList())
         )
 
     fun setPos(pos: Pos) {
@@ -48,6 +48,6 @@ data class PosState(
     val pos: Pos?
 )
 
-data class RoofState(
-    val roofSections: List<RoofSection>
+data class RoofSectionsState(
+    val roofSections: List<MapRoofSection>
 )
