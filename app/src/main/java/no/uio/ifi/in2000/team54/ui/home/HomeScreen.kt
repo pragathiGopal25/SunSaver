@@ -64,7 +64,7 @@ fun PropertyCards() {
             containerColor = Color(0xFFF6A35A),
         )
     ) {
-        Column(
+        Column(git
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
