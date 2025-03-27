@@ -13,27 +13,26 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
-import no.uio.ifi.in2000.team54.model.building.AddressSuggestion
+import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
-import no.uio.ifi.in2000.team54.model.building.Pos
 
 class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
 
-    private val _mapQueryPos = MutableStateFlow(
-        PosState(null)
-    )
     private val _mapAddress = MutableStateFlow(
-        AddressState("")
+        AddressState(null)
+    )
+    private val _mapSearchAddress = MutableStateFlow(
+        SearchAddressState("")
     )
 
-    val mapAddress: StateFlow<AddressState> = _mapAddress.asStateFlow()
+    val mapAddress: StateFlow<SearchAddressState> = _mapSearchAddress.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val mapRoofSections = _mapQueryPos
-        .filter { state -> state.pos != null }
+    val mapRoofSections = _mapAddress
+        .filter { state -> state.address != null }
         .mapLatest { state ->
-            val roofSections = repository.getRoofSections(state.pos!!.lat, state.pos.lon)
+            val roofSections = repository.getRoofSections(state.address!!)
             RoofSectionsState(roofSections)
         }
         .stateIn(
@@ -43,10 +42,10 @@ class ManageSolarArrayViewModel : ViewModel() {
         )
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val mapAddressSuggestions = _mapAddress
+    val mapSearchAddressSuggestions = _mapSearchAddress
         .debounce(250)
         .mapLatest { state ->
-            val suggestions = repository.getAddressSuggestions(state.address)
+            val suggestions = repository.getAddressSuggestions(state.query)
             AddressSuggestionsState(suggestions)
         }
         .stateIn(
@@ -56,31 +55,31 @@ class ManageSolarArrayViewModel : ViewModel() {
         )
 
 
-    fun setMapQueryPos(pos: Pos) {
-        _mapQueryPos.value = _mapQueryPos.value.copy(
-            pos = pos
-        )
-    }
-
-    fun setMapAddress(address: String) {
+    fun setMapAddress(address: Address) {
         _mapAddress.value = _mapAddress.value.copy(
             address = address
         )
     }
+
+    fun setMapAddress(query: String) {
+        _mapSearchAddress.value = _mapSearchAddress.value.copy(
+            query = query
+        )
+    }
 }
 
-data class PosState(
-    val pos: Pos?
+data class AddressState(
+    val address: Address?
 )
 
 data class RoofSectionsState(
     val roofSections: List<MapRoofSection>
 )
 
-data class AddressState(
-    val address: String
+data class SearchAddressState(
+    val query: String
 )
 
 data class AddressSuggestionsState(
-    val suggestions: List<AddressSuggestion>
+    val suggestions: List<Address>
 )

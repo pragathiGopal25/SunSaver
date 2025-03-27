@@ -90,7 +90,7 @@ import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
-import no.uio.ifi.in2000.team54.model.building.AddressSuggestion
+import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
 import no.uio.ifi.in2000.team54.ui.state.RoofSection
 import no.uio.ifi.in2000.team54.ui.theme.Beige
@@ -484,13 +484,13 @@ private fun SearchField(
     val scope = rememberCoroutineScope()
 
     val addressState = viewModel.mapAddress.collectAsState()
-    val addressSuggestions = viewModel.mapAddressSuggestions.collectAsState()
+    val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsState()
     var showSuggestions by remember { mutableStateOf(false) }
 
-    val selectSuggestion: (AddressSuggestion) -> Unit = remember {
+    val selectSuggestion: (Address) -> Unit = remember {
         { suggestion ->
             viewModel.setMapAddress(suggestion.toFormatted())
-            viewModel.setMapQueryPos(suggestion.pos)
+            viewModel.setMapAddress(suggestion)
 
             scope.launch {
                 draggableState.animateTo(ArraySettingsMenuAnchors.Bottom)
@@ -507,7 +507,7 @@ private fun SearchField(
 
     Column {
         SearchTextField(
-            address = addressState.value.address,
+            address = addressState.value.query,
             onAddressChange = { address ->
                 viewModel.setMapAddress(address)
             },
@@ -603,8 +603,8 @@ private fun SearchTextField(
 
 @Composable
 private fun SuggestionsPopup(
-    suggestions: List<AddressSuggestion>,
-    onSuggestionClick: (AddressSuggestion) -> Unit,
+    suggestions: List<Address>,
+    onSuggestionClick: (Address) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     Popup(
@@ -630,7 +630,7 @@ private fun SuggestionsPopup(
 }
 
 @Composable
-private fun SuggestionItem(suggestion: AddressSuggestion, onClick: () -> Unit) {
+private fun SuggestionItem(suggestion: Address, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()

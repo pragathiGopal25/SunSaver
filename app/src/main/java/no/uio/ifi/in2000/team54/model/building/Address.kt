@@ -8,7 +8,7 @@ import kotlinx.serialization.json.JsonNames
 @OptIn(ExperimentalSerializationApi::class)
 @JsonIgnoreUnknownKeys
 @Serializable
-class AddressSuggestion(
+class Address(
     @JsonNames("adressetekst")
     val address: String,
     @JsonNames("poststed")
@@ -16,7 +16,13 @@ class AddressSuggestion(
     @JsonNames("postnummer")
     val areaCode: String,
     @JsonNames("representasjonspunkt")
-    val pos: Pos
+    val pos: Pos,
+    @JsonNames("gardsnummer")
+    val cadastralNumber: Int,
+    @JsonNames("bruksnummer")
+    val propertyNumber: Int,
+    @JsonNames("kommunenummer")
+    val communityNumber: String,
 ) {
 
     fun toFormatted(): String {

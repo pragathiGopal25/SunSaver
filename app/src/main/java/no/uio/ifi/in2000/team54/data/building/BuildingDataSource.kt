@@ -14,9 +14,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import kotlinx.serialization.json.JsonNames
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
-import no.uio.ifi.in2000.team54.model.building.AddressSuggestion
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
+import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 
 class BuildingDataSource {
@@ -26,7 +28,7 @@ class BuildingDataSource {
         }
     }
 
-    suspend fun getAddressSuggestions(address: String): List<AddressSuggestion> {
+    suspend fun getAddressSuggestions(address: String): List<Address> {
         val response = httpClient.get("https://ws.geonorge.no/adresser/v1/sok") {
             parameter("sok", address)
             parameter("fuzzy", true)
@@ -43,27 +45,25 @@ class BuildingDataSource {
         return response.body<AddressSuggestionsResponse>().suggestions
     }
 
-    suspend fun getBuildingDataByCoordinate(lat: Double, lng: Double): JsonObject? {
-        val response = httpClient.get("https://overpass-api.de/api/interpreter") {
-            parameter(
-                "data", """
-                [out:json];
-                (
-                  way["building"]["ref:bygningsnr"](around:10, $lat, $lng);
-                );
-                out tags;
-            """.trimIndent()
-            )
-        }
+    suspend fun getCadastreId(address: Address): Long? {
+        val response = httpClient.get(
+            "https://seeiendom.kartverket.no/api/matrikkelenhet/" +
+                    "${address.communityNumber}/" +
+                    "${address.cadastralNumber}/" +
+                    "${address.propertyNumber}"
+        )
 
-        if (response.status != HttpStatusCode.OK) {
-            return null
-        }
-
-        return Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        return Json.parseToJsonElement(response.bodyAsText()).jsonObject["matrikkelenhetId"]?.jsonPrimitive?.long
     }
 
-    suspend fun getRoofSections(buildingId: Long): List<MapRoofSection> {
+    suspend fun getBuildingIds(cadastreId: Long): List<String> {
+        val response = httpClient.get("https://seeiendom.kartverket.no/api/bygningerForMatrikkelenhet/$cadastreId")
+        return Json.parseToJsonElement(response.bodyAsText()).jsonArray
+            .mapNotNull { it.jsonObject["bygningsnummer"] }
+            .map { it.jsonPrimitive.content }
+    }
+
+    suspend fun getRoofSections(buildingId: String): List<MapRoofSection> {
         val response = httpClient.get("https://sol-api.fjordkraft.no/roof-information/query-by-buildings") {
             parameter("buildingIds", buildingId)
         }
@@ -82,5 +82,5 @@ data class RoofSectionsResponse(
 @Serializable
 data class AddressSuggestionsResponse(
     @JsonNames("adresser")
-    val suggestions: List<AddressSuggestion>
+    val suggestions: List<Address>
 )
