@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.team54.ui.managesolararray
 
 
-import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
@@ -74,12 +73,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.core.text.isDigitsOnly
-import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.Style
-import com.mapbox.maps.ViewAnnotationOptions
 import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
@@ -91,11 +88,9 @@ import com.mapbox.maps.extension.compose.rememberMapState
 import com.mapbox.maps.extension.compose.style.MapStyle
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
-import com.mapbox.search.autocomplete.PlaceAutocomplete
-import com.mapbox.search.autocomplete.PlaceAutocompleteSuggestion
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
-import no.uio.ifi.in2000.team54.model.building.Pos
+import no.uio.ifi.in2000.team54.model.building.AddressSuggestion
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
 import no.uio.ifi.in2000.team54.ui.state.RoofSection
 import no.uio.ifi.in2000.team54.ui.theme.Beige
@@ -108,7 +103,6 @@ import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.Red
 import kotlin.math.roundToInt
 
-private val placeAutocomplete = PlaceAutocomplete.create()
 private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
 
 enum class ArraySettingsMenuAnchors { Bottom, Top }
@@ -145,7 +139,7 @@ private fun Map(
     viewModel: ManageSolarArrayViewModel,
     roofSections: SnapshotStateList<RoofSection>
 ) {
-    val roofSectionsState by viewModel.roofSections.collectAsState()
+    val roofSectionsState by viewModel.mapRoofSections.collectAsState()
 
     MapboxMap(
         Modifier
@@ -197,7 +191,12 @@ private fun Map(
                     geometry(Polygon.fromLngLats(listOf(points)))
                 }
             ) {
-                Text("Flate 1")
+                Text(
+                    "Flate 1",
+                    modifier =
+                    Modifier
+                        .background(Red)
+                )
             }
         }
     }
@@ -484,48 +483,38 @@ private fun SearchField(
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
 
-    var address by remember { mutableStateOf("") }
-    val suggestions = remember { mutableStateOf<List<PlaceAutocompleteSuggestion>>(listOf()) }
+    val addressState = viewModel.mapAddress.collectAsState()
+    val addressSuggestions = viewModel.mapAddressSuggestions.collectAsState()
     var showSuggestions by remember { mutableStateOf(false) }
 
-    val selectSuggestion: (PlaceAutocompleteSuggestion) -> Unit = remember {
+    val selectSuggestion: (AddressSuggestion) -> Unit = remember {
         { suggestion ->
-            address = suggestion.formattedAddress ?: address
+            viewModel.setMapAddress(suggestion.toFormatted())
+            viewModel.setMapQueryPos(suggestion.pos)
+
             scope.launch {
                 draggableState.animateTo(ArraySettingsMenuAnchors.Bottom)
-                val selectionResponse = placeAutocomplete.select(suggestion)
-                selectionResponse.onValue { result ->
-                    viewModel.setPos(Pos.fromPoint(result.coordinate))
 
-                    mapViewportState.easeTo(
-                        CameraOptions.Builder()
-                            .center(result.coordinate)
-                            .zoom(19.0)
-                            .build()
-                    )
-                }.onError { e ->
-                    Log.i("Address search", "An error occurred during selection", e)
-                }
+                mapViewportState.easeTo(
+                    CameraOptions.Builder()
+                        .center(suggestion.pos.toPoint())
+                        .zoom(19.0)
+                        .build()
+                )
             }
         }
     }
 
     Column {
         SearchTextField(
-            address = address,
-            onAddressChange = { query ->
-                address = query
-                scope.launch {
-                    val response = placeAutocomplete.suggestions(query)
-                    if (response.isValue) {
-                        suggestions.value = requireNotNull(response.value)
-                    }
-                }
+            address = addressState.value.address,
+            onAddressChange = { address ->
+                viewModel.setMapAddress(address)
             },
             onDone = {
                 keyboardController?.hide()
                 focusManager.clearFocus()
-                suggestions.value.firstOrNull()?.let { selectSuggestion(it) }
+                addressSuggestions.value.suggestions.firstOrNull()?.let { selectSuggestion(it) }
             },
             onFocusChanged = { isFocused ->
                 showSuggestions = isFocused
@@ -539,7 +528,7 @@ private fun SearchField(
 
         if (showSuggestions) {
             SuggestionsPopup(
-                suggestions = suggestions.value,
+                suggestions = addressSuggestions.value.suggestions,
                 onSuggestionClick = { suggestion ->
                     keyboardController?.hide()
                     focusManager.clearFocus()
@@ -614,8 +603,8 @@ private fun SearchTextField(
 
 @Composable
 private fun SuggestionsPopup(
-    suggestions: List<PlaceAutocompleteSuggestion>,
-    onSuggestionClick: (PlaceAutocompleteSuggestion) -> Unit,
+    suggestions: List<AddressSuggestion>,
+    onSuggestionClick: (AddressSuggestion) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     Popup(
@@ -631,26 +620,24 @@ private fun SuggestionsPopup(
                 .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(15.dp))
         ) {
             suggestions.forEach { suggestion ->
-                if (suggestion.formattedAddress != null) {
-                    SuggestionItem(
-                        suggestion = suggestion,
-                        onClick = { onSuggestionClick(suggestion) }
-                    )
-                }
+                SuggestionItem(
+                    suggestion = suggestion,
+                    onClick = { onSuggestionClick(suggestion) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun SuggestionItem(suggestion: PlaceAutocompleteSuggestion, onClick: () -> Unit) {
+private fun SuggestionItem(suggestion: AddressSuggestion, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)
             .clickable { onClick() }
     ) {
-        Text(text = suggestion.formattedAddress ?: "")
+        Text(suggestion.toFormatted())
     }
 }
 

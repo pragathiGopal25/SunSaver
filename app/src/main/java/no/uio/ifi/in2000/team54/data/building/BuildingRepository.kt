@@ -4,10 +4,15 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.long
+import no.uio.ifi.in2000.team54.model.building.AddressSuggestion
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 
 class BuildingRepository {
     private val dataSource = BuildingDataSource()
+
+    suspend fun getAddressSuggestions(address: String): List<AddressSuggestion> {
+        return dataSource.getAddressSuggestions(address)
+    }
 
     suspend fun getNorwayBuildingId(lat: Double, lng: Double): List<Long> {
         val buildingData = dataSource.getBuildingDataByCoordinate(lat, lng) ?: return emptyList()

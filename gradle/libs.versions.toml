@@ -1,6 +1,5 @@
 [versions]
 agp = "8.8.2"
-mapbox-search = "2.8.0-rc.1"
 mapbox = "11.10.2"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -22,12 +21,6 @@ vico = "2.1.0"
 mapbox = { module = "com.mapbox.maps:android", version.ref = "mapbox" }
 mapbox-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
 mapbox-sdk-turf = { module = "com.mapbox.mapboxsdk:mapbox-sdk-turf", version.ref = "mapboxSdkTurf" }
-search-mapbox-place-autocomplete = { module = "com.mapbox.search:place-autocomplete", version.ref = "mapbox-search" }
-search-mapbox-offline = { module = "com.mapbox.search:offline", version.ref = "mapbox-search" }
-search-mapbox-discover = { module = "com.mapbox.search:discover", version.ref = "mapbox-search" }
-search-mapbox-autofill = { module = "com.mapbox.search:autofill", version.ref = "mapbox-search" }
-search-mapbox-android = { module = "com.mapbox.search:mapbox-search-android", version.ref = "mapbox-search" }
-search-mapbox-android-ui = { module = "com.mapbox.search:mapbox-search-android-ui", version.ref = "mapbox-search" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCore" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientCore" }
