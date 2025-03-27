@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -64,6 +65,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -89,6 +91,7 @@ import com.mapbox.maps.extension.compose.style.MapStyle
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
@@ -101,6 +104,7 @@ import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.Red
+import java.util.Locale
 import kotlin.math.roundToInt
 
 private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
@@ -397,7 +401,7 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
                     text = "Takflate ${index + 1}",
                     fontSize = 19.sp,
                     fontWeight = FontWeight.Bold,
-                    color = BrightYellow
+                    color = DarkYellow
                 )
                 Icon(
                     Icons.Rounded.Delete,
@@ -452,9 +456,82 @@ private fun PriceSummaryCard() {
             .clip(RoundedCornerShape(15.dp))
             .background(Light)
             .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
-            .padding(15.dp)
+            .padding(horizontal = 40.dp, vertical = 15.dp)
     ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Column(
+                verticalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .width(150.dp)
+                    .height(150.dp)
+            ) {
+                Text(
+                    text = "Oversikt",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Column {
+                    Text(
+                        text = "Bruttopris",
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                    )
+                    PriceText(100_000.0)
+                }
+                Column {
+                    Text(
+                        text = "Støtte fra staten",
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                    )
+                    PriceText(30_000.0)
+                }
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Totalpris",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Image(
+                    painter = painterResource(R.drawable.planet),
+                    contentDescription = "Planet med solcellepanel",
+                    modifier = Modifier
+                        .size(100.dp)
+                )
+                PriceText(70_000.0)
+            }
+        }
+    }
+}
 
+@Composable
+private fun PriceText(price: Double) {
+    Row (
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Text(
+            text = "%,d".format(price.toInt(), Locale.GERMANY).replace(",", " "),
+            color = Color.Black,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = "NOK",
+            color = Color.Black,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
