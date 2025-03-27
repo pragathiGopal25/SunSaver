@@ -1,6 +1,8 @@
 package no.uio.ifi.in2000.team54.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,110 +12,193 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonColors
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import no.uio.ifi.in2000.team54.R
+import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
+import no.uio.ifi.in2000.team54.ui.theme.Light
+import no.uio.ifi.in2000.team54.ui.theme.LightYellow
+import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
+import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 
 val viewModel = ElectricityPriceViewModel()
 
 @Composable
 fun ElectricityBillOverview() {
     val uiState by viewModel.uiState.collectAsState()
-    var buttonState by remember { mutableStateOf("day") }
+    var pageState by remember { mutableStateOf("1") }
     Box(
         modifier = Modifier
             .shadow(
                 elevation = 10.dp,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(20.dp)
             )
             .width(350.dp)
-            .background(color = MaterialTheme.colorScheme.tertiary) // Vi endrer farger senere
-            .height(200.dp),
-        contentAlignment = Alignment.TopCenter,
+            .background(color = Light)
+            .border(
+                color = DarkBeige,
+                width = 1.dp,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .height(280.dp),
+        contentAlignment = Alignment.BottomCenter,
     ) {
         Column(
             modifier = Modifier
                 .padding(bottom = 8.dp, top = 3.dp, start = 4.dp, end = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
+            Text("Strømutgifter & Sparing", fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            Spacer(Modifier.padding(5.dp))
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
             ) {
-                MenuButton(
-                    "Day", { buttonState = "day" },
-                    color = if (buttonState == "day") Color.LightGray else Color.DarkGray
-                )
-                MenuButton(
-                    "Month", { buttonState = "month" },
-                    color = if (buttonState == "month") Color.LightGray else Color.DarkGray
-                )
-                MenuButton(
-                    "Year", { buttonState = "year" },
-                    color = if (buttonState == "year") Color.LightGray else Color.DarkGray
-                )
+                TimeScopeButton()
             }
-            Text(
-                text = "Electricity price comparison by NOK per kWh the last 24 hours",
-                fontSize = 13.sp
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = "Average : ${uiState.realPrice}",
-                fontSize = 17.sp,
-            )
-            Text(
-                "Average with solar array: ${uiState.solarPrice}",
-                fontSize = 17.sp,
-            )
-            Spacer(Modifier.height(10.dp))
-            HorizontalDivider(
-                thickness = 1.dp,
-            )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                "Saved: ${uiState.saved} NOK",
-                fontSize = 17.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Spacer(Modifier.padding(10.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                MoneyBox(false, "${uiState.realPrice}", R.drawable.stop)
+                Spacer(Modifier.padding(8.dp))
+                MoneyBox(true, "${uiState.saved}", R.drawable.coin)
+                Spacer(Modifier.padding(8.dp))
+                MoneyBox(false, "${uiState.solarPrice}", R.drawable.solar)
+            }
+            Spacer(Modifier.padding(10.dp))
+            Row {
+                MoneyNavButton({ pageState = "1" }, pageState == "1")
+                Spacer(Modifier.padding(8.dp))
+                MoneyNavButton({ pageState = "2" }, pageState == "2")
+                Spacer(Modifier.padding(8.dp))
+                MoneyNavButton({ pageState = "3" }, pageState == "3")
+            }
         }
     }
 }
 
 
 @Composable
-fun MenuButton(text: String, onClick: () -> Unit, color: Color) {
+fun MoneyNavButton(onClick: () -> Unit, selected: Boolean) {
     Button(
         modifier = Modifier
             .shadow(
-                elevation = 10.dp,
-                shape = RoundedCornerShape(8.dp)
+                elevation = 4.dp,
+                shape = RoundedCornerShape(20.dp)
             )
-            .padding(horizontal = 5.dp)
-            .width(100.dp)
-            .height(28.dp),
+            .width(15.dp)
+            .height(15.dp),
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = color
+            containerColor = if (selected) LightYellow else Color.LightGray,
         ),
         contentPadding = PaddingValues(0.dp)
+    ) {}
+}
+
+@Composable
+fun MoneyBox(main: Boolean, text: String, image: Int) {
+    Box(
+        modifier = Modifier
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .height(if (main) 134.dp else 95.dp)
+            .width(if (main) 121.dp else 85.dp)
+            .background(if (main) RandomBeige else LightestYellow)
+            .border(
+                color = DarkBeige,
+                width = 1.dp,
+                shape = RoundedCornerShape(20.dp)
+            ),
+        contentAlignment = if (main) Alignment.TopCenter else Alignment.Center
     ) {
-        Text(text = text)
+        Column(
+            Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (main) Text("SPART", fontWeight = FontWeight.Bold)
+            val img = painterResource(image)
+            val size = if (main) 60.dp else 50.dp
+            Image(
+                modifier = Modifier
+                    .shadow(
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = 0.dp
+                    )
+                    .size(size)
+                    .clip(CircleShape),
+                painter = img,
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds
+            )
+            Text("$text,-")
+        }
+    }
+}
+
+@Composable
+fun TimeScopeButton() {
+    var selectedIndex by remember { mutableIntStateOf(0) }
+    val options = listOf("Dag", "Måned", "År")
+
+    SingleChoiceSegmentedButtonRow {
+        options.forEachIndexed { index, label ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = options.size
+                ),
+                onClick = { selectedIndex = index },
+                selected = index == selectedIndex,
+                icon = {},
+                colors = SegmentedButtonColors(
+                    activeContainerColor = LightestYellow,
+                    activeContentColor = Color.Black,
+                    activeBorderColor = LightestYellow,
+                    inactiveContainerColor = RandomBeige,
+                    inactiveContentColor = Color.Gray,
+                    inactiveBorderColor = RandomBeige,
+                    disabledActiveContainerColor = Color.Red,
+                    disabledActiveContentColor = Color.Red,
+                    disabledActiveBorderColor = Color.Red,
+                    disabledInactiveContainerColor = Color.Red,
+                    disabledInactiveContentColor = Color.Red,
+                    disabledInactiveBorderColor = Color.Red,
+                ),
+                label = { Text(text = label) }
+            )
+        }
     }
 }
