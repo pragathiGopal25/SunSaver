@@ -28,6 +28,7 @@ class BuildingDataSource {
         }
     }
 
+    // https://ws.geonorge.no/adresser/v1/punktsok?lat=59.947348&lon=10.810721&radius=10&koordsys=4258&utkoordsys=4258&treffPerSide=10&side=0&asciiKompatibel=true
     suspend fun getAddressSuggestions(address: String): List<Address> {
         val response = httpClient.get("https://ws.geonorge.no/adresser/v1/sok") {
             parameter("sok", address)

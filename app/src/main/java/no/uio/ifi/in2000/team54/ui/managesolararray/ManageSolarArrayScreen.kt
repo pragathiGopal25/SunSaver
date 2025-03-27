@@ -186,17 +186,24 @@ private fun Map(
                 lineWidth = 3.0
             }
 
-            ViewAnnotation(
-                options = viewAnnotationOptions {
-                    geometry(Polygon.fromLngLats(listOf(points)))
+            if (localRoofSection != null) {
+                ViewAnnotation(
+                    options = viewAnnotationOptions {
+                        geometry(Polygon.fromLngLats(listOf(points)))
+                        //geometry(Point.fromLngLat(roofSection.longitude, roofSection.latitude))
+                        allowOverlap(true)
+                        allowOverlapWithPuck(true)
+                    }
+                ) {
+                    Text(
+                        "Tak ${roofSections.indexOf(localRoofSection) + 1}",
+                        modifier =
+                        Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Light)
+                            .padding(horizontal = 3.dp, vertical = 2.dp)
+                    )
                 }
-            ) {
-                Text(
-                    "Flate 1",
-                    modifier =
-                    Modifier
-                        .background(Red)
-                )
             }
         }
     }
