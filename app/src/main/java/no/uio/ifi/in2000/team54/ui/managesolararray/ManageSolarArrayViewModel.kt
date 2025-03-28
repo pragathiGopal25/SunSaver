@@ -13,16 +13,12 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
-import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 
 class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
 
-    private val _solarPanelType = MutableStateFlow(
-        SolarPanelTypeState(SolarPanelType.PREMIUM)
-    )
     private val _mapAddress = MutableStateFlow(
         AddressState(null)
     )
@@ -30,7 +26,6 @@ class ManageSolarArrayViewModel : ViewModel() {
         SearchAddressState("")
     )
 
-    val solarPanelType: StateFlow<SolarPanelTypeState> = _solarPanelType.asStateFlow()
     val mapAddress: StateFlow<SearchAddressState> = _mapSearchAddress.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -59,12 +54,6 @@ class ManageSolarArrayViewModel : ViewModel() {
             initialValue = AddressSuggestionsState(emptyList())
         )
 
-    fun setSolarPanelType(type: SolarPanelType) {
-        _solarPanelType.value = _solarPanelType.value.copy(
-            type = type
-        )
-    }
-
     fun setMapAddress(address: Address) {
         _mapAddress.value = _mapAddress.value.copy(
             address = address
@@ -77,10 +66,6 @@ class ManageSolarArrayViewModel : ViewModel() {
         )
     }
 }
-
-data class SolarPanelTypeState(
-    val type: SolarPanelType
-)
 
 data class AddressState(
     val address: Address?

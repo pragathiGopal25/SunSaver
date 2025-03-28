@@ -324,6 +324,8 @@ private fun ArraySettingsContent(
     viewModel: ManageSolarArrayViewModel,
     roofSections: SnapshotStateList<RoofSection>
 ) {
+    var solarPanelType by remember { mutableStateOf(SolarPanelType.PREMIUM) }
+
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -336,7 +338,9 @@ private fun ArraySettingsContent(
             mapViewportState,
             draggableState,
             viewModel,
-            roofSections
+            solarPanelType,
+            roofSections,
+            { solarPanelType = it }
         )
         SaveButton()
     }
@@ -349,7 +353,9 @@ private fun ArraySettingsMainSection(
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
     viewModel: ManageSolarArrayViewModel,
+    solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>,
+    onSelectPanelType: (SolarPanelType) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -368,8 +374,8 @@ private fun ArraySettingsMainSection(
                     roofSections.add(it)
                 }
             )
-            SolarPanelTypeDropdown(viewModel)
-            PriceSummaryCard(viewModel, roofSections)
+            SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
+            PriceSummaryCard(viewModel, solarPanelType, roofSections)
         }
     }
 }
@@ -474,11 +480,14 @@ private fun RoofSectionRow(name: String, value: String) {
 }
 
 @Composable
-private fun PriceSummaryCard(viewModel: ManageSolarArrayViewModel, roofSections: SnapshotStateList<RoofSection>) {
-    val panelTypeState by viewModel.solarPanelType.collectAsState()
+private fun PriceSummaryCard(
+    viewModel: ManageSolarArrayViewModel,
+    solarPanelType: SolarPanelType,
+    roofSections: SnapshotStateList<RoofSection>
+) {
     val totalPanels = roofSections.sumOf { it.panels }
-    val grossPrice = panelTypeState.type.totalPrice(totalPanels)
-    val subsidy = calculateSubsidy(panelTypeState.type, totalPanels)
+    val grossPrice = solarPanelType.totalPrice(totalPanels)
+    val subsidy = calculateSubsidy(solarPanelType, totalPanels)
 
     Box(
         modifier = Modifier
@@ -497,7 +506,7 @@ private fun PriceSummaryCard(viewModel: ManageSolarArrayViewModel, roofSections:
                 verticalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .width(150.dp)
-                    .height(150.dp)
+                    .height(130.dp)
             ) {
                 Text(
                     text = "Oversikt",
@@ -535,7 +544,7 @@ private fun PriceSummaryCard(viewModel: ManageSolarArrayViewModel, roofSections:
                     painter = painterResource(R.drawable.planet),
                     contentDescription = "Planet med solcellepanel",
                     modifier = Modifier
-                        .size(100.dp)
+                        .size(80.dp)
                 )
                 PriceText(grossPrice - subsidy)
             }
@@ -768,7 +777,7 @@ private fun AddRoofSectionCard(onAdd: (RoofSection) -> Unit) {
             .clip(shape = RoundedCornerShape(15.dp))
             .background(Light)
             .border(1.dp, DarkYellow, shape = RoundedCornerShape(15.dp))
-            .padding(horizontal = 10.dp, vertical = 5.dp)
+            .padding(10.dp)
     ) {
         Text(
             text = "Legg til takflate",
@@ -864,9 +873,7 @@ private fun AddRoofButton(onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SolarPanelTypeDropdown(viewModel: ManageSolarArrayViewModel) {
-    val panelTypeState by viewModel.solarPanelType.collectAsState()
-
+private fun SolarPanelTypeDropdown(solarPanelType: SolarPanelType, onSelect: (SolarPanelType) -> Unit) {
     var dropdownExpanded by remember { mutableStateOf(false) }
 
     Column(
@@ -883,7 +890,7 @@ private fun SolarPanelTypeDropdown(viewModel: ManageSolarArrayViewModel) {
             onExpandedChange = { dropdownExpanded = it }
         ) {
             BasicTextField(
-                value = panelTypeState.type.nameWithWatt(),
+                value = solarPanelType.nameWithWatt(),
                 readOnly = true,
                 onValueChange = {},
                 textStyle = LocalTextStyle.current.copy(
@@ -907,7 +914,7 @@ private fun SolarPanelTypeDropdown(viewModel: ManageSolarArrayViewModel) {
                         text = { Text(type.nameWithWatt()) },
                         onClick = {
                             dropdownExpanded = false
-                            viewModel.setSolarPanelType(type)
+                            onSelect(type)
                         }
                     )
                 }
