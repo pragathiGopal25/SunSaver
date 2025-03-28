@@ -72,10 +72,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.core.text.isDigitsOnly
 import com.mapbox.geojson.Point
@@ -99,12 +101,14 @@ import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
 import no.uio.ifi.in2000.team54.ui.state.RoofSection
+import no.uio.ifi.in2000.team54.ui.state.SolarArray
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
+import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 import no.uio.ifi.in2000.team54.ui.theme.Red
 import no.uio.ifi.in2000.team54.util.calculateSubsidy
 import java.util.Locale
@@ -264,7 +268,7 @@ private fun ArraySettingsMenu(
             animationSpec = tween(durationMillis = 100),
         )*/
         AnchoredDraggableState(
-            initialValue = ArraySettingsMenuAnchors.Bottom,
+            initialValue = ArraySettingsMenuAnchors.Top,
             anchors = anchors,
             positionalThreshold = { it },
             velocityThreshold = { 0f },
@@ -342,7 +346,7 @@ private fun ArraySettingsContent(
             roofSections,
             { solarPanelType = it }
         )
-        SaveButton()
+        SaveButton(solarPanelType, roofSections)
     }
 }
 
@@ -575,9 +579,29 @@ private fun PriceText(price: Double) {
 }
 
 @Composable
-private fun SaveButton() {
+private fun SaveButton(solarPanelType: SolarPanelType, roofSections: List<RoofSection>) {
+    var name by remember { mutableStateOf("") }
+    var openSaveDialog by remember { mutableStateOf(false) }
+
+    if (openSaveDialog) {
+        SaveDialog(
+            onDismissRequest = { openSaveDialog = false },
+            onSave = {
+                openSaveDialog = false
+
+                SolarArray(name, solarPanelType, roofSections)
+                // TODO save to some view model
+                // TODO navigate home
+            },
+            name,
+            onNameChange = { name = it }
+        )
+    }
+
     OutlinedButton(
-        onClick = { },
+        onClick = {
+            openSaveDialog = true
+        },
         colors = ButtonDefaults.buttonColors(
             containerColor = Light
         ),
@@ -591,6 +615,65 @@ private fun SaveButton() {
             color = Color.Black,
             fontSize = 18.sp
         )
+    }
+}
+
+@Composable
+private fun SaveDialog(
+    onDismissRequest: () -> Unit,
+    onSave: () -> Unit,
+    name: String,
+    onNameChange: (String) -> Unit
+) {
+    Dialog(onDismissRequest) {
+        Column(
+            modifier = Modifier
+                .clip(RoundedCornerShape(15.dp))
+                .background(RandomBeige)
+                .border(1.dp, BrightYellow, RoundedCornerShape(15.dp))
+                .padding(horizontal = 16.dp, vertical = 10.dp)
+        ) {
+            Text(
+                text = "Lagre anlegg",
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth(),
+            )
+            Text(
+                text = "Ved å lagre dette anlegget vil det bli lagt til på hjemskjermen din.",
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                color = Color.DarkGray,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+            CustomTextField(
+                modifier = Modifier.fillMaxWidth(),
+                containerModifier = Modifier.fillMaxWidth(),
+                value = name,
+                onValueChange = onNameChange,
+                label = "Navn",
+                placeholder = "Navn på anlegget",
+            )
+            OutlinedButton(
+                onClick = onSave,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Light
+                ),
+                contentPadding = PaddingValues(2.dp),
+                border = BorderStroke(1.dp, DarkYellow),
+                modifier = Modifier
+                    .defaultMinSize(100.dp, 30.dp)
+            ) {
+                Text(
+                    "Lagre",
+                    color = Color.Black,
+                    fontSize = 14.sp
+                )
+            }
+        }
     }
 }
 
