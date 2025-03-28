@@ -18,8 +18,10 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -96,7 +98,6 @@ import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
 import no.uio.ifi.in2000.team54.ui.state.RoofSection
-import no.uio.ifi.in2000.team54.ui.theme.Beige
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
@@ -104,6 +105,7 @@ import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.Red
+import no.uio.ifi.in2000.team54.util.calculateSubsidy
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -143,7 +145,7 @@ private fun Map(
     viewModel: ManageSolarArrayViewModel,
     roofSections: SnapshotStateList<RoofSection>
 ) {
-    val roofSectionsState by viewModel.mapRoofSections.collectAsState()
+    val mapRoofSectionsState by viewModel.mapRoofSections.collectAsState()
 
     MapboxMap(
         Modifier
@@ -155,18 +157,20 @@ private fun Map(
         },
         scaleBar = {},
         onMapClickListener = { point ->
-            val targetRoofSection = roofSectionsState.roofSections.find {
+            val targetRoofSection = mapRoofSectionsState.roofSections.find {
                 it.geometry.contains(point)
             }
 
             if (targetRoofSection != null) {
                 if (!roofSections.removeIf { it.mapId == targetRoofSection.id }) {
+                    val area = targetRoofSection.width * targetRoofSection.length
+
                     roofSections.add(
                         RoofSection(
-                            targetRoofSection.width * targetRoofSection.length,
+                            area,
                             targetRoofSection.incline,
                             targetRoofSection.direction,
-                            SolarPanelType.PREMIUM,
+                            (area / SolarPanelType.AREA).toInt(),
                             targetRoofSection.id
                         )
                     )
@@ -177,7 +181,7 @@ private fun Map(
             false
         }
     ) {
-        roofSectionsState.roofSections.forEach { roofSection ->
+        mapRoofSectionsState.roofSections.forEach { roofSection ->
             val points = roofSection.geometry.toPoints()
             val localRoofSection = roofSections.find { it.mapId == roofSection.id }
 
@@ -257,8 +261,8 @@ private fun ArraySettingsMenu(
                 mapState,
                 mapViewportState,
                 draggableState,
-                roofSections,
-                viewModel
+                viewModel,
+                roofSections
             )
         }
     }
@@ -296,8 +300,8 @@ private fun ArraySettingsContent(
     mapState: MapState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
-    roofSections: SnapshotStateList<RoofSection>,
-    viewModel: ManageSolarArrayViewModel
+    viewModel: ManageSolarArrayViewModel,
+    roofSections: SnapshotStateList<RoofSection>
 ) {
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
@@ -310,8 +314,8 @@ private fun ArraySettingsContent(
             mapState,
             mapViewportState,
             draggableState,
-            roofSections,
-            viewModel
+            viewModel,
+            roofSections
         )
         SaveButton()
     }
@@ -323,8 +327,8 @@ private fun ArraySettingsMainSection(
     mapState: MapState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
+    viewModel: ManageSolarArrayViewModel,
     roofSections: SnapshotStateList<RoofSection>,
-    viewModel: ManageSolarArrayViewModel
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -334,7 +338,7 @@ private fun ArraySettingsMainSection(
         SearchField(mapState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
         Column(
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             RoofSectionsList(roofSections)
@@ -343,7 +347,8 @@ private fun ArraySettingsMainSection(
                     roofSections.add(it)
                 }
             )
-            PriceSummaryCard()
+            SolarPanelTypeDropdown(viewModel)
+            PriceSummaryCard(viewModel, roofSections)
         }
     }
 }
@@ -385,7 +390,7 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
             .clip(RoundedCornerShape(15.dp))
             .background(Light)
             .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
-            .padding(15.dp)
+            .padding(10.dp)
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -399,7 +404,7 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
             ) {
                 Text(
                     text = "Takflate ${index + 1}",
-                    fontSize = 19.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = DarkYellow
                 )
@@ -421,8 +426,7 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
             ) {
                 RoofSectionRow("Areal", "%.1fm²".format(section.area))
                 RoofSectionRow("Helning", "%.1f°".format(section.incline))
-                RoofSectionRow("Paneltype", "${section.solarPanelType.watt}W")
-                RoofSectionRow("Paneler", "1")
+                RoofSectionRow("Paneler", section.panels.toString())
             }
         }
     }
@@ -438,7 +442,7 @@ private fun RoofSectionRow(name: String, value: String) {
         Text(
             text = name,
             fontWeight = FontWeight.Medium,
-            fontSize = 17.sp
+            fontSize = 16.sp
         )
         Text(
             text = value,
@@ -449,7 +453,12 @@ private fun RoofSectionRow(name: String, value: String) {
 }
 
 @Composable
-private fun PriceSummaryCard() {
+private fun PriceSummaryCard(viewModel: ManageSolarArrayViewModel, roofSections: SnapshotStateList<RoofSection>) {
+    val panelTypeState by viewModel.solarPanelType.collectAsState()
+    val totalPanels = roofSections.sumOf { it.panels }
+    val grossPrice = panelTypeState.type.totalPrice(totalPanels)
+    val subsidy = calculateSubsidy(panelTypeState.type, totalPanels)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -481,7 +490,7 @@ private fun PriceSummaryCard() {
                         color = Color.Black,
                         fontSize = 14.sp,
                     )
-                    PriceText(100_000.0)
+                    PriceText(grossPrice)
                 }
                 Column {
                     Text(
@@ -489,7 +498,7 @@ private fun PriceSummaryCard() {
                         color = Color.Black,
                         fontSize = 14.sp,
                     )
-                    PriceText(30_000.0)
+                    PriceText(subsidy)
                 }
             }
             Column(
@@ -507,7 +516,7 @@ private fun PriceSummaryCard() {
                     modifier = Modifier
                         .size(100.dp)
                 )
-                PriceText(70_000.0)
+                PriceText(grossPrice - subsidy)
             }
         }
     }
@@ -515,7 +524,7 @@ private fun PriceSummaryCard() {
 
 @Composable
 private fun PriceText(price: Double) {
-    Row (
+    Row(
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
@@ -730,22 +739,22 @@ private fun AddRoofSectionCard(onAdd: (RoofSection) -> Unit) {
     var area by remember { mutableStateOf("") }
     var angle by remember { mutableStateOf("") }
     var direction by remember { mutableStateOf("") }
-    var solarPanelType by remember { mutableStateOf(SolarPanelType.entries[0]) }
+    var panels by remember { mutableStateOf("") }
 
     Column(
+        verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier
             .clip(shape = RoundedCornerShape(15.dp))
             .background(Light)
             .border(1.dp, DarkYellow, shape = RoundedCornerShape(15.dp))
-            .padding(horizontal = 15.dp, vertical = 10.dp)
+            .padding(horizontal = 10.dp, vertical = 5.dp)
     ) {
         Text(
             text = "Legg til takflate",
-            fontSize = 22.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = DarkYellow
         )
-        Spacer(modifier = Modifier.size(10.dp))
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth()
@@ -782,21 +791,23 @@ private fun AddRoofSectionCard(onAdd: (RoofSection) -> Unit) {
                     .fillMaxWidth()
                     .weight(1f)
             )
-            SolarPanelTypeDropdown(
-                selectedType = solarPanelType,
-                onSelect = { solarPanelType = it },
+            NumberInputField(
+                value = panels,
+                onValueChange = { panels = it },
+                label = "Paneler",
+                placeholder = "Antall paneler",
                 modifier = Modifier
-                    .weight(1f),
+                    .fillMaxWidth()
+                    .weight(1f)
             )
         }
-        Spacer(modifier = Modifier.size(10.dp))
         AddRoofButton {
             onAdd(
                 RoofSection(
                     area.toDouble(),
                     angle.toDouble(),
                     direction.toDouble(),
-                    solarPanelType,
+                    panels.toInt(),
                     mapId = null,
                 )
             )
@@ -817,12 +828,14 @@ private fun AddRoofButton(onClick: () -> Unit) {
             containerColor = Light
         ),
         border = BorderStroke(1.dp, DarkBeige),
-        modifier = Modifier.width(150.dp)
+        modifier = Modifier
+            .defaultMinSize(100.dp, 30.dp),
+        contentPadding = PaddingValues(0.dp),
     ) {
         Text(
             "Legg til",
             color = Color.Black,
-            fontSize = 18.sp
+            fontSize = 14.sp
         )
     }
 }
@@ -830,24 +843,26 @@ private fun AddRoofButton(onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SolarPanelTypeDropdown(
-    modifier: Modifier = Modifier,
-    selectedType: SolarPanelType,
-    onSelect: (SolarPanelType) -> Unit
-) {
+private fun SolarPanelTypeDropdown(viewModel: ManageSolarArrayViewModel) {
+    val panelTypeState by viewModel.solarPanelType.collectAsState()
+
     var dropdownExpanded by remember { mutableStateOf(false) }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
     ) {
-        Text("Paneltype", fontWeight = FontWeight.Bold)
+        Text(
+            "Paneltype",
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
         ExposedDropdownMenuBox(
             expanded = dropdownExpanded,
             onExpandedChange = { dropdownExpanded = it }
         ) {
             BasicTextField(
-                value = selectedType.nameWithWatt(),
+                value = panelTypeState.type.nameWithWatt(),
                 readOnly = true,
                 onValueChange = {},
                 textStyle = LocalTextStyle.current.copy(
@@ -857,8 +872,8 @@ private fun SolarPanelTypeDropdown(
                 modifier = Modifier
                     .menuAnchor(MenuAnchorType.PrimaryEditable, true)
                     .clip(RoundedCornerShape(15))
-                    .background(Beige)
-                    .border(1.dp, DarkBeige, RoundedCornerShape(15))
+                    .background(Light)
+                    .border(1.dp, DarkYellow, RoundedCornerShape(15))
                     .fillMaxWidth()
                     .padding(10.dp)
             )
@@ -871,7 +886,7 @@ private fun SolarPanelTypeDropdown(
                         text = { Text(type.nameWithWatt()) },
                         onClick = {
                             dropdownExpanded = false
-                            onSelect(type)
+                            viewModel.setSolarPanelType(type)
                         }
                     )
                 }

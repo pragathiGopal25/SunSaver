@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.ui.theme.Beige
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
 
@@ -33,7 +34,7 @@ fun CustomTextField(
     onValueChange: (String) -> Unit,
     label: String = "Label",
     placeholder: String = "",
-    fontSize: TextUnit = MaterialTheme.typography.bodyMedium.fontSize,
+    fontSize: TextUnit = 12.sp,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -41,13 +42,17 @@ fun CustomTextField(
     Column(
         modifier = containerModifier
     ) {
-        Text(label, fontWeight = FontWeight.Bold)
+        Text(
+            label,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp
+        )
         BasicTextField(
             modifier = modifier
                 .clip(RoundedCornerShape(15))
                 .background(Beige)
                 .border(1.dp, DarkBeige, RoundedCornerShape(15))
-                .padding(10.dp),
+                .padding(vertical = 5.dp, horizontal = 10.dp),
             value = value,
             onValueChange = onValueChange,
             singleLine = true,
