@@ -1,12 +1,9 @@
 package no.uio.ifi.in2000.team54.data.pvgis
 
-import android.util.Log
 import no.uio.ifi.in2000.team54.model.pvgis.SolarIrradianceData
 
 class PVGISRepository {
-
         private val solarData: PVGISDataSource = PVGISDataSource()
-
 
         suspend fun getMonthlySolarRadiation(latitude: Double, longitude: Double):Map<String, Double> {
             return getMonthlyAverageValues(solarData.fetchMonthlyRadiation(latitude, longitude))
@@ -21,8 +18,8 @@ class PVGISRepository {
                 averageMonthly.getOrPut(month) { mutableListOf() }.add(it.irradiance) } // extracts month from date
 
 
-            val monthlyTemps = averageMonthly.mapValues { (_, values) -> values.sum() / values.size}
-            return monthlyTemps.toSortedMap()
+            val monthlySolar = averageMonthly.mapValues { (_, values) -> values.sum() / values.size}
+            return monthlySolar
         }
 
 }

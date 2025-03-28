@@ -1,6 +1,5 @@
 package no.uio.ifi.in2000.team54.data.pvgis
 
-import android.location.Location
 import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -10,7 +9,6 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import no.uio.ifi.in2000.team54.model.pvgis.LocationInfo
 import no.uio.ifi.in2000.team54.model.pvgis.SolarIrradianceData
 
 class PVGISDataSource {
@@ -40,11 +38,12 @@ class PVGISDataSource {
 
         // Formatting the date expression in the table.
             // d{4} = date (eg. 2005)
-            // \w+ = one or more letters/word characters
+            // \s = represents space (as the values in the table are spaced apart)
+            // [A-Za-z]+ = one or more character/letter
             // \d+ = one or more digits
             // \. = decimal point
             // .toRegex() =. converts everything into a regular expression. Note that a regular expression is: a sequence of symbols and characters expressing a string or pattern to be searched for within a longer piece of text.
-        val dateExpression = """(\d{4}) (\w+) (\d+\.\d+)""".toRegex()
+        val dateExpression = """(\d{4})\s+([A-Za-z]+)\s+(\d+\.\d+)""".toRegex()
 
         // Iterates through the data to find all instance of the dates that match the dateExpression. It then returns an object of that expression (matchResult)
         // each date is then split into the year, month and irradiance respectively.
@@ -56,7 +55,7 @@ class PVGISDataSource {
             SolarIrradianceData(year, month, irradiance) // creating an object of the SolarIrradianceData data class
         }.toList()
 
-
+        Log.i("Error her", irradianceData.toString())
         return irradianceData
     }
 

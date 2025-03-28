@@ -5,9 +5,3 @@ data class SolarIrradianceData(
     val month: String,
     val irradiance: Double
 )
-
-data class LocationInfo(
-    var latitude: Double,
-    var longitude: Double,
-    var radiationDb: String
-)
