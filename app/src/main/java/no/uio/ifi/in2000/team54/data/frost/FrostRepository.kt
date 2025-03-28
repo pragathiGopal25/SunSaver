@@ -12,7 +12,7 @@ class FrostRepository() {
 
     // get observation data
     suspend fun getObservationData(latitude: Double, longitude: Double,elementName: String, referenceTime:String): Map<String, Double> {
-       return getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(latitude, longitude, elementName, referenceTime))
+        return getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(latitude, longitude, elementName, referenceTime))
     }
 
     // function that calculates and returns monthly average values for the data
@@ -24,8 +24,9 @@ class FrostRepository() {
             it.observations.forEach { obs -> averageMonthly.getOrPut(month) { mutableListOf() }.add(obs.value) } // extracts month from date
         }
 
-        val monthlyTemps = averageMonthly.mapValues { (_, values) -> values.sum() / values.size}
+        val monthlyValues = averageMonthly.mapValues { (_, values) -> values.sum() / values.size}
 
-        return monthlyTemps.toSortedMap()
+        return monthlyValues.toSortedMap()
     }
+
 }

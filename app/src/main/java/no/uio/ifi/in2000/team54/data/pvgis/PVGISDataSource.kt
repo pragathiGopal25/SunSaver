@@ -1,6 +1,6 @@
 package no.uio.ifi.in2000.team54.data.pvgis
 
-import android.util.Log
+
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -55,7 +55,6 @@ class PVGISDataSource {
             SolarIrradianceData(year, month, irradiance) // creating an object of the SolarIrradianceData data class
         }.toList()
 
-        Log.i("Error her", irradianceData.toString())
         return irradianceData
     }
 

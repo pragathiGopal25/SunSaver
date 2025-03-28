@@ -31,9 +31,14 @@ class HomeScreenViewModel: ViewModel() {
             val monthlySnow: Map<String, Double> = _repository.getObservationData(
                 59.9423,10.72,  "mean(snow_coverage_type%20P1M)", "2019-01-01/2024-12-31")
 
+            // uses frost
+            val monthlySolarIrradiance: Map<String, Double> = _repository.getObservationData(
+                59.9423,10.72,  "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)", "2019-01-01/2024-12-31")
+
             Log.i("testMapTemp", monthlyTemps.toString())
             Log.i("testMapCloud", monthlyCloud.toString())
             Log.i("testMapSnow", monthlySnow.toString())
+            Log.i("testSolarIrradiance", monthlySolarIrradiance.toString())
 
         }
 
@@ -41,7 +46,7 @@ class HomeScreenViewModel: ViewModel() {
     }
 
 
-
+    // calculating average solar irradiance using PVGIS
     private fun getSolarIrradiance() {
         viewModelScope.launch {
             val monthlyRadiance = _pvgisRepo.getMonthlySolarRadiation(59.9423,10.72, )
