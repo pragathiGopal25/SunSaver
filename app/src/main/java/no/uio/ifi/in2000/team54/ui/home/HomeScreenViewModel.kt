@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.pvgis.PVGISRepository
+import kotlin.math.*
 
 
 class HomeScreenViewModel: ViewModel() {
@@ -15,7 +16,7 @@ class HomeScreenViewModel: ViewModel() {
 
     init {
         getObservationsFromRepo()
-        getSolarIrradiance()
+        // getSolarIrradiance()
     }
 
     private fun getObservationsFromRepo() {
@@ -40,6 +41,17 @@ class HomeScreenViewModel: ViewModel() {
             Log.i("testMapSnow", monthlySnow.toString())
             Log.i("testSolarIrradiance", monthlySolarIrradiance.toString())
 
+            calculateSolarEnergy(
+                monthlyTemps = monthlyTemps,
+                monthlyCloud = monthlyCloud,
+                monthlySnow = monthlySnow,
+                monthlyRadiance = monthlySolarIrradiance,
+                area = 20.0,
+                angle= 35.0,
+                direction = 180.0,
+                latitude = 59.0
+            )
+
         }
 
 
@@ -53,6 +65,59 @@ class HomeScreenViewModel: ViewModel() {
             Log.i("testSolar", monthlyRadiance.toString())
         }
     }
+
+    // https://chatgpt.com/share/67e6bf32-a850-8008-ba21-1b8d5e6303b9
+    private fun calculateSolarEnergy(
+        monthlyTemps: Map<String, Double>,
+        monthlyCloud: Map<String, Double>,
+        monthlySnow: Map<String, Double>,
+        monthlyRadiance: Map<String, Double>,
+        area: Double,
+        angle: Double,
+        direction: Double,
+        latitude: Double
+    ): Map<String, Double> {
+        val result = mutableMapOf<String, Double>()
+
+        val optimalTilt = latitude * 0.76 + 3.1
+        val tiltFactor = cos(Math.toRadians(angle - optimalTilt))
+        val orientationFactor = orientationFactor(direction.toInt())
+
+        val referenceEfficiency = 0.20
+        val temperatureCoefficient = 0.004
+
+        for (month in monthlyRadiance.keys) {
+            val ghi = monthlyRadiance[month] ?: continue
+            val cloud = monthlyCloud[month] ?: 0.0  // 0.3 = 30% skydekke
+            val snow = monthlySnow[month] ?: 0.0    // 0.1 = 10% snødekket
+            val temp = monthlyTemps[month] ?: 0.0   // °C
+
+            val poa = ghi * tiltFactor * orientationFactor * (1 - cloud) * (1 - snow)
+
+            // Enkel modell for celletemperatur: omgivelsestemp + ca. 20 °C
+            val tCell = temp + 20
+            val actualEfficiency = referenceEfficiency * (1 - temperatureCoefficient * (tCell - 25))
+
+            val energy = poa * area * actualEfficiency  // kWh for måneden
+            result[month] = energy
+            Log.i("FFFFF", result.toString())
+        }
+
+        return result
+    }
+
+    private fun orientationFactor(azimuth: Int): Double {
+        return when (azimuth) {
+            in 170..190 -> 1.00
+            in 140..210 -> 0.98
+            in 110..240 -> 0.95
+            in 80..100, in 260..280 -> 0.90
+            in 50..110, in 250..310 -> 0.80
+            in 20..50, in 310..340 -> 0.65
+            else -> 0.50
+        }
+    }
+
 }
 
 
