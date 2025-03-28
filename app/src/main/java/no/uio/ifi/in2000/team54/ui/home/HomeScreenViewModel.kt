@@ -16,7 +16,7 @@ class HomeScreenViewModel: ViewModel() {
 
     init {
         getObservationsFromRepo()
-        // getSolarIrradiance()
+        //getSolarIrradiance()
     }
 
     private fun getObservationsFromRepo() {
@@ -36,16 +36,18 @@ class HomeScreenViewModel: ViewModel() {
             val monthlySolarIrradiance: Map<String, Double> = _repository.getObservationData(
                 59.9423,10.72,  "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)", "2019-01-01/2024-12-31")
 
+            val monthlyRadiance = _pvgisRepo.getMonthlySolarRadiation(59.9423,10.72, )
+
             Log.i("testMapTemp", monthlyTemps.toString())
             Log.i("testMapCloud", monthlyCloud.toString())
             Log.i("testMapSnow", monthlySnow.toString())
-            Log.i("testSolarIrradiance", monthlySolarIrradiance.toString())
+            //Log.i("testSolarIrradiance", monthlySolarIrradiance.toString())
 
             calculateSolarEnergy(
                 monthlyTemps = monthlyTemps,
                 monthlyCloud = monthlyCloud,
                 monthlySnow = monthlySnow,
-                monthlyRadiance = monthlySolarIrradiance,
+                monthlyRadiance = monthlyRadiance,
                 area = 20.0,
                 angle= 35.0,
                 direction = 180.0,
@@ -102,7 +104,7 @@ class HomeScreenViewModel: ViewModel() {
             result[month] = energy
             Log.i("FFFFF", result.toString())
         }
-
+        Log.i("DONERESULT", result.toString())
         return result
     }
 
