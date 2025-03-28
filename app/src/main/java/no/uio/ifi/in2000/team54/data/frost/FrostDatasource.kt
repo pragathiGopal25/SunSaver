@@ -8,6 +8,7 @@ import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import android.util.Base64
+import android.util.Log
 import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
@@ -37,7 +38,7 @@ class FrostDatasource {
 
     private suspend fun fetchNearestSource(latitude: Double, longitude: Double): String {
 
-        val response: HttpResponse = client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT($latitude%20$longitude))") {
+        val response: HttpResponse = client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT($longitude%20$latitude))") {
             header(HttpHeaders.Authorization, authHeader)
             header(HttpHeaders.Accept, "application/json")
         }

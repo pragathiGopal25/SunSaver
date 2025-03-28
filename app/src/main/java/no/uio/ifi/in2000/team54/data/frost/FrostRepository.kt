@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.data.frost
 
+import android.util.Log
 import no.uio.ifi.in2000.team54.model.frost.ObservationData
 
 class FrostRepository() {
