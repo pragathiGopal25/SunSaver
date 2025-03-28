@@ -35,6 +35,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
@@ -129,6 +130,7 @@ fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel) {
             .fillMaxSize()
     ) {
         Map(mapState, mapViewportState, viewModel, roofSections)
+        BackButton()
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -215,6 +217,25 @@ private fun Map(
             }
         }
     }
+}
+
+@Composable
+private fun BackButton() {
+    Icon(
+        Icons.AutoMirrored.Default.ArrowBack,
+        contentDescription = "Gå tilbake",
+        tint = DarkYellow,
+        modifier = Modifier
+            .padding(10.dp)
+            .width(35.dp)
+            .height(35.dp)
+            .clip(RoundedCornerShape(100.dp))
+            .background(LightestYellow)
+            .padding(7.dp)
+            .clickable {
+                // TODO navigate home
+            }
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
