@@ -69,7 +69,12 @@ class FrostDatasource {
         return testObservations.map {it.sourceId}
     }
 
-    suspend fun fetchObservationDataFromFrost(latitude: Double, longitude: Double, elementName: String, referenceTime: String): List<ObservationData> {
+    suspend fun fetchObservationDataFromFrost(
+        latitude: Double,
+        longitude: Double,
+        elementName: String,
+        referenceTime: String
+    ): List<ObservationData> {
         if(sensorId == "") {
             sensorId = fetchNearestSource(latitude, longitude)
             storedLatitude = latitude
@@ -82,7 +87,15 @@ class FrostDatasource {
             storedLongitude =longitude
         }
 
-        val response: HttpResponse = client.get("https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName") {
+        var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
+
+        if (elementName == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
+            Log.i("testMan", "man")
+            url = "$url&qualities=0"
+        }
+        Log.i("testLink", url)
+
+        val response: HttpResponse = client.get(url) {
             header(HttpHeaders.Authorization, authHeader)
             header(HttpHeaders.Accept, "application/json")
         }
