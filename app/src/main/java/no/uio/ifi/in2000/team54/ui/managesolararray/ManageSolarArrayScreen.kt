@@ -83,7 +83,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
-import androidx.core.text.isDigitsOnly
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraOptions
@@ -115,6 +114,7 @@ import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 import no.uio.ifi.in2000.team54.ui.theme.Red
 import no.uio.ifi.in2000.team54.util.calculateSubsidy
+import no.uio.ifi.in2000.team54.util.isNumber
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -365,6 +365,8 @@ private fun ArraySettingsMainSection(
     roofSections: SnapshotStateList<RoofSection>,
     onSelectPanelType: (SolarPanelType) -> Unit
 ) {
+    var editingRoofSection by remember { mutableStateOf<Int?>(null) }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -376,12 +378,8 @@ private fun ArraySettingsMainSection(
             verticalArrangement = Arrangement.spacedBy(15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            RoofSectionsList(roofSections)
-            AddRoofSectionCard(
-                onAdd = {
-                    roofSections.add(it)
-                }
-            )
+            RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
+            ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
             SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
             PriceSummaryCard(viewModel, solarPanelType, roofSections)
         }
@@ -401,7 +399,7 @@ private fun DragHandle() {
 }
 
 @Composable
-private fun RoofSectionsList(roofSections: SnapshotStateList<RoofSection>) {
+private fun RoofSectionsList(roofSections: SnapshotStateList<RoofSection>, onRemove: () -> Unit, onEdit: (Int) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -414,7 +412,14 @@ private fun RoofSectionsList(roofSections: SnapshotStateList<RoofSection>) {
                 NoRoofSectionCard()
             } else {
                 roofSections.forEachIndexed { index, section ->
-                    RoofSectionCard(section, index, { roofSections.remove(section) })
+                    RoofSectionCard(
+                        section,
+                        index,
+                        onRemove = {
+                            roofSections.remove(section)
+                            onRemove()
+                        },
+                        onEdit = { onEdit(roofSections.indexOf(section)) })
                 }
             }
         }
@@ -422,7 +427,7 @@ private fun RoofSectionsList(roofSections: SnapshotStateList<RoofSection>) {
 }
 
 @Composable
-private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Unit) {
+private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Unit, onEdit: () -> Unit) {
     Box(
         modifier = Modifier
             .width(180.dp)
@@ -431,6 +436,7 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
             .background(Light)
             .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
             .padding(10.dp)
+            .clickable { onEdit() }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -880,11 +886,30 @@ private fun SuggestionItem(suggestion: Address, onClick: () -> Unit) {
 }
 
 @Composable
-private fun AddRoofSectionCard(onAdd: (RoofSection) -> Unit) {
-    var area by remember { mutableStateOf("") }
-    var angle by remember { mutableStateOf("") }
-    var direction by remember { mutableStateOf("") }
-    var panels by remember { mutableStateOf("") }
+private fun ManageRoofSectionCard(
+    roofSections: SnapshotStateList<RoofSection>,
+    editingRoofSectionIndex: Int?,
+    onSave: () -> Unit
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val isEditing = editingRoofSectionIndex != null
+    val editingRoofSection = if (isEditing) roofSections[editingRoofSectionIndex!!] else null
+    var isEditingInitialized by remember(editingRoofSectionIndex) { mutableStateOf(false) }
+
+    var area by remember(isEditing) { mutableStateOf("") }
+    var incline by remember(isEditing) { mutableStateOf("") }
+    var direction by remember(isEditing) { mutableStateOf("") }
+    var panels by remember(isEditing) { mutableStateOf("") }
+
+    if (isEditing && !isEditingInitialized) {
+        isEditingInitialized = true
+
+        area = "%.2f".format(editingRoofSection!!.area)
+        incline = "%.2f".format(editingRoofSection.incline)
+        direction = "%.2f".format(editingRoofSection.direction)
+        panels = editingRoofSection.panels.toString()
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -895,7 +920,7 @@ private fun AddRoofSectionCard(onAdd: (RoofSection) -> Unit) {
             .padding(10.dp)
     ) {
         Text(
-            text = "Legg til takflate",
+            text = if (isEditing) "Redigerer takflate ${editingRoofSectionIndex!! + 1}" else "Legg til takflate",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = DarkYellow
@@ -914,8 +939,8 @@ private fun AddRoofSectionCard(onAdd: (RoofSection) -> Unit) {
                     .weight(1f)
             )
             NumberInputField(
-                value = angle,
-                onValueChange = { angle = it },
+                value = incline,
+                onValueChange = { incline = it },
                 label = "Helning",
                 placeholder = "Helning i grader",
                 modifier = Modifier
@@ -946,45 +971,46 @@ private fun AddRoofSectionCard(onAdd: (RoofSection) -> Unit) {
                     .weight(1f)
             )
         }
-        AddRoofButton {
-            onAdd(
-                RoofSection(
+        Button(
+            onClick = {
+                keyboardController?.hide()
+
+                val newSection = RoofSection(
                     area.toDouble(),
-                    angle.toDouble(),
+                    incline.toDouble(),
                     direction.toDouble(),
                     panels.toInt(),
-                    mapId = null,
+                    mapId = editingRoofSection?.mapId,
                 )
+                if (isEditing) {
+                    roofSections[editingRoofSectionIndex!!] = newSection
+                } else {
+                    roofSections.add(newSection)
+                }
+
+                onSave()
+
+                area = ""
+                incline = ""
+                direction = ""
+                panels = ""
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Light
+            ),
+            border = BorderStroke(1.dp, DarkBeige),
+            modifier = Modifier
+                .defaultMinSize(100.dp, 30.dp),
+            contentPadding = PaddingValues(0.dp),
+        ) {
+            Text(
+                if (isEditing) "Lagre" else "Legg til",
+                color = Color.Black,
+                fontSize = 14.sp
             )
         }
     }
 }
-
-@Composable
-private fun AddRoofButton(onClick: () -> Unit) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-    Button(
-        onClick = {
-            onClick()
-            keyboardController?.hide()
-        },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Light
-        ),
-        border = BorderStroke(1.dp, DarkBeige),
-        modifier = Modifier
-            .defaultMinSize(100.dp, 30.dp),
-        contentPadding = PaddingValues(0.dp),
-    ) {
-        Text(
-            "Legg til",
-            color = Color.Black,
-            fontSize = 14.sp
-        )
-    }
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1050,7 +1076,7 @@ private fun NumberInputField(
         modifier = Modifier.fillMaxWidth(),
         containerModifier = modifier,
         value = value,
-        onValueChange = { if (it.isDigitsOnly()) onValueChange(it) },
+        onValueChange = { if (it.isNumber()) onValueChange(it) },
         label = label,
         placeholder = placeholder,
         keyboardOptions = KeyboardOptions(

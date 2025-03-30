@@ -1,6 +1,6 @@
 package no.uio.ifi.in2000.team54.ui.state
 
-class RoofSection(
+data class RoofSection(
     val area: Double,
     val incline: Double,
     val direction: Double,
