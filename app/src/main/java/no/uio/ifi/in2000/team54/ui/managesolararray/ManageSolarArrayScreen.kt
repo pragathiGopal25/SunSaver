@@ -61,9 +61,13 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -406,8 +410,12 @@ private fun RoofSectionsList(roofSections: SnapshotStateList<RoofSection>) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            roofSections.forEachIndexed { index, section ->
-                RoofSectionCard(section, index, { roofSections.remove(section) })
+            if (roofSections.isEmpty()) {
+                NoRoofSectionCard()
+            } else {
+                roofSections.forEachIndexed { index, section ->
+                    RoofSectionCard(section, index, { roofSections.remove(section) })
+                }
             }
         }
     }
@@ -418,6 +426,7 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
     Box(
         modifier = Modifier
             .width(180.dp)
+            .height(135.dp)
             .clip(RoundedCornerShape(15.dp))
             .background(Light)
             .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
@@ -460,6 +469,29 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
                 RoofSectionRow("Paneler", section.panels.toString())
             }
         }
+    }
+}
+
+@Composable
+private fun NoRoofSectionCard() {
+    Box(
+        modifier = Modifier
+            .width(180.dp)
+            .height(135.dp)
+            .drawBehind {
+                drawRoundRect(
+                    color = DarkYellow,
+                    cornerRadius = CornerRadius(15.dp.toPx()),
+                    style = Stroke(width = 3f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
+                )
+            }
+            .padding(10.dp)
+    ) {
+        Text(
+            "Søk på en adresse og velg en takflate i kartet, eller legg inn en manuelt i boksen under.",
+            fontSize = 12.sp,
+            color = Color.Gray,
+        )
     }
 }
 
