@@ -13,6 +13,7 @@ import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
 import kotlinx.serialization.Serializable
+import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.model.frost.ObservationData
 import no.uio.ifi.in2000.team54.model.frost.ObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.SensorSystem
@@ -32,13 +33,15 @@ class FrostDatasource {
     private val raw = "b8d04ecc-dc8a-40a9-942e-2acfb8aba15d" + ":" // client id for team54@uio.no
     private val encoded: String = Base64.encodeToString(raw.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
     private val authHeader = "Basic $encoded"
+
+
     private var sensorId = ""
     private var storedLatitude = 0.0
     private var storedLongitude = 0.0
 
-    private suspend fun fetchNearestSource(latitude: Double, longitude: Double): String {
+    private suspend fun fetchNearestSource(coordinates:Coordinates): String {
 
-        val response: HttpResponse = client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT($longitude%20$latitude))") {
+        val response: HttpResponse = client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))") {
             header(HttpHeaders.Authorization, authHeader)
             header(HttpHeaders.Accept, "application/json")
         }
@@ -49,14 +52,14 @@ class FrostDatasource {
     }
 
     // Just to test connection (does nothing useful)
-    suspend fun getSomethingFromFrost(latitude: Double, longitude: Double): List<String> {
+    suspend fun getSomethingFromFrost(coordinates: Coordinates): List<String> {
 
         @Serializable
         data class Test(val sourceId: String)
         @Serializable
         data class ResponseTest (val data: List<Test>)
 
-        val source = fetchNearestSource(latitude, longitude)
+        val source = fetchNearestSource(coordinates)
 
         val urlMock = "https://frost.met.no/observations/v0.jsonld?sources=$source&referencetime=2024-03-25%2F2025-03-25&elements=mean(cloud_area_fraction%20P1D)"
         val response: HttpResponse = client.get(urlMock) {
@@ -70,21 +73,20 @@ class FrostDatasource {
     }
 
     suspend fun fetchObservationDataFromFrost(
-        latitude: Double,
-        longitude: Double,
+        coordinates: Coordinates,
         elementName: String,
         referenceTime: String
     ): List<ObservationData> {
         if(sensorId == "") {
-            sensorId = fetchNearestSource(latitude, longitude)
-            storedLatitude = latitude
-            storedLongitude = longitude
+            sensorId = fetchNearestSource(coordinates)
+            storedLatitude = coordinates.latitude
+            storedLongitude = coordinates.longitude
         }
 
-        if (latitude != storedLatitude || longitude != storedLongitude) { // coordiantes changed, so sensor needs to be updated.
-            sensorId = fetchNearestSource(latitude, longitude)
-            storedLatitude =latitude
-            storedLongitude =longitude
+        if (coordinates.latitude != storedLatitude || coordinates.longitude != storedLongitude) { // coordiantes changed, so sensor needs to be updated.
+            sensorId = fetchNearestSource(coordinates)
+            storedLatitude = coordinates.latitude
+            storedLongitude = coordinates.longitude
         }
 
         var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"

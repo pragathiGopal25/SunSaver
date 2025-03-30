@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.pvgis.PVGISRepository
 import no.uio.ifi.in2000.team54.data.shared.SharedRepository
+import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import kotlin.math.*
 
@@ -26,6 +27,9 @@ class HomeScreenViewModel: ViewModel() {
     private val _pvgisRepo = PVGISRepository() // probably will delete later
     private val _sharedRepository = SharedRepository()
 
+
+    private lateinit var fetchedData: FrostRepository.FetchAllData
+
     private val _graphDataUiState = MutableStateFlow(GraphDataUiState())
     private val _solarArrayUiState = MutableStateFlow(SolarArrayUiState())
 
@@ -39,34 +43,17 @@ class HomeScreenViewModel: ViewModel() {
     private fun getObservationsFromRepo() {
         viewModelScope.launch {
 
-            val dateInterval = "2022-12-31/2024-12-31"
-            // uses frost
-            val monthlySolarIrradiance: Map<String, Double> = _repository.getObservationData(
-                59.9423,
-                10.72,
-                "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)",
-                dateInterval
-            )
-            Log.i("testIIrrFrost", monthlySolarIrradiance.toString())
+            fetchedData =  _repository.getObservationData(Coordinates(59.9423, 10.72))
 
-            // retrieves data from the last five years
-            val monthlyTemps: Map<String, Double> = _repository.getObservationData(
-                59.9423, 10.72, "mean(air_temperature%20P1M)", dateInterval
-            )
+            val monthlyTemps = fetchedData.monthlyTemps
+            val monthlySnow = fetchedData.monthlySnow
+            val monthlyCloud = fetchedData.monthlyCloud
+            val monthlySolarIrradiance = fetchedData.monthlyRadiation
 
-            val monthlyCloud: Map<String, Double> = _repository.getObservationData(
-                59.9423, 10.72, "mean(cloud_area_fraction%20P1D)", dateInterval
-            )
-
-            val monthlySnow: Map<String, Double> = _repository.getObservationData(
-                59.9423, 10.72, "mean(snow_coverage_type%20P1M)", dateInterval
-            )
-            // val monthlyRadiance = _pvgisRepo.getMonthlySolarRadiation(59.9423, 10.72,)
-
-            Log.i("testMapTemp", monthlyTemps.toString())
-            Log.i("testMapCloud", monthlyCloud.toString())
-            Log.i("testMapSnow", monthlySnow.toString())
-            //Log.i("testSolarIrradiance", monthlySolarIrradiance.toString())
+            /*Log.i("testMapTemp", fetchedData.monthlyTemps.toString())
+            Log.i("testMapCloud", fetchedData.monthlyCloud.toString())
+            Log.i("testMapSnow", fetchedData.monthlySnow.toString())
+            Log.i("testSolarIrradiance", monthlySolarIrradiance.toString())*/
 
             val solarArray: SolarArray? = _sharedRepository.getSolarArrayByName(name = _solarArrayUiState.value.name)
             if (solarArray != null) {
