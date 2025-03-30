@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
 
-class ElectricityPriceViewModel: ViewModel() {
+class ElectricityPriceViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(PriceUiState(0.0, 0.0, 0.0))
     private val priceData = ElectricityPriceRepository(ElectricityPriceDatasource())
@@ -19,16 +19,16 @@ class ElectricityPriceViewModel: ViewModel() {
         seePrices()
     }
 
-     fun seePrices() {
+    fun seePrices() {
         viewModelScope.launch {
             try {
                 val realPrice = priceData.absPrice()
                 val solarPrice = priceData.absPriceSolar()
                 _uiState.value =
                     _uiState.value.copy(
-                        realPrice = (Math.round(realPrice*10000) / 10000.0),
-                        solarPrice = (Math.round(solarPrice*10000) / 10000.0),
-                        saved = Math.round((realPrice - solarPrice) * 10000) / 10000.0
+                        realPrice = (Math.round(realPrice * 10) / 10.0),
+                        solarPrice = (Math.round(solarPrice * 10) / 10.0),
+                        saved = Math.round((realPrice - solarPrice) * 10) / 10.0
                     )
             } finally {
 
