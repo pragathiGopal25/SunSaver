@@ -15,11 +15,6 @@ class FrostRepository() {
 
     private val dateInterval = "2022-12-31/2024-12-31"
 
-    // Just to test connection
-    suspend fun getSomethingFromDatasource(coordinates: Coordinates): List<String> {
-        return datasource.getSomethingFromFrost(coordinates)
-    }
-
     // store fetched data from data source in an object
     data class FetchAllData (
         var monthlyTemps: Map<String, Double> = emptyMap(),
@@ -30,12 +25,12 @@ class FrostRepository() {
 
     suspend fun getObservationData(coordinates: Coordinates): FetchAllData {
         val fetchData = FetchAllData()
-        nameMap.forEach { (name, _) ->
+        nameMap.forEach { (name, elementName) ->
             when (name) {
-                "temp" -> fetchData.monthlyTemps = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, name, dateInterval))
-                "cloud" ->  fetchData.monthlyCloud = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, name, dateInterval))
-                "snow" -> fetchData.monthlySnow = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, name, dateInterval))
-                "radiation" -> fetchData.monthlyRadiation = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, name, dateInterval))
+                "temp" -> fetchData.monthlyTemps = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
+                "cloud" ->  fetchData.monthlyCloud = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
+                "snow" -> fetchData.monthlySnow = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
+                "radiation" -> fetchData.monthlyRadiation = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
             }
         }
 

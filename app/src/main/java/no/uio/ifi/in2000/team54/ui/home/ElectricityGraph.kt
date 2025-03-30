@@ -41,13 +41,6 @@ import com.patrykandpatrick.vico.core.common.component.ShapeComponent
 import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 
-/*
-val data = mapOf( // test data for both components
-    "Strøm" to listOf( 16.0, 41.2, 91.0, 118.2, 133.3, 137.0, 130.0, 112.0, 84.0, 52.0, 21.0, 10.0),
-    "Solenergi" to listOf(6.0, 21.2, 41.0, 50.2, 64.3, 79.0, 90.0, 62.0, 34.0, 22.0, 5.0, 10.0)
-)
-*/
-// x values
 val monthFormatter = CartesianValueFormatter { _, value, _ -> // overriding "format" method in CastertianValueFormatter
     val months = listOf(
         "Jan", "Feb", "Mar", "Apr", "Mai", "Jun",
@@ -60,13 +53,13 @@ val monthFormatter = CartesianValueFormatter { _, value, _ -> // overriding "for
 @Composable
 fun EletricityGraphContainer(
     modifier: Modifier = Modifier,
-    viewModel: HomeScreenViewModel = HomeScreenViewModel()
+    viewModel: HomeScreenViewModel
 ) {
 
     val graphDataUiState by viewModel.graphDataUiState.collectAsStateWithLifecycle()
 
     if (graphDataUiState.solarIrradianceData == emptyMap<String, List<Double>>()) {
-        Text("laster")
+        Text(text = graphDataUiState.loadingState)
     } else {
         ElectricityGraph(data = graphDataUiState.solarIrradianceData)
     }

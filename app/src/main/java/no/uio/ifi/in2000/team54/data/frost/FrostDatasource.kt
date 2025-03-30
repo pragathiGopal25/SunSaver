@@ -12,7 +12,6 @@ import android.util.Log
 import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
-import kotlinx.serialization.Serializable
 import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.model.frost.ObservationData
 import no.uio.ifi.in2000.team54.model.frost.ObservationResponse
@@ -51,27 +50,6 @@ class FrostDatasource {
         return body[0].id
     }
 
-    // Just to test connection (does nothing useful)
-    suspend fun getSomethingFromFrost(coordinates: Coordinates): List<String> {
-
-        @Serializable
-        data class Test(val sourceId: String)
-        @Serializable
-        data class ResponseTest (val data: List<Test>)
-
-        val source = fetchNearestSource(coordinates)
-
-        val urlMock = "https://frost.met.no/observations/v0.jsonld?sources=$source&referencetime=2024-03-25%2F2025-03-25&elements=mean(cloud_area_fraction%20P1D)"
-        val response: HttpResponse = client.get(urlMock) {
-            header(HttpHeaders.Authorization, authHeader)
-            header(HttpHeaders.Accept, "application/json")
-        }
-
-        val testObservations = response.body<ResponseTest>().data
-
-        return testObservations.map {it.sourceId}
-    }
-
     suspend fun fetchObservationDataFromFrost(
         coordinates: Coordinates,
         elementName: String,
@@ -93,7 +71,7 @@ class FrostDatasource {
 
         if (elementName == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
             Log.i("testMan", "man")
-            url = "$url&qualities=0"
+            url = "$url&qualities=0" // no data of other qualities
         }
         Log.i("testLink", url)
 
