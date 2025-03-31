@@ -8,10 +8,13 @@ import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import android.util.Base64
+import android.util.Log
 import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
-import kotlinx.serialization.Serializable
+import no.uio.ifi.in2000.team54.domain.Coordinates
+import no.uio.ifi.in2000.team54.model.frost.ObservationData
+import no.uio.ifi.in2000.team54.model.frost.ObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.SensorSystem
 import no.uio.ifi.in2000.team54.model.frost.SourceResponse
 
@@ -30,9 +33,14 @@ class FrostDatasource {
     private val encoded: String = Base64.encodeToString(raw.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
     private val authHeader = "Basic $encoded"
 
-    private suspend fun fetchNearestSource(latitude: String, longitude: String): String {
 
-        val response: HttpResponse = client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT($latitude%20$longitude))") {
+    private var sensorId = ""
+    private var storedLatitude = 0.0
+    private var storedLongitude = 0.0
+
+    private suspend fun fetchNearestSource(coordinates:Coordinates): String {
+
+        val response: HttpResponse = client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))") {
             header(HttpHeaders.Authorization, authHeader)
             header(HttpHeaders.Accept, "application/json")
         }
@@ -42,24 +50,39 @@ class FrostDatasource {
         return body[0].id
     }
 
-    // Just to test connection (does nothing useful)
-    suspend fun getSomethingFromFrost(latitude: String, longtitude: String): List<String> {
+    suspend fun fetchObservationDataFromFrost(
+        coordinates: Coordinates,
+        elementName: String,
+        referenceTime: String
+    ): List<ObservationData> {
+        if(sensorId == "") {
+            sensorId = fetchNearestSource(coordinates)
+            storedLatitude = coordinates.latitude
+            storedLongitude = coordinates.longitude
+        }
 
-        @Serializable
-        data class Test(val sourceId: String)
-        @Serializable
-        data class ResponseTest (val data: List<Test>)
+        if (coordinates.latitude != storedLatitude || coordinates.longitude != storedLongitude) { // coordiantes changed, so sensor needs to be updated.
+            sensorId = fetchNearestSource(coordinates)
+            storedLatitude = coordinates.latitude
+            storedLongitude = coordinates.longitude
+        }
 
-        val source = fetchNearestSource(latitude, longtitude)
+        var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
 
-        val urlMock = "https://frost.met.no/observations/v0.jsonld?sources=$source&referencetime=2024-03-25%2F2025-03-25&elements=mean(cloud_area_fraction%20P1D)"
-        val response: HttpResponse = client.get(urlMock) {
+        if (elementName == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
+            Log.i("testMan", "man")
+            url = "$url&qualities=0" // no data of other qualities
+        }
+        Log.i("testLink", url)
+
+        val response: HttpResponse = client.get(url) {
             header(HttpHeaders.Authorization, authHeader)
             header(HttpHeaders.Accept, "application/json")
         }
 
-        val testObservations = response.body<ResponseTest>().data
+        val observationResponse: ObservationResponse = response.body()
 
-        return testObservations.map {it.sourceId}
+        return observationResponse.data
+
     }
 }

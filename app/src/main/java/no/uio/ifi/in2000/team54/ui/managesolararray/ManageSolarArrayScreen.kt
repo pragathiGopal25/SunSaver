@@ -1,11 +1,11 @@
 package no.uio.ifi.in2000.team54.ui.managesolararray
 
 
-import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,8 +18,10 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +35,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -42,6 +46,8 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -55,49 +61,72 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
-import androidx.core.text.isDigitsOnly
 import com.mapbox.geojson.Point
+import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.MapboxMap
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.annotation.ViewAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolygonAnnotation
 import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
 import com.mapbox.maps.extension.compose.rememberMapState
 import com.mapbox.maps.extension.compose.style.MapStyle
-import com.mapbox.search.autocomplete.PlaceAutocomplete
-import com.mapbox.search.autocomplete.PlaceAutocompleteSuggestion
+import com.mapbox.maps.viewannotation.geometry
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.team54.R
+import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
-import no.uio.ifi.in2000.team54.model.building.Pos
+import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
-import no.uio.ifi.in2000.team54.ui.state.RoofState
+import no.uio.ifi.in2000.team54.domain.RoofSection
+import no.uio.ifi.in2000.team54.domain.SolarArray
+import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
+import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
+import no.uio.ifi.in2000.team54.ui.theme.Light
+import no.uio.ifi.in2000.team54.ui.theme.LightYellow
+import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
+import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
+import no.uio.ifi.in2000.team54.ui.theme.Red
+import no.uio.ifi.in2000.team54.util.calculateSubsidy
+import no.uio.ifi.in2000.team54.util.isNumber
+import java.util.Locale
 import kotlin.math.roundToInt
 
-private val placeAutocomplete = PlaceAutocomplete.create()
 private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
 
 enum class ArraySettingsMenuAnchors { Bottom, Top }
 
 @Composable
 fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel) {
+    val roofSections = remember { mutableStateListOf<RoofSection>() }
+
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             center(osloCenter)
@@ -109,19 +138,25 @@ fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Map(mapState, mapViewportState, viewModel)
+        Map(mapState, mapViewportState, viewModel, roofSections)
+        BackButton()
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            ArraySettingsMenu(mapState, mapViewportState, viewModel)
+            ArraySettingsMenu(mapState, mapViewportState, viewModel, roofSections)
         }
     }
 }
 
 @Composable
-private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewModel: ManageSolarArrayViewModel) {
-    val roofSections by viewModel.roofSections.collectAsState()
+private fun Map(
+    mapState: MapState,
+    mapViewportState: MapViewportState,
+    viewModel: ManageSolarArrayViewModel,
+    roofSections: SnapshotStateList<RoofSection>
+) {
+    val mapRoofSectionsState by viewModel.mapRoofSections.collectAsState()
 
     MapboxMap(
         Modifier
@@ -131,37 +166,100 @@ private fun Map(mapState: MapState, mapViewportState: MapViewportState, viewMode
         style = {
             MapStyle(style = Style.STANDARD)
         },
+        scaleBar = {},
         onMapClickListener = { point ->
-            viewModel.setPos(Pos.fromPoint(point))
+            val targetRoofSection = mapRoofSectionsState.roofSections.find {
+                it.geometry.contains(point)
+            }
+
+            if (targetRoofSection != null) {
+                if (!roofSections.removeIf { it.mapId == targetRoofSection.id }) {
+                    val area = targetRoofSection.width * targetRoofSection.length
+
+                    roofSections.add(
+                        RoofSection(
+                            area,
+                            targetRoofSection.incline,
+                            targetRoofSection.direction,
+                            (area / SolarPanelType.AREA).toInt(),
+                            targetRoofSection.id
+                        )
+                    )
+                }
+            }
+
+            //viewModel.setPos(Pos.fromPoint(point))
             false
         }
     ) {
-        val color = MaterialTheme.colorScheme.secondary
-        roofSections.roofSections.forEach { roofSection ->
-            val points = roofSection.geometry.coordinates[0].map {
-                Point.fromLngLat(it[0], it[1])
-            }
+        mapRoofSectionsState.roofSections.forEach { roofSection ->
+            val points = roofSection.geometry.toPoints()
+            val localRoofSection = roofSections.find { it.mapId == roofSection.id }
 
             PolygonAnnotation(listOf(points)) {
-                fillColor = color
+                fillColor = if (localRoofSection == null) LightYellow else DarkYellow
                 fillOpacity = 0.9
             }
             PolylineAnnotation(points) {
                 lineColor = Color.Black
                 lineWidth = 3.0
             }
+
+            if (localRoofSection != null) {
+                ViewAnnotation(
+                    options = viewAnnotationOptions {
+                        geometry(Polygon.fromLngLats(listOf(points)))
+                        //geometry(Point.fromLngLat(roofSection.longitude, roofSection.latitude))
+                        allowOverlap(true)
+                        allowOverlapWithPuck(true)
+                    }
+                ) {
+                    Text(
+                        "Tak ${roofSections.indexOf(localRoofSection) + 1}",
+                        modifier =
+                        Modifier
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Light)
+                            .padding(horizontal = 3.dp, vertical = 2.dp)
+                    )
+                }
+            }
         }
     }
 }
 
+@Composable
+private fun BackButton() {
+    Icon(
+        Icons.AutoMirrored.Default.ArrowBack,
+        contentDescription = "Gå tilbake",
+        tint = DarkYellow,
+        modifier = Modifier
+            .padding(10.dp)
+            .width(35.dp)
+            .height(35.dp)
+            .clip(RoundedCornerShape(100.dp))
+            .background(LightestYellow)
+            .padding(7.dp)
+            .clickable {
+                // TODO navigate home
+            }
+    )
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ArraySettingsMenu(mapState: MapState, mapViewportState: MapViewportState, viewModel: ManageSolarArrayViewModel) {
+private fun ArraySettingsMenu(
+    mapState: MapState,
+    mapViewportState: MapViewportState,
+    viewModel: ManageSolarArrayViewModel,
+    roofSections: SnapshotStateList<RoofSection>
+) {
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
 
     val anchors = DraggableAnchors {
-        ArraySettingsMenuAnchors.Bottom at screenSizePx - 500f
+        ArraySettingsMenuAnchors.Bottom at screenSizePx - 750f
         ArraySettingsMenuAnchors.Top at 150f
     }
 
@@ -175,7 +273,7 @@ private fun ArraySettingsMenu(mapState: MapState, mapViewportState: MapViewportS
             animationSpec = tween(durationMillis = 100),
         )*/
         AnchoredDraggableState(
-            initialValue = ArraySettingsMenuAnchors.Bottom,
+            initialValue = ArraySettingsMenuAnchors.Top,
             anchors = anchors,
             positionalThreshold = { it },
             velocityThreshold = { 0f },
@@ -183,8 +281,6 @@ private fun ArraySettingsMenu(mapState: MapState, mapViewportState: MapViewportS
             decayAnimationSpec = decayAnimation,
         )
     }
-
-    val roofs = remember { mutableStateListOf<RoofState>() }
 
     Column {
         DraggableBox(
@@ -195,8 +291,8 @@ private fun ArraySettingsMenu(mapState: MapState, mapViewportState: MapViewportS
                 mapState,
                 mapViewportState,
                 draggableState,
-                roofs,
-                viewModel
+                viewModel,
+                roofSections
             )
         }
     }
@@ -221,7 +317,7 @@ private fun DraggableBox(
             }
             .size(screenSizeDp)
             .clip(shape = RoundedCornerShape(25.dp, 25.dp, 0.dp, 0.dp))
-            .background(MaterialTheme.colorScheme.primary)
+            .background(LightestYellow)
             .anchoredDraggable(draggableState, Orientation.Vertical)
     ) {
         content()
@@ -234,9 +330,11 @@ private fun ArraySettingsContent(
     mapState: MapState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
-    roofs: SnapshotStateList<RoofState>,
-    viewModel: ManageSolarArrayViewModel
+    viewModel: ManageSolarArrayViewModel,
+    roofSections: SnapshotStateList<RoofSection>
 ) {
+    var solarPanelType by remember { mutableStateOf(SolarPanelType.PREMIUM) }
+
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -248,10 +346,12 @@ private fun ArraySettingsContent(
             mapState,
             mapViewportState,
             draggableState,
-            roofs,
-            viewModel
+            viewModel,
+            solarPanelType,
+            roofSections,
+            { solarPanelType = it }
         )
-        SaveButton()
+        SaveButton(solarPanelType, roofSections, viewModel)
     }
 }
 
@@ -261,22 +361,29 @@ private fun ArraySettingsMainSection(
     mapState: MapState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
-    roofs: SnapshotStateList<RoofState>,
-    viewModel: ManageSolarArrayViewModel
+    viewModel: ManageSolarArrayViewModel,
+    solarPanelType: SolarPanelType,
+    roofSections: SnapshotStateList<RoofSection>,
+    onSelectPanelType: (SolarPanelType) -> Unit
 ) {
+    var editingRoofSection by remember { mutableStateOf<Int?>(null) }
+
     Column(
-        verticalArrangement = Arrangement.spacedBy(5.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DragHandle()
         SearchField(mapState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
-        RoofList(roofs)
-        AddRoofComponent(
-            onAdd = {
-                roofs.add(it)
-            }
-        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(15.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
+            ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
+            SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
+            PriceSummaryCard(viewModel, solarPanelType, roofSections)
+        }
     }
 }
 
@@ -288,55 +395,327 @@ private fun DragHandle() {
             .width(85.dp)
             .height(7.dp)
             .clip(shape = RoundedCornerShape(100.dp))
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(BrightYellow)
     )
 }
 
 @Composable
-private fun RoofList(roofs: SnapshotStateList<RoofState>) {
+private fun RoofSectionsList(roofSections: SnapshotStateList<RoofSection>, onRemove: () -> Unit, onEdit: (Int) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            roofs.forEachIndexed { index, roof ->
-                RoofItem(index = index, onRemove = { roofs.remove(roof) })
+            if (roofSections.isEmpty()) {
+                NoRoofSectionCard()
+            } else {
+                roofSections.forEachIndexed { index, section ->
+                    RoofSectionCard(
+                        section,
+                        index,
+                        onRemove = {
+                            roofSections.remove(section)
+                            onRemove()
+                        },
+                        onEdit = { onEdit(roofSections.indexOf(section)) })
+                }
             }
         }
     }
 }
 
 @Composable
-private fun RoofItem(index: Int, onRemove: () -> Unit) {
+private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Unit, onEdit: () -> Unit) {
     Box(
         modifier = Modifier
-            .width(100.dp)
-            .height(100.dp)
-            .clip(shape = RoundedCornerShape(15.dp))
-            .background(Color.White)
+            .width(180.dp)
+            .height(135.dp)
+            .clip(RoundedCornerShape(15.dp))
+            .background(Light)
+            .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
             .padding(10.dp)
-            .clickable { onRemove() }
+            .clickable { onEdit() }
     ) {
-        Text("Tak #${index + 1}")
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Takflate ${index + 1}",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = DarkYellow
+                )
+                Icon(
+                    Icons.Rounded.Delete,
+                    contentDescription = "Slett takflate",
+                    tint = Red,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            onRemove()
+                        }
+                )
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                RoofSectionRow("Areal", "%.1fm²".format(section.area))
+                RoofSectionRow("Helning", "%.1f°".format(section.incline))
+                RoofSectionRow("Paneler", section.panels.toString())
+            }
+        }
     }
 }
 
 @Composable
-private fun SaveButton() {
-    Button(
-        onClick = { },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.tertiary
-        ),
+private fun NoRoofSectionCard() {
+    Box(
         modifier = Modifier
-            .width(200.dp)
-            .padding(bottom = 60.dp, top = 20.dp)
+            .width(180.dp)
+            .height(135.dp)
+            .drawBehind {
+                drawRoundRect(
+                    color = DarkYellow,
+                    cornerRadius = CornerRadius(15.dp.toPx()),
+                    style = Stroke(width = 3f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
+                )
+            }
+            .padding(10.dp)
+    ) {
+        Text(
+            "Søk på en adresse og velg en takflate i kartet, eller legg inn en manuelt i boksen under.",
+            fontSize = 12.sp,
+            color = Color.Gray,
+        )
+    }
+}
+
+@Composable
+private fun RoofSectionRow(name: String, value: String) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
             .fillMaxWidth()
     ) {
-        Text("Lagre", color = Color.Black)
+        Text(
+            text = name,
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp
+        )
+        Text(
+            text = value,
+            fontWeight = FontWeight.Medium,
+            fontSize = 15.sp
+        )
+    }
+}
+
+@Composable
+private fun PriceSummaryCard(
+    viewModel: ManageSolarArrayViewModel,
+    solarPanelType: SolarPanelType,
+    roofSections: SnapshotStateList<RoofSection>
+) {
+    val totalPanels = roofSections.sumOf { it.panels }
+    val grossPrice = solarPanelType.totalPrice(totalPanels)
+    val subsidy = calculateSubsidy(solarPanelType, totalPanels)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(15.dp))
+            .background(Light)
+            .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
+            .padding(horizontal = 40.dp, vertical = 15.dp)
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Column(
+                verticalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .width(150.dp)
+                    .height(130.dp)
+            ) {
+                Text(
+                    text = "Oversikt",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Column {
+                    Text(
+                        text = "Bruttopris",
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                    )
+                    PriceText(grossPrice)
+                }
+                Column {
+                    Text(
+                        text = "Støtte fra staten",
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                    )
+                    PriceText(subsidy)
+                }
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Totalpris",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Image(
+                    painter = painterResource(R.drawable.planet),
+                    contentDescription = "Planet med solcellepanel",
+                    modifier = Modifier
+                        .size(80.dp)
+                )
+                PriceText(grossPrice - subsidy)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PriceText(price: Double) {
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Text(
+            text = "%,d".format(price.toInt(), Locale.GERMANY).replace(",", " "),
+            color = Color.Black,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = "NOK",
+            color = Color.Black,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun SaveButton(
+    solarPanelType: SolarPanelType,
+    roofSections: List<RoofSection>,
+    viewModel: ManageSolarArrayViewModel
+) {
+    var name by remember { mutableStateOf("") }
+    var openSaveDialog by remember { mutableStateOf(false) }
+
+    if (openSaveDialog) {
+        SaveDialog(
+            onDismissRequest = { openSaveDialog = false },
+            onSave = {
+                openSaveDialog = false
+                viewModel.addSolarArray(SolarArray(name, solarPanelType, roofSections, Coordinates(59.9423, 10.72))) // todo: retrieve from map
+
+                // TODO navigate home
+            },
+            name,
+            onNameChange = { name = it }
+        )
+    }
+
+    OutlinedButton(
+        onClick = {
+            openSaveDialog = true
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Light
+        ),
+        border = BorderStroke(1.dp, DarkYellow),
+        modifier = Modifier
+            .width(250.dp)
+            .padding(bottom = 60.dp, top = 20.dp)
+    ) {
+        Text(
+            "Lagre",
+            color = Color.Black,
+            fontSize = 18.sp
+        )
+    }
+}
+
+@Composable
+private fun SaveDialog(
+    onDismissRequest: () -> Unit,
+    onSave: () -> Unit,
+    name: String,
+    onNameChange: (String) -> Unit
+) {
+    Dialog(onDismissRequest) {
+        Column(
+            modifier = Modifier
+                .clip(RoundedCornerShape(15.dp))
+                .background(RandomBeige)
+                .border(1.dp, BrightYellow, RoundedCornerShape(15.dp))
+                .padding(horizontal = 16.dp, vertical = 10.dp)
+        ) {
+            Text(
+                text = "Lagre anlegg",
+                textAlign = TextAlign.Center,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth(),
+            )
+            Text(
+                text = "Ved å lagre dette anlegget vil det bli lagt til på hjemskjermen din.",
+                textAlign = TextAlign.Center,
+                fontSize = 14.sp,
+                color = Color.DarkGray,
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+            CustomTextField(
+                modifier = Modifier.fillMaxWidth(),
+                containerModifier = Modifier.fillMaxWidth(),
+                value = name,
+                onValueChange = onNameChange,
+                label = "Navn",
+                placeholder = "Navn på anlegget",
+            )
+            OutlinedButton(
+                onClick = onSave,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Light
+                ),
+                contentPadding = PaddingValues(2.dp),
+                border = BorderStroke(1.dp, DarkYellow),
+                modifier = Modifier
+                    .defaultMinSize(100.dp, 30.dp)
+            ) {
+                Text(
+                    "Lagre",
+                    color = Color.Black,
+                    fontSize = 14.sp
+                )
+            }
+        }
     }
 }
 
@@ -352,48 +731,38 @@ private fun SearchField(
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
 
-    var address by remember { mutableStateOf("") }
-    val suggestions = remember { mutableStateOf<List<PlaceAutocompleteSuggestion>>(listOf()) }
+    val addressState = viewModel.mapAddress.collectAsState()
+    val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsState()
     var showSuggestions by remember { mutableStateOf(false) }
 
-    val selectSuggestion: (PlaceAutocompleteSuggestion) -> Unit = remember {
+    val selectSuggestion: (Address) -> Unit = remember {
         { suggestion ->
-            address = suggestion.formattedAddress ?: address
+            viewModel.setMapAddress(suggestion.toFormatted())
+            viewModel.setMapAddress(suggestion)
+
             scope.launch {
                 draggableState.animateTo(ArraySettingsMenuAnchors.Bottom)
-                val selectionResponse = placeAutocomplete.select(suggestion)
-                selectionResponse.onValue { result ->
-                    viewModel.setPos(Pos.fromPoint(result.coordinate))
 
-                    mapViewportState.easeTo(
-                        CameraOptions.Builder()
-                            .center(result.coordinate)
-                            .zoom(18.0)
-                            .build()
-                    )
-                }.onError { e ->
-                    Log.i("Address search", "An error occurred during selection", e)
-                }
+                mapViewportState.easeTo(
+                    CameraOptions.Builder()
+                        .center(suggestion.pos.toPoint())
+                        .zoom(19.0)
+                        .build()
+                )
             }
         }
     }
 
     Column {
         SearchTextField(
-            address = address,
-            onAddressChange = { query ->
-                address = query
-                scope.launch {
-                    val response = placeAutocomplete.suggestions(query)
-                    if (response.isValue) {
-                        suggestions.value = requireNotNull(response.value)
-                    }
-                }
+            address = addressState.value.query,
+            onAddressChange = { address ->
+                viewModel.setMapAddress(address)
             },
             onDone = {
                 keyboardController?.hide()
                 focusManager.clearFocus()
-                suggestions.value.firstOrNull()?.let { selectSuggestion(it) }
+                addressSuggestions.value.suggestions.firstOrNull()?.let { selectSuggestion(it) }
             },
             onFocusChanged = { isFocused ->
                 showSuggestions = isFocused
@@ -407,7 +776,7 @@ private fun SearchField(
 
         if (showSuggestions) {
             SuggestionsPopup(
-                suggestions = suggestions.value,
+                suggestions = addressSuggestions.value.suggestions,
                 onSuggestionClick = { suggestion ->
                     keyboardController?.hide()
                     focusManager.clearFocus()
@@ -431,10 +800,10 @@ private fun SearchTextField(
             .fillMaxWidth()
             .clip(RoundedCornerShape(100.dp))
             .background(
-                MaterialTheme.colorScheme.tertiary,
+                Light,
                 MaterialTheme.shapes.small
             )
-            .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(100.dp))
+            .border(1.dp, DarkYellow, shape = RoundedCornerShape(100.dp))
             .padding(start = 30.dp)
             .onFocusChanged { onFocusChanged(it.isFocused) },
         value = address,
@@ -472,7 +841,7 @@ private fun SearchTextField(
                         .width(40.dp)
                         .height(40.dp)
                         .clip(RoundedCornerShape(100.dp))
-                        .background(MaterialTheme.colorScheme.secondary)
+                        .background(BrightYellow)
                         .padding(7.dp)
                 )
             }
@@ -482,8 +851,8 @@ private fun SearchTextField(
 
 @Composable
 private fun SuggestionsPopup(
-    suggestions: List<PlaceAutocompleteSuggestion>,
-    onSuggestionClick: (PlaceAutocompleteSuggestion) -> Unit,
+    suggestions: List<Address>,
+    onSuggestionClick: (Address) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     Popup(
@@ -499,49 +868,67 @@ private fun SuggestionsPopup(
                 .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(15.dp))
         ) {
             suggestions.forEach { suggestion ->
-                if (suggestion.formattedAddress != null) {
-                    SuggestionItem(
-                        suggestion = suggestion,
-                        onClick = { onSuggestionClick(suggestion) }
-                    )
-                }
+                SuggestionItem(
+                    suggestion = suggestion,
+                    onClick = { onSuggestionClick(suggestion) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun SuggestionItem(suggestion: PlaceAutocompleteSuggestion, onClick: () -> Unit) {
+private fun SuggestionItem(suggestion: Address, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)
             .clickable { onClick() }
     ) {
-        Text(text = suggestion.formattedAddress ?: "")
+        Text(suggestion.toFormatted())
     }
 }
 
 @Composable
-private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
-    var area by remember { mutableStateOf("") }
-    var angle by remember { mutableStateOf("") }
-    var direction by remember { mutableStateOf("") }
-    var solarPanelType by remember { mutableStateOf(SolarPanelType.entries[0]) }
+private fun ManageRoofSectionCard(
+    roofSections: SnapshotStateList<RoofSection>,
+    editingRoofSectionIndex: Int?,
+    onSave: () -> Unit
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    val isEditing = editingRoofSectionIndex != null
+    val editingRoofSection = if (isEditing) roofSections[editingRoofSectionIndex!!] else null
+    var isEditingInitialized by remember(editingRoofSectionIndex) { mutableStateOf(false) }
+
+    var area by remember(isEditing) { mutableStateOf("") }
+    var incline by remember(isEditing) { mutableStateOf("") }
+    var direction by remember(isEditing) { mutableStateOf("") }
+    var panels by remember(isEditing) { mutableStateOf("") }
+
+    if (isEditing && !isEditingInitialized) {
+        isEditingInitialized = true
+
+        area = "%.2f".format(editingRoofSection!!.area)
+        incline = "%.2f".format(editingRoofSection.incline)
+        direction = "%.2f".format(editingRoofSection.direction)
+        panels = editingRoofSection.panels.toString()
+    }
 
     Column(
+        verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier
             .clip(shape = RoundedCornerShape(15.dp))
-            .background(MaterialTheme.colorScheme.tertiary)
-            .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(15.dp))
-            .padding(horizontal = 15.dp, vertical = 10.dp)
+            .background(Light)
+            .border(1.dp, DarkYellow, shape = RoundedCornerShape(15.dp))
+            .padding(10.dp)
     ) {
         Text(
-            text = "Takflate",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
+            text = if (isEditing) "Redigerer takflate ${editingRoofSectionIndex!! + 1}" else "Legg til takflate",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = DarkYellow
         )
-        Spacer(modifier = Modifier.size(10.dp))
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.fillMaxWidth()
@@ -549,16 +936,16 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
             NumberInputField(
                 value = area,
                 onValueChange = { area = it },
-                label = "Areal (m²)",
+                label = "Areal",
                 placeholder = "Areal i kvadratmeter",
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             )
             NumberInputField(
-                value = angle,
-                onValueChange = { angle = it },
-                label = "Helning (grader°)",
+                value = incline,
+                onValueChange = { incline = it },
+                label = "Helning",
                 placeholder = "Helning i grader",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -572,81 +959,94 @@ private fun AddRoofComponent(onAdd: (RoofState) -> Unit) {
             NumberInputField(
                 value = direction,
                 onValueChange = { direction = it },
-                label = "Retning (grader°)",
+                label = "Retning",
                 placeholder = "Retning i grader",
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             )
-            SolarPanelTypeDropdown(
-                selectedType = solarPanelType,
-                onSelect = { solarPanelType = it },
+            NumberInputField(
+                value = panels,
+                onValueChange = { panels = it },
+                label = "Paneler",
+                placeholder = "Antall paneler",
                 modifier = Modifier
-                    .weight(1f),
+                    .fillMaxWidth()
+                    .weight(1f)
             )
         }
-        Spacer(modifier = Modifier.size(10.dp))
-        AddRoofButton {
-            onAdd(
-                RoofState(
+        Button(
+            onClick = {
+                keyboardController?.hide()
+
+                val newSection = RoofSection(
                     area.toDouble(),
-                    angle.toDouble(),
+                    incline.toDouble(),
                     direction.toDouble(),
-                    solarPanelType
+                    panels.toInt(),
+                    mapId = editingRoofSection?.mapId,
                 )
+                if (isEditing) {
+                    roofSections[editingRoofSectionIndex!!] = newSection
+                } else {
+                    roofSections.add(newSection)
+                }
+
+                onSave()
+
+                area = ""
+                incline = ""
+                direction = ""
+                panels = ""
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Light
+            ),
+            border = BorderStroke(1.dp, DarkBeige),
+            modifier = Modifier
+                .defaultMinSize(100.dp, 30.dp),
+            contentPadding = PaddingValues(0.dp),
+        ) {
+            Text(
+                if (isEditing) "Lagre" else "Legg til",
+                color = Color.Black,
+                fontSize = 14.sp
             )
         }
     }
 }
-
-@Composable
-private fun AddRoofButton(onClick: () -> Unit) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-    Button(
-        onClick = {
-            onClick()
-            keyboardController?.hide()
-        },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.tertiary
-        ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
-        modifier = Modifier.width(150.dp)
-    ) {
-        Text("Legg til", color = Color.Black)
-    }
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SolarPanelTypeDropdown(
-    modifier: Modifier = Modifier,
-    selectedType: SolarPanelType,
-    onSelect: (SolarPanelType) -> Unit
-) {
+private fun SolarPanelTypeDropdown(solarPanelType: SolarPanelType, onSelect: (SolarPanelType) -> Unit) {
     var dropdownExpanded by remember { mutableStateOf(false) }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
     ) {
-        Text("Solcellepaneltype")
+        Text(
+            "Paneltype",
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
         ExposedDropdownMenuBox(
             expanded = dropdownExpanded,
             onExpandedChange = { dropdownExpanded = it }
         ) {
             BasicTextField(
-                value = selectedType.nameWithWatt(),
+                value = solarPanelType.nameWithWatt(),
                 readOnly = true,
                 onValueChange = {},
+                textStyle = LocalTextStyle.current.copy(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = MaterialTheme.typography.bodyMedium.fontSize
+                ),
                 modifier = Modifier
-                    .menuAnchor()
-                    .background(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.shapes.small,
-                    )
+                    .menuAnchor(MenuAnchorType.PrimaryEditable, true)
+                    .clip(RoundedCornerShape(15))
+                    .background(Light)
+                    .border(1.dp, DarkYellow, RoundedCornerShape(15))
                     .fillMaxWidth()
                     .padding(10.dp)
             )
@@ -680,7 +1080,7 @@ private fun NumberInputField(
         modifier = Modifier.fillMaxWidth(),
         containerModifier = modifier,
         value = value,
-        onValueChange = { if (it.isDigitsOnly()) onValueChange(it) },
+        onValueChange = { if (it.isNumber()) onValueChange(it) },
         label = label,
         placeholder = placeholder,
         keyboardOptions = KeyboardOptions(
