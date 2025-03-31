@@ -16,10 +16,11 @@ mapsCompose = "11.10.2"
 vico = "2.1.0"
 
 navigationCompose = "2.8.9"
+composeMaterial = "1.4.0"
 
 [libraries]
 
-mapbox = { module = "com.mapbox.maps:android", version.ref = "mapbox" }
+mapbox = { module = "com.mapbox.maps:android", version.ref = "android" }
 mapbox-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
 mapbox-sdk-turf = { module = "com.mapbox.mapboxsdk:mapbox-sdk-turf", version.ref = "mapboxSdkTurf" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
@@ -47,6 +48,7 @@ vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", ve
 
 maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

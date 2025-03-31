@@ -3,6 +3,8 @@ package no.uio.ifi.in2000.team54.ui.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +30,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
+import androidx.wear.compose.material.FractionalThreshold
+import androidx.wear.compose.material.rememberSwipeableState
+import androidx.wear.compose.material.swipeable
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
@@ -168,16 +175,27 @@ fun PropertyCard() {
     }
 }
 
+@OptIn(ExperimentalWearMaterialApi::class)
 @Composable
 fun ElectricityCard() {
 
-    Card(
-        modifier = Modifier
-            .height(250.dp)
-            .width(395.dp)
-            .padding(15.dp)
-            .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp)),
+    val swipeState = rememberSwipeableState(initialValue = 0)
+    val swipeTargets = listOf(0, 1, 2)
 
+    val swipeableModifier = Modifier
+        .height(250.dp)
+        .width(395.dp)
+        .padding(15.dp)
+        .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
+        .swipeable(
+            state = swipeState,
+            anchors = mapOf(0f to 0, 500f to 1, 1000f to 2),
+            thresholds = { _, _ -> FractionalThreshold(0.3f) },
+            orientation = Orientation.Horizontal
+        )
+
+    Card(
+        modifier = swipeableModifier,
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
         colors = CardDefaults.cardColors(
@@ -186,7 +204,10 @@ fun ElectricityCard() {
         )
     ) {
         Row(
-            Modifier.padding(10.dp)
+            Modifier
+                .padding(10.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
         ) {
             Text(
                 text = "Strøm ",
@@ -202,13 +223,10 @@ fun ElectricityCard() {
     }
 }
 
+
+
 @Composable
-fun WeatherCard() {
-
-    val onClick = {
-
-
-    }
+fun WeatherCard(navController: NavController) {
 
     Card(
         modifier = Modifier
@@ -216,7 +234,7 @@ fun WeatherCard() {
             .width(395.dp)
             .padding(15.dp)
             .border(1.dp, WeatherBorder, shape = RoundedCornerShape(20.dp))
-            .clickable { onClick() },
+            .clickable { navController.navigate("weather")},
 
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
@@ -234,12 +252,12 @@ fun WeatherCard() {
                     .padding(15.dp)
             ) {
                 Text(
-                    text = "Væroversikt ",
+                    text = "Værforhold ",
                     style = MaterialTheme.typography.bodyLarge
                 )
 
                 Text(
-                    text = "& Temperatur",
+                    text = "& Skydekke",
                     style = MaterialTheme.typography.bodyLarge,
                     color = Color.White
                 )
@@ -258,3 +276,8 @@ fun WeatherCard() {
 }
 
 
+@Preview(showBackground = true)
+@Composable
+fun PreviewElectricityCard() {
+    ElectricityCard()
+}

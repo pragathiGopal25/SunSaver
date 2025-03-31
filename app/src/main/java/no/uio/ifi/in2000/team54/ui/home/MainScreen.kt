@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -35,7 +36,7 @@ fun MainScreen() {
             startDestination = "home",
             modifier = Modifier.padding(innerpadding)
         ) {
-            composable("home") { HomeScreen() }
+            composable("home") { HomeScreen(navController) }
             composable("stats") { StatScreen() }
             composable("managesolararray") { ManageSolarArrayScreen(viewModel) }
             composable("weather") { WeatherScreen() }
@@ -45,14 +46,14 @@ fun MainScreen() {
 }
 
 @Composable
-fun HomeScreen() {
-    val navController = rememberNavController()
+fun HomeScreen(navController: NavController) {
+
     Column(
         Modifier.fillMaxSize().background(Background)
     ) {
         HomeScreenTopBar()
         PropertyCard()
         ElectricityCard()
-        WeatherCard()
+        WeatherCard(navController)
     }
 }
