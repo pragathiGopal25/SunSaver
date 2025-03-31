@@ -15,12 +15,14 @@ import no.uio.ifi.in2000.team54.ui.home.pages.SettingsScreen
 import no.uio.ifi.in2000.team54.ui.home.pages.StatScreen
 import no.uio.ifi.in2000.team54.ui.home.pages.WeatherScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayScreen
+import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayViewModel
 import no.uio.ifi.in2000.team54.ui.theme.Background
 
 @Composable
 fun MainScreen() {
 
     val navController = rememberNavController()
+    val viewModel = ManageSolarArrayViewModel()
 
     Scaffold (
         modifier = Modifier.fillMaxSize(),
@@ -35,7 +37,7 @@ fun MainScreen() {
         ) {
             composable("home") { HomeScreen() }
             composable("stats") { StatScreen() }
-            composable("managesolararray") { ManageSolarArrayScreen() }
+            composable("managesolararray") { ManageSolarArrayScreen(viewModel) }
             composable("weather") { WeatherScreen() }
             composable("settings") { SettingsScreen() }
         }
