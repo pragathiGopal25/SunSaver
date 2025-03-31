@@ -57,3 +57,12 @@ fun HomeScreen(navController: NavController) {
         WeatherCard(navController)
     }
 }
+
+/*
+dependencies:
+implementation(libs.androidx.compose.material)
+
+libs.versions.toml:
+   composeMaterial = "1.4.0"
+   androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
+*/
