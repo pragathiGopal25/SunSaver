@@ -3,6 +3,9 @@ package no.uio.ifi.in2000.team54
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import no.uio.ifi.in2000.team54.ui.home.ElectricityGraph
+import no.uio.ifi.in2000.team54.ui.home.EletricityGraphContainer
+import no.uio.ifi.in2000.team54.ui.home.HomeScreenViewModel
 
 import no.uio.ifi.in2000.team54.ui.theme.Team54Theme
 
@@ -11,6 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Team54Theme {
+                EletricityGraphContainer(viewModel = HomeScreenViewModel())
             }
         }
     }
