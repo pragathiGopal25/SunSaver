@@ -15,6 +15,7 @@ mapboxSdkTurf = "7.3.2"
 mapsCompose = "11.10.2"
 vico = "2.1.0"
 
+navigationCompose = "2.8.9"
 
 [libraries]
 
@@ -44,6 +45,8 @@ vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 
 
+maps-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
