@@ -6,6 +6,6 @@ data class NavItem (
 
     val label: String,
     @DrawableRes val selected: Int,
-    @DrawableRes val unselected: Int
-
+    @DrawableRes val unselected: Int,
+    val route: String
 )

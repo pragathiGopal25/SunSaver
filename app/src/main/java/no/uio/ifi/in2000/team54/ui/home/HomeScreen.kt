@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.team54.ui.home
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -19,26 +18,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.team54.R
-import no.uio.ifi.in2000.team54.ui.home.pages.SettingsScreen
-import no.uio.ifi.in2000.team54.ui.home.pages.StatScreen
-import no.uio.ifi.in2000.team54.ui.home.pages.WeatherScreen
-import no.uio.ifi.in2000.team54.ui.theme.Background
 import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
@@ -83,13 +72,13 @@ fun HomeScreenTopBar() {
                         color = YellowText
                     )
                 }
-                    Text(
-                        text = "Status ",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = YellowText
-                    )
-                }
+                Text(
+                    text = "Status ",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = YellowText
+                )
+            }
 
             Image(
                 painter = painterResource(R.drawable.sun),
@@ -105,7 +94,7 @@ fun HomeScreenTopBar() {
 }
 
 @Composable
-fun PropertyCards() {
+fun PropertyCard() {
 
     Card(
         modifier = Modifier
@@ -267,40 +256,4 @@ fun WeatherCard() {
     }
 }
 
-@Composable
-fun HomeScreen() {
-    var selectedIndex by remember { mutableIntStateOf(0) }
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        bottomBar = { NavBar(selectedIndex) { selectedIndex = it } }
-    ) { innerPadding ->
-        ContentScreen(modifier = Modifier.padding(innerPadding), selectedIndex)
-    }
-}
-
-@Composable
-fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int) {
-    Box(modifier = modifier.fillMaxSize()) {
-        when (selectedIndex) {
-            0 -> HomeContent()
-            1 -> StatScreen()
-            2 -> WeatherScreen()
-            3 -> SettingsScreen()
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeContent() {
-    Column(
-        Modifier.fillMaxSize().background(Background)
-    ) {
-        HomeScreenTopBar()
-        PropertyCards()
-        ElectricityCard()
-        WeatherCard()
-    }
-}
 
