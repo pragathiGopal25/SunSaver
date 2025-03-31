@@ -18,18 +18,6 @@ class ElectricityPriceDatasource {
         }
     }
 
-    @SuppressLint("SimpleDateFormat")
-    suspend fun getTodaysElectricityPrices(area: String): List<ElectricityPriceInfo> {
-        val pattern = "yyyy/MM-dd"
-        val simpleDateFormat = SimpleDateFormat(pattern)
-        val date = simpleDateFormat.format(Date())
-
-        val response: List<ElectricityPriceInfo> =
-            client.get("https://www.hvakosterstrommen.no/api/v1/prices/${date}_$area.json")
-                .body()
-        return response
-    }
-
     suspend fun getElectricityPrices(area: String, date: String): List<ElectricityPriceInfo> {
         val response: List<ElectricityPriceInfo> =
             client.get("https://www.hvakosterstrommen.no/api/v1/prices/${date}_$area.json")

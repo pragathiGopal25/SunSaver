@@ -11,7 +11,7 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
     //Get the average electricity price
     // The avg is in NOK per kWh
     suspend fun getPriceData(days: Int, area: String): Double {
-        return getPriceDataInterval(days, area).average() * days
+        return getPriceDataInterval(days, area).average() * days //* avg kWh usage per day
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -22,12 +22,12 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
         var currentDate = simpleDateFormat.format(Date())
 
         for (i in 0..<days) {
-            currentDate = decrementDate(currentDate)
             if (days in 2..30 && i % 2 != 0) continue //Limit requests
             if (days > 30 && i % 7 != 0) continue //Limit requests
             datasource.getElectricityPrices(area, currentDate).forEach {
                 nokPerKwh.add(it.nokPrKiloWh)
             }
+            currentDate = decrementDate(currentDate)
         }
         return nokPerKwh
     }

@@ -94,26 +94,26 @@ fun ElectricityBillOverview() {
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
             ) {
-                TimeScopeButton(viewModel)
+                TimeScopeSegmentedButton(viewModel)
             }
             Spacer(Modifier.padding(10.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                MoneyBox(false, "${uiState.realPrice}", R.drawable.nosolar, uiState)
+                ExpensesStatBox(false, "${uiState.realPrice}", R.drawable.nosolar, uiState)
                 Spacer(Modifier.padding(8.dp))
-                MoneyBox(true, "${uiState.saved}", R.drawable.coin, uiState)
+                ExpensesStatBox(true, "${uiState.saved}", R.drawable.coin, uiState)
                 Spacer(Modifier.padding(8.dp))
-                MoneyBox(false, "${uiState.solarPrice}", R.drawable.solar, uiState)
+                ExpensesStatBox(false, "${uiState.solarPrice}", R.drawable.solar, uiState)
             }
             Spacer(Modifier.padding(10.dp))
             Row {
-                MoneyNavButton({ pageState = "1" }, pageState == "1")
+                SlidePageButton({ pageState = "1" }, pageState == "1")
                 Spacer(Modifier.padding(8.dp))
-                MoneyNavButton({ pageState = "2" }, pageState == "2")
+                SlidePageButton({ pageState = "2" }, pageState == "2")
                 Spacer(Modifier.padding(8.dp))
-                MoneyNavButton({ pageState = "3" }, pageState == "3")
+                SlidePageButton({ pageState = "3" }, pageState == "3")
             }
         }
     }
@@ -130,7 +130,7 @@ fun IndeterminateCircularIndicator(uiState: PriceUiState) {
 }
 
 @Composable
-fun MoneyNavButton(onClick: () -> Unit, selected: Boolean) {
+fun SlidePageButton(onClick: () -> Unit, selected: Boolean) {
     Button(
         modifier = Modifier
             .shadow(
@@ -148,7 +148,7 @@ fun MoneyNavButton(onClick: () -> Unit, selected: Boolean) {
 }
 
 @Composable
-fun MoneyBox(main: Boolean, text: String, image: Int, uiState: PriceUiState) {
+fun ExpensesStatBox(main: Boolean, text: String, image: Int, uiState: PriceUiState) {
     Box(
         modifier = Modifier
             .shadow(
@@ -192,7 +192,7 @@ fun MoneyBox(main: Boolean, text: String, image: Int, uiState: PriceUiState) {
 }
 
 @Composable
-fun TimeScopeButton(viewModel: ElectricityPriceViewModel) {
+fun TimeScopeSegmentedButton(viewModel: ElectricityPriceViewModel) {
     var selectedIndex by remember { mutableIntStateOf(0) }
     val options = listOf("Dag", "Måned", "År")
 
