@@ -31,19 +31,24 @@ class SharedRepository {
         coordinates = Coordinates(59.9423, 10.72)
     )
 
-    private val solarArrays: MutableList<SolarArray> = mutableListOf(testSolarArray)
+    private val _solarArrays: MutableList<SolarArray> = mutableListOf(testSolarArray)
 
-    fun addSolarArray(newSolarArray: SolarArray) {
-        solarArrays.add(newSolarArray)
-        // todo: check if exists, update then (probably need to add an id then)
+    fun getSolarArrays(): List<SolarArray> {
+        return _solarArrays
     }
 
+    fun addSolarArray(newSolarArray: SolarArray) {
+        _solarArrays.add(newSolarArray)
+        // todo: check if exists, update then (probably need to add an id then)
+    }
+    /*
     fun getSolarArrayByName(name: String): SolarArray? {
-        return solarArrays.find { it.name == name }
+        return _solarArrays.find { it.name == name }
     }
 
     fun deleteSolarArray(newSolarArray: SolarArray) {
         // todo
     }
+     */
 }
 
