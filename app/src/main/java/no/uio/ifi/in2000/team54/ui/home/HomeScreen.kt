@@ -1,27 +1,61 @@
 package no.uio.ifi.in2000.team54.ui.home
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.mapbox.maps.extension.style.style
+import no.uio.ifi.in2000.team54.R
+import no.uio.ifi.in2000.team54.ui.home.pages.SettingsScreen
+import no.uio.ifi.in2000.team54.ui.home.pages.StatScreen
+import no.uio.ifi.in2000.team54.ui.home.pages.WeatherScreen
+import no.uio.ifi.in2000.team54.ui.theme.Background
+import no.uio.ifi.in2000.team54.ui.theme.GreyText
+import no.uio.ifi.in2000.team54.ui.theme.Light
+import no.uio.ifi.in2000.team54.ui.theme.LightOrange
+import no.uio.ifi.in2000.team54.ui.theme.Lighter
+import no.uio.ifi.in2000.team54.ui.theme.WeatherBlue
+import no.uio.ifi.in2000.team54.ui.theme.WeatherBorder
+import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
+import no.uio.ifi.in2000.team54.ui.theme.YellowText
 
+
+@Composable
+fun GreetingMessage() {
+    Text(
+        text = getGreeting(),
+        style = MaterialTheme.typography.bodyMedium
+    )
+}
 
 @Composable
 fun HomeScreenTopBar() {
@@ -29,24 +63,44 @@ fun HomeScreenTopBar() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(5.dp)
+            .padding(top = 15.dp, start = 15.dp)
     ) {
-        Row {
-            Text(
-                text = "Oversikt",
-                style = MaterialTheme.typography.headlineLarge
-            )
-            Text(
-                text = " & ",
-                style = MaterialTheme.typography.headlineLarge,
-                color = Color(0xFFEABA0E)
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column{
+                GreetingMessage()
+                Row (Modifier.padding(top = 13.dp)) {
+                    Text(
+                        text = "Oversikt",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = " & ",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = YellowText
+                    )
+                }
+                    Text(
+                        text = "Status ",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = YellowText
+                    )
+                }
+
+            Image(
+                painter = painterResource(R.drawable.sun),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(130.dp)
+                    .align(Alignment.TopEnd)
+                    .offset(x = (-25).dp),
+                contentScale = ContentScale.Crop
             )
         }
-        Text(
-            text = "Status ",
-            style = MaterialTheme.typography.headlineLarge,
-            color = Color(0xFFEABA0E)
-        )
     }
 }
 
@@ -55,48 +109,71 @@ fun PropertyCards() {
 
     Card(
         modifier = Modifier
-            .height(200.dp)
+            .height(205.dp)
             .width(201.dp)
-            .padding(5.dp),
+            .padding(15.dp)
+            .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp)),
+
+        shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
         colors = CardDefaults.cardColors(
-            contentColor = Color.Black,
-            containerColor = Color(0xFFF6A35A),
+            containerColor = LightOrange,
         )
     ) {
-        Column(git
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .height(131.dp)
+                .width(159.dp)
+                .padding(15.dp),
+
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                contentColor = Color.Black,
+                containerColor = Lighter,
+            )
         ) {
-
-            Spacer(modifier = Modifier.height(5.dp))
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "* sett inn bilde *: ",
-                    style = MaterialTheme.typography.bodySmall
-                )
 
-                Spacer(modifier = Modifier.height(70.dp))
+                Spacer(modifier = Modifier.height(5.dp))
 
-                Text(
-                    text = "Adresse: ",
-                    style = MaterialTheme.typography.bodySmall
-                )
-
-                Spacer(modifier = Modifier.height(3.dp))
-
-                Text(
-                    text = "Penger spart : ",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                ) {
+                    Text(
+                        text = "* sett inn bilde *: ",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
+        }
+
+        Column(
+            modifier = Modifier.padding(start = 15.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = "Adresse: ",
+                style = MaterialTheme.typography.bodySmall,
+                color = GreyText,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(3.dp))
+
+            Text(
+                text = "Penger spart : ",
+                style = MaterialTheme.typography.bodySmall,
+                color = GreyText,
+                fontWeight = FontWeight.Bold
+
+            )
         }
     }
 }
@@ -106,13 +183,16 @@ fun ElectricityCard() {
 
     Card(
         modifier = Modifier
-            .height(200.dp)
-            .width(374.dp)
-            .padding(5.dp),
+            .height(250.dp)
+            .width(395.dp)
+            .padding(15.dp)
+            .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp)),
+
+        shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
         colors = CardDefaults.cardColors(
             contentColor = Color.Black,
-            containerColor = Color(0xFFF0C571),
+            containerColor = Light,
         )
     ) {
         Row(
@@ -125,7 +205,7 @@ fun ElectricityCard() {
             Text(
                 text = "& Sparing",
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color.White
+                color = YellowText
             )
         }
 
@@ -135,52 +215,91 @@ fun ElectricityCard() {
 @Composable
 fun WeatherCard() {
 
+    val onClick = {
+
+
+    }
+
     Card(
         modifier = Modifier
-            .height(64.dp)
-            .width(374.dp)
-            .padding(5.dp),
+            .height(80.dp)
+            .width(395.dp)
+            .padding(15.dp)
+            .border(1.dp, WeatherBorder, shape = RoundedCornerShape(20.dp))
+            .clickable { onClick() },
+
+        shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
         colors = CardDefaults.cardColors(
             contentColor = Color.Black,
-            containerColor = Color(0xFF98B0D5),
+            containerColor = WeatherBlue,
         )
     ) {
-        Row(
-            Modifier.padding(15.dp)
+        Box(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = "Væroversikt ",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = "& Temperatur",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(15.dp)
+            ) {
+                Text(
+                    text = "Væroversikt ",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Text(
+                    text = "& Temperatur",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White
+                )
+            }
+
+            Image(
+                painter = painterResource(R.drawable.weather),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(45.dp)
+                    .align(Alignment.CenterEnd)
+                    .offset(x = (-15).dp)
             )
         }
     }
 }
 
+@Composable
+fun HomeScreen() {
+    var selectedIndex by remember { mutableIntStateOf(0) }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = { NavBar(selectedIndex) { selectedIndex = it } }
+    ) { innerPadding ->
+        ContentScreen(modifier = Modifier.padding(innerPadding), selectedIndex)
+    }
+}
+
+@Composable
+fun ContentScreen(modifier: Modifier = Modifier, selectedIndex: Int) {
+    Box(modifier = modifier.fillMaxSize()) {
+        when (selectedIndex) {
+            0 -> HomeContent()
+            1 -> StatScreen()
+            2 -> WeatherScreen()
+            3 -> SettingsScreen()
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewPropertyCard() {
-
-
-    Column{
-
+fun HomeContent() {
+    Column(
+        Modifier.fillMaxSize().background(Background)
+    ) {
         HomeScreenTopBar()
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Row {
-            PropertyCards()
-          // PropertyCards()
-        }
-
+        PropertyCards()
         ElectricityCard()
-
         WeatherCard()
     }
 }

@@ -3,10 +3,7 @@ package no.uio.ifi.in2000.team54
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import no.uio.ifi.in2000.team54.ui.home.PropertyCards
-import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayScreen
+import no.uio.ifi.in2000.team54.ui.home.HomeScreen
 import no.uio.ifi.in2000.team54.ui.theme.Team54Theme
 
 class MainActivity : ComponentActivity() {
@@ -14,8 +11,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Team54Theme {
-                ManageSolarArrayScreen()
-
+                HomeScreen()
             }
         }
     }
