@@ -197,7 +197,10 @@ fun ElectricityCard() {
         ) {
             Text(
                 text = "Strøm ",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color.Black
+
+
             )
             Text(
                 text = "& Sparing",
@@ -232,6 +235,7 @@ fun SavingsCard() {
                Text(
                    text = "Strøm ",
                    style = MaterialTheme.typography.bodyLarge,
+                   color = Color.Black,
                    modifier = Modifier.padding(top = 15.dp)
 
                )
