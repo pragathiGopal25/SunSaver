@@ -68,7 +68,7 @@ class HomeScreenViewModel: ViewModel() {
 
             _graphDataUiState.update { currentState ->
                 currentState.copy(
-                    solarIrradianceData = mapOf("Irradiance" to electricityProduction.values.toList())
+                    solarIrradianceData = mapOf("Strøm Produksjon" to electricityProduction.values.toList())
                 )
             }
         }
