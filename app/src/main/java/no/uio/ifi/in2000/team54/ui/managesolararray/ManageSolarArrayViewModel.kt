@@ -13,11 +13,14 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
+import no.uio.ifi.in2000.team54.data.shared.SharedRepository
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
+import no.uio.ifi.in2000.team54.domain.SolarArray
 
 class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
+    private val _sharedRepository: SharedRepository = SharedRepository()
 
     private val _mapAddress = MutableStateFlow(
         AddressState(null)
@@ -64,6 +67,10 @@ class ManageSolarArrayViewModel : ViewModel() {
         _mapSearchAddress.value = _mapSearchAddress.value.copy(
             query = query
         )
+    }
+
+    fun addSolarArray(newSolarArray: SolarArray) {
+        _sharedRepository.addSolarArray(newSolarArray)
     }
 }
 

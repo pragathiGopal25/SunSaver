@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team54.ui.state
+package no.uio.ifi.in2000.team54.domain
 
 data class RoofSection(
     val area: Double,

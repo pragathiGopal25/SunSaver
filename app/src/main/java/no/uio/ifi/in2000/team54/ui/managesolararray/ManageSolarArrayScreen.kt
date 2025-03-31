@@ -100,11 +100,12 @@ import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.R
+import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
-import no.uio.ifi.in2000.team54.ui.state.RoofSection
-import no.uio.ifi.in2000.team54.ui.state.SolarArray
+import no.uio.ifi.in2000.team54.domain.RoofSection
+import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
@@ -350,7 +351,7 @@ private fun ArraySettingsContent(
             roofSections,
             { solarPanelType = it }
         )
-        SaveButton(solarPanelType, roofSections)
+        SaveButton(solarPanelType, roofSections, viewModel)
     }
 }
 
@@ -617,7 +618,11 @@ private fun PriceText(price: Double) {
 }
 
 @Composable
-private fun SaveButton(solarPanelType: SolarPanelType, roofSections: List<RoofSection>) {
+private fun SaveButton(
+    solarPanelType: SolarPanelType,
+    roofSections: List<RoofSection>,
+    viewModel: ManageSolarArrayViewModel
+) {
     var name by remember { mutableStateOf("") }
     var openSaveDialog by remember { mutableStateOf(false) }
 
@@ -626,9 +631,8 @@ private fun SaveButton(solarPanelType: SolarPanelType, roofSections: List<RoofSe
             onDismissRequest = { openSaveDialog = false },
             onSave = {
                 openSaveDialog = false
+                viewModel.addSolarArray(SolarArray(name, solarPanelType, roofSections, Coordinates(59.9423, 10.72))) // todo: retrieve from map
 
-                SolarArray(name, solarPanelType, roofSections)
-                // TODO save to some view model
                 // TODO navigate home
             },
             name,
