@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -43,7 +44,7 @@ fun MainScreen() {
             startDestination = "home",
             modifier = Modifier.padding(innerpadding)
         ) {
-            composable("home") { HomeScreen() }
+            composable("home") { HomeScreen(navController) }
             composable("stats") { StatScreen() }
             composable("managesolararray") { ManageSolarArrayScreen(viewModel, navController) }
             composable("weather") { WeatherScreen() }
@@ -52,18 +53,12 @@ fun MainScreen() {
     }
 }
 
-@Composable
-fun HomeScreen() {
-    //val navController = rememberNavController()
-    val homeScreenViewModel = HomeScreenViewModel()
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(Background)
-    ) {
-        HomeScreenTopBar()
-        PropertyCard()
-        ElectricityCard(viewModel = homeScreenViewModel)
-        WeatherCard()
-    }
-}
+
+/*
+dependencies:
+implementation(libs.androidx.compose.material)
+
+libs.versions.toml:
+   composeMaterial = "1.4.0"
+   androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
+*/
