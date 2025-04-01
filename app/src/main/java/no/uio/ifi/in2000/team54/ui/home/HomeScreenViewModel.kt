@@ -6,36 +6,38 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
 import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.pvgis.PVGISRepository
-import no.uio.ifi.in2000.team54.data.shared.SharedRepository
+import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.util.calculateElectrisityProduction
 
-data class GraphDataUiState(
+data class GraphDataUiState( // only for ElectrisityGraph
     val electricityProductionData: Map<String, List<Double>> = emptyMap(),
-    val loadingState: String = "Henter data... Det kan ta tid"
+    val loadingState: String = "Ingen solceller lagret",
 )
 
 data class SolarArrayUiState( // i guess we fetch separately for different addresses
-    val arrays: List<SolarArray> = emptyList(),
+    val arrays: List<SolarArray> = emptyList(), //
     val solarArrayInFocus: SolarArray? = null
 )
 
 class HomeScreenViewModel : ViewModel() {
     private val _repository = FrostRepository()
     private val _pvgisRepo = PVGISRepository() // probably will delete later
-    private val _sharedRepository = SharedRepository()
+    private val _sharedRepository = RepositoryProvider.sharedRepository
 
     private lateinit var fetchedData: FrostRepository.FetchAllData
 
     private val _graphDataUiState = MutableStateFlow(GraphDataUiState())
-    private val _solarArrayUiState = MutableStateFlow(SolarArrayUiState())
 
+    val solarArrays: StateFlow<List<SolarArray>> = _sharedRepository.solarArrays // save to SolarArraysUiState?
     val graphDataUiState = _graphDataUiState.asStateFlow()
 
     private val _priceUiState = MutableStateFlow(PriceUiState(0.0, 0.0, 0.0, false, Scope.DAY))
@@ -51,28 +53,24 @@ class HomeScreenViewModel : ViewModel() {
 
 
     init {
-        getAllSolarArrays()
-        getObservationsFromRepo(solarArray = _solarArrayUiState.value.solarArrayInFocus)
-        Scope.entries.forEach {
+        viewModelScope.launch {
+            solarArrays.filter { it.isNotEmpty() }
+                .distinctUntilChanged()
+                .collect { list ->
+                    val firstItem2 = list.firstOrNull()
+                    if (firstItem2 != null) {
+                        getObservationsFromRepo(firstItem2)
+                    }
+                }
+                Scope.entries.forEach {
             loadData(scopeToDays[it]!!, _solarArrayUiState.value.solarArrayInFocus!!)
         }
-    }
-
-    private fun getAllSolarArrays() {
-        viewModelScope.launch {
-            val allArrays = _sharedRepository.getSolarArrays()
-            _solarArrayUiState.update { currentState ->
-                currentState.copy(
-                    arrays = allArrays,
-                    solarArrayInFocus = if (allArrays.isEmpty()) null else allArrays[0]
-                )
-            }
         }
     }
 
     private fun getObservationsFromRepo(solarArray: SolarArray?) {
         viewModelScope.launch {
-            if (solarArray == null) {
+            if (solarArray == null) { // safety
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
                         loadingState = "Ingen solpaneler lagret"
@@ -81,7 +79,12 @@ class HomeScreenViewModel : ViewModel() {
                 return@launch
             }
 
-            fetchedData = _repository.getObservationData(solarArray.coordinates)
+            _graphDataUiState.update { currentState ->
+                currentState.copy(
+                    loadingState = "Henter data... det kan ta tid"
+                )
+            }
+            fetchedData =  _repository.getObservationData(solarArray.coordinates)
 
             val monthlyTemps = fetchedData.monthlyTemps
             val monthlySnow = fetchedData.monthlySnow
@@ -110,6 +113,7 @@ class HomeScreenViewModel : ViewModel() {
             _graphDataUiState.update { currentState ->
                 currentState.copy(
                     electricityProductionData = mapOf("Strøm Produksjon" to solarArrayLoadedData[solarArray]!!.values.toList())
+
                 )
             }
         }

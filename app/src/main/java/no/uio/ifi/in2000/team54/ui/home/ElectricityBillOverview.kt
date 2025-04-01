@@ -99,7 +99,7 @@ fun ElectricityBillOverview() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                ExpensesStatBox(false, "${uiState.realPrice}", R.drawable.nosolar, uiState)
+                ExpensesStatBox(false, "${uiState.realPrice}", R.drawable.withoutsolar, uiState)
                 Spacer(Modifier.padding(8.dp))
                 ExpensesStatBox(true, "${uiState.saved}", R.drawable.coin, uiState)
                 Spacer(Modifier.padding(8.dp))

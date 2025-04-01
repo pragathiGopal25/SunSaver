@@ -84,6 +84,5 @@ class FrostDatasource {
         val observationResponse: ObservationResponse = response.body()
 
         return observationResponse.data
-
     }
 }
