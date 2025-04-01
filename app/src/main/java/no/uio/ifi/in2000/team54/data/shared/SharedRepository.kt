@@ -1,5 +1,9 @@
 package no.uio.ifi.in2000.team54.data.shared
 
+import android.util.Log
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
@@ -31,24 +35,18 @@ class SharedRepository {
         coordinates = Coordinates(59.9423, 10.72)
     )
 
-    private val _solarArrays: MutableList<SolarArray> = mutableListOf(testSolarArray)
-
-    fun getSolarArrays(): List<SolarArray> {
-        return _solarArrays
-    }
+    private val solarArrays = MutableStateFlow<List<SolarArray>>(emptyList())
+    val itemList: StateFlow<List<SolarArray>> = solarArrays.asStateFlow()
 
     fun addSolarArray(newSolarArray: SolarArray) {
-        _solarArrays.add(newSolarArray)
+        Log.i("testHash", System.identityHashCode(solarArrays.value).toString())
+        solarArrays.value = (solarArrays.value + newSolarArray).toList()
+        Log.i("test", "added$newSolarArray")
         // todo: check if exists, update then (probably need to add an id then)
     }
-    /*
-    fun getSolarArrayByName(name: String): SolarArray? {
-        return _solarArrays.find { it.name == name }
-    }
+}
 
-    fun deleteSolarArray(newSolarArray: SolarArray) {
-        // todo
-    }
-     */
+object RepositoryProvider {
+    val sharedRepository = SharedRepository()
 }
 
