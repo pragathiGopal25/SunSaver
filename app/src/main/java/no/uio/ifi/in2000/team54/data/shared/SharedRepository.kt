@@ -1,9 +1,9 @@
 package no.uio.ifi.in2000.team54.data.shared
 
+import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
-import no.uio.ifi.in2000.team54.model.building.Pos
 
 class SharedRepository {
     // todo: Connect to Room database and store all values there
@@ -28,7 +28,7 @@ class SharedRepository {
         name = "test1",
         panelType = SolarPanelType.ECONOMY,
         roofSections = listOf(testRoofSection1, testRoofSection2),
-        coordinates = Pos(59.9423, 10.72)
+        coordinates = Coordinates(59.9423, 10.72)
     )
 
     private val solarArrays: MutableList<SolarArray> = mutableListOf(testSolarArray)
