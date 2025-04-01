@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,8 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -42,31 +39,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.Light
-import no.uio.ifi.in2000.team54.ui.theme.LightYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 
-val viewModel = HomeScreenViewModel()
 
 @Composable
-fun ElectricityBillOverview() {
+fun ElectricityPriceContainer(viewModel: HomeScreenViewModel) {
     val uiState by viewModel.priceUiState.collectAsState()
     Box(
-        modifier = Modifier
-            .shadow(
-                elevation = 1.dp,
-                shape = RoundedCornerShape(20.dp)
-            )
-            .width(350.dp)
-            .background(color = Light)
-            .border(
-                color = DarkBeige,
-                width = 1.dp,
-                shape = RoundedCornerShape(20.dp)
-            )
-            .height(280.dp),
+        modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
     ) {
         Column(
@@ -75,19 +56,6 @@ fun ElectricityBillOverview() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Row(
-                Modifier.padding(8.dp)
-            ) {
-                Text(
-                    text = "Strømutgifter ",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = "& Sparing",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = DarkYellow
-                )
-            }
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -118,24 +86,6 @@ fun IndeterminateCircularIndicator(uiState: HomeScreenViewModel.PriceUiState) {
         color = MaterialTheme.colorScheme.secondary,
         trackColor = MaterialTheme.colorScheme.surfaceVariant,
     )
-}
-
-@Composable
-fun SlidePageButton(onClick: () -> Unit, selected: Boolean) {
-    Button(
-        modifier = Modifier
-            .shadow(
-                elevation = 4.dp,
-                shape = RoundedCornerShape(20.dp)
-            )
-            .width(15.dp)
-            .height(15.dp),
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (selected) LightYellow else Color.LightGray,
-        ),
-        contentPadding = PaddingValues(0.dp)
-    ) {}
 }
 
 @Composable

@@ -192,7 +192,10 @@ fun NoSolarArrayCard() {
                 drawRoundRect(
                     color = YellowBorder,
                     cornerRadius = CornerRadius(20.dp.toPx()),
-                    style = Stroke(width = 3f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
+                    style = Stroke(
+                        width = 3f,
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+                    )
                 )
             }
             .padding(15.dp)
@@ -212,7 +215,29 @@ fun NoSolarArrayCard() {
 }
 
 @Composable
-fun ElectricityCard(viewModel: HomeScreenViewModel) {
+fun SwitchContent(homeScreenViewModel: HomeScreenViewModel) {
+    var isFlipped by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .height(300.dp)
+            .width(409.dp)
+            .clickable { isFlipped = !isFlipped },
+        contentAlignment = Alignment.Center
+    ) {
+        ElectricityCard {
+            if (!isFlipped) {
+                EletricityGraphContainer(viewModel = homeScreenViewModel)
+            } else {
+                ElectricityPriceContainer(viewModel = homeScreenViewModel)
+            }
+        }
+    }
+}
+
+@Composable
+fun ElectricityCard(content: @Composable () -> Unit) {
     Card(
         modifier = Modifier
             .padding(15.dp)
@@ -244,37 +269,9 @@ fun ElectricityCard(viewModel: HomeScreenViewModel) {
                     color = YellowText
                 )
             }
-            EletricityGraphContainer(viewModel = viewModel)
-
+            content()
         }
     }
-}
-
-@Composable
-fun SwitchContent(homeScreenViewModel: HomeScreenViewModel) {
-    var isFlipped by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .height(250.dp)
-            .width(409.dp)
-            .clickable { isFlipped = !isFlipped },
-        contentAlignment = Alignment.Center
-    ) {
-        if (!isFlipped) {
-            ElectricityCard(homeScreenViewModel)
-        } else {
-            SavingsCard()
-        }
-    }
-}
-
-
-@Composable
-fun SavingsCard() {
-
-    ElectricityBillOverview()
 }
 
 @Composable

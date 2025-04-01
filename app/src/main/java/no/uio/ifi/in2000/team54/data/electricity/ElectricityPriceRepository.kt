@@ -6,14 +6,14 @@ import java.util.Date
 
 class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasource) {
     // https://forbrukerguiden.no/normalt-stromforbruk/
-    fun fakeAvgKwh(): Double = 44.43 //Avg kWh for 120kvm enebolig per dag
+    private fun estimatedAvgKwh(): Double = 44.43 //Avg kWh for 120kvm enebolig per dag
 
 
     //Get the average electricity price with and without solar panel
     // The avg is in NOK per kWh
     suspend fun getPriceData(days: Int, area: String, solarProduction: Double): List<Double> {
         val avgPrice = getPriceDataInterval(days, area).average()
-        return listOf((fakeAvgKwh() - solarProduction) * days * avgPrice, avgPrice * days * fakeAvgKwh())
+        return listOf((estimatedAvgKwh() - solarProduction) * days * avgPrice, avgPrice * days * estimatedAvgKwh())
     }
 
     //Get which month the calculations base themselves on

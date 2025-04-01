@@ -56,15 +56,15 @@ class HomeScreenViewModel : ViewModel() {
         viewModelScope.launch {
             solarArrays.filter { it.isNotEmpty() }
                 .distinctUntilChanged()
-                .collect { list ->
-                    val firstItem2 = list.firstOrNull()
-                    if (firstItem2 != null) {
-                        getObservationsFromRepo(firstItem2)
+                .collect { solarArrays ->
+                    val firstSolarArray = solarArrays.firstOrNull()
+                    if (firstSolarArray != null) {
+                        getObservationsFromRepo(firstSolarArray)
+                        Scope.entries.forEach {
+                            loadData(scopeToDays[it]!!, firstSolarArray)
+                        }
                     }
                 }
-                Scope.entries.forEach {
-            loadData(scopeToDays[it]!!, _solarArrayUiState.value.solarArrayInFocus!!)
-        }
         }
     }
 
