@@ -1,25 +1,26 @@
 package no.uio.ifi.in2000.team54.ui.home
 
 import android.text.Layout
-import androidx.compose.foundation.layout.Arrangement
+import android.util.Log
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.ColorUtils
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
-import com.patrykandpatrick.vico.compose.cartesian.layer.point
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
@@ -42,19 +43,16 @@ import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.core.common.Fill
 import com.patrykandpatrick.vico.core.common.LayeredComponent
 import com.patrykandpatrick.vico.core.common.LegendItem
 import com.patrykandpatrick.vico.core.common.component.ShapeComponent
 import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
+import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 
-val data = mapOf( // test data for both components
-    "Strøm" to listOf( 16.0, 41.2, 91.0, 118.2, 133.3, 137.0, 130.0, 112.0, 84.0, 52.0, 21.0, 10.0),
-    "Solenergi" to listOf(6.0, 21.2, 41.0, 50.2, 64.3, 79.0, 90.0, 62.0, 34.0, 22.0, 5.0, 10.0)
-)
-
-// x values
 val monthFormatter = CartesianValueFormatter { _, value, _ -> // overriding "format" method in CastertianValueFormatter
     val months = listOf(
         "Jan", "Feb", "Mar", "Apr", "Mai", "Jun",
@@ -65,42 +63,88 @@ val monthFormatter = CartesianValueFormatter { _, value, _ -> // overriding "for
 }
 
 @Composable
-fun TestGraphs() { // just for demo, delete later
-    Column(Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        ElectricityGraph()
-        ElectricityGraph2()
+fun EletricityGraphContainer(
+    modifier: Modifier = Modifier,
+    viewModel: HomeScreenViewModel
+) {
+
+    val graphDataUiState by viewModel.graphDataUiState.collectAsStateWithLifecycle()
+    if (graphDataUiState.electricityProductionData == emptyMap<String, List<Double>>()) {
+        Box(modifier.fillMaxSize(), Alignment.Center) {
+            Text(text = graphDataUiState.loadingState)
+        }
+    } else {
+        ElectricityGraph(data = graphDataUiState.electricityProductionData)
     }
+
 }
+
+private val LegendLabelKey = ExtraStore.Key<Set<String>>()
+
 
 
 @Composable
-fun ElectricityGraph (modifier: Modifier = Modifier){
+fun ElectricityGraph (
+    modifier: Modifier = Modifier,
+    data: Map<String, List<Double>>
+){
     val modelProducer = remember { CartesianChartModelProducer() }
+    Log.i("testGraph", data.toString())
 
     Box(modifier = modifier,
         contentAlignment = Alignment.Center,
         ) {
         LaunchedEffect(Unit) {
             modelProducer.runTransaction {
-                lineSeries { data.forEach{(_, map) -> series(map)}}
+                lineSeries { data.forEach{(_, list) -> series(list)}}
+                extras { extraStore -> extraStore[LegendLabelKey] = data.keys }
             }
         }
+
+        val lineColors = listOf(BrightYellow)
+        val legendItemLabelComponent = rememberTextComponent(vicoTheme.textColor)
+
         CartesianChartHost(
             rememberCartesianChart(
-                rememberLineCartesianLayer(),
+                rememberLineCartesianLayer(LineCartesianLayer.LineProvider.series(
+                    lineColors.map { color ->
+                        LineCartesianLayer.rememberLine(
+                            fill = LineCartesianLayer.LineFill.double(fill(color), fill(color)),
+                            areaFill = LineCartesianLayer.AreaFill.single(
+                                Fill(
+                                ShaderProvider.verticalGradient(
+                                    ColorUtils.setAlphaComponent(0xFFF9B87D.toInt(), 102),
+                                    android.graphics.Color.TRANSPARENT,
+                                )
+                            )
+                            ),
+                        )
+                    })
+                ),
                 startAxis = VerticalAxis.rememberStart(
                     title = "Strøm produsert (kWh)",
-                    titleComponent = TextComponent()
+                    titleComponent = TextComponent(),
+                    guideline = null // gets rid of axis lines
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     title = "Tid (Måneder)",
                     titleComponent = TextComponent(),
+                    guideline = null,
                     valueFormatter = monthFormatter
                 ),
-                marker = rememberMarker()
+                marker = rememberMarker(),
+                legend = rememberVerticalLegend(
+                    items = { extraStore ->
+                        extraStore[LegendLabelKey].forEachIndexed { index, label ->
+                            add(
+                                LegendItem(
+                                    shapeComponent(fill(lineColors[index]), CorneredShape.Pill),
+                                    legendItemLabelComponent,
+                                    label,
+                                )
+                            )
+                        }
+                    })
             ),
             modelProducer,
             modifier = modifier.padding(10.dp).height(250.dp),
@@ -109,7 +153,7 @@ fun ElectricityGraph (modifier: Modifier = Modifier){
         )
     }
 }
-
+/*
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
 @Composable
 fun ElectricityGraph2(modifier: Modifier = Modifier) {
@@ -172,11 +216,12 @@ fun ElectricityGraph2(modifier: Modifier = Modifier) {
     )
 }
 
+*/
 // copied from vicos github, some adjustments to be made
 @Composable
 fun rememberMarker(
     valueFormatter: DefaultCartesianMarker.ValueFormatter =
-        DefaultCartesianMarker.ValueFormatter.default(),
+        DefaultCartesianMarker.ValueFormatter.default(colorCode = false), // allows us to set textcomponent color
     showIndicator: Boolean = true,
 ): CartesianMarker {
     val labelBackgroundShape = markerCorneredShape(CorneredShape.Corner.Rounded)
@@ -189,7 +234,7 @@ fun rememberMarker(
         )
     val label =
         rememberTextComponent(
-            color = MaterialTheme.colorScheme.onSurface,
+            color = Color.Black,
             textAlignment = Layout.Alignment.ALIGN_CENTER,
             padding = insets(8.dp, 4.dp),
             background = labelBackground,
@@ -197,7 +242,7 @@ fun rememberMarker(
         )
     val indicatorFrontComponent =
         rememberShapeComponent(fill(MaterialTheme.colorScheme.surface), CorneredShape.Pill)
-    val guideline = rememberAxisGuidelineComponent()
+    //val guideline = rememberAxisGuidelineComponent()
     return rememberDefaultCartesianMarker(
         label = label,
         valueFormatter = valueFormatter,
@@ -219,6 +264,6 @@ fun rememberMarker(
             null
         },
         indicatorSize = 36.dp,
-        guideline = guideline,
+        labelPosition = DefaultCartesianMarker.LabelPosition.AroundPoint
     )
 }

@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonColors
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -39,9 +41,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
@@ -56,7 +58,7 @@ fun ElectricityBillOverview() {
     Box(
         modifier = Modifier
             .shadow(
-                elevation = 10.dp,
+                elevation = 1.dp,
                 shape = RoundedCornerShape(20.dp)
             )
             .width(350.dp)
@@ -75,40 +77,60 @@ fun ElectricityBillOverview() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Strømutgifter & Sparing", fontWeight = FontWeight.Bold, fontSize = 17.sp)
-            Spacer(Modifier.padding(5.dp))
+            Row(
+                Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = "Strømutgifter ",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "& Sparing",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = DarkYellow
+                )
+            }
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
             ) {
-                TimeScopeButton()
+                TimeScopeSegmentedButton(viewModel)
             }
             Spacer(Modifier.padding(10.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                MoneyBox(false, "${uiState.realPrice}", R.drawable.stop)
+                ExpensesStatBox(false, "${uiState.realPrice}", R.drawable.nosolar, uiState)
                 Spacer(Modifier.padding(8.dp))
-                MoneyBox(true, "${uiState.saved}", R.drawable.coin)
+                ExpensesStatBox(true, "${uiState.saved}", R.drawable.coin, uiState)
                 Spacer(Modifier.padding(8.dp))
-                MoneyBox(false, "${uiState.solarPrice}", R.drawable.solar)
+                ExpensesStatBox(false, "${uiState.solarPrice}", R.drawable.solar, uiState)
             }
             Spacer(Modifier.padding(10.dp))
             Row {
-                MoneyNavButton({ pageState = "1" }, pageState == "1")
+                SlidePageButton({ pageState = "1" }, pageState == "1")
                 Spacer(Modifier.padding(8.dp))
-                MoneyNavButton({ pageState = "2" }, pageState == "2")
+                SlidePageButton({ pageState = "2" }, pageState == "2")
                 Spacer(Modifier.padding(8.dp))
-                MoneyNavButton({ pageState = "3" }, pageState == "3")
+                SlidePageButton({ pageState = "3" }, pageState == "3")
             }
         }
     }
 }
 
+@Composable
+fun IndeterminateCircularIndicator(uiState: PriceUiState) {
+    if (!uiState.loading) return
+    CircularProgressIndicator(
+        modifier = Modifier.width(23.dp),
+        color = MaterialTheme.colorScheme.secondary,
+        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+    )
+}
 
 @Composable
-fun MoneyNavButton(onClick: () -> Unit, selected: Boolean) {
+fun SlidePageButton(onClick: () -> Unit, selected: Boolean) {
     Button(
         modifier = Modifier
             .shadow(
@@ -126,7 +148,7 @@ fun MoneyNavButton(onClick: () -> Unit, selected: Boolean) {
 }
 
 @Composable
-fun MoneyBox(main: Boolean, text: String, image: Int) {
+fun ExpensesStatBox(main: Boolean, text: String, image: Int, uiState: PriceUiState) {
     Box(
         modifier = Modifier
             .shadow(
@@ -163,13 +185,14 @@ fun MoneyBox(main: Boolean, text: String, image: Int) {
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds
             )
+            IndeterminateCircularIndicator(uiState)
             Text("$text,-")
         }
     }
 }
 
 @Composable
-fun TimeScopeButton() {
+fun TimeScopeSegmentedButton(viewModel: ElectricityPriceViewModel) {
     var selectedIndex by remember { mutableIntStateOf(0) }
     val options = listOf("Dag", "Måned", "År")
 
@@ -180,7 +203,10 @@ fun TimeScopeButton() {
                     index = index,
                     count = options.size
                 ),
-                onClick = { selectedIndex = index },
+                onClick = {
+                    selectedIndex = index
+                    viewModel.changeTimeScope(Scope.entries[selectedIndex])
+                },
                 selected = index == selectedIndex,
                 icon = {},
                 colors = SegmentedButtonColors(
