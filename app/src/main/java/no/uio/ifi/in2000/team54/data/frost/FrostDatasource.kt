@@ -79,34 +79,35 @@ class FrostDatasource {
                 return body[0].id
             }
 
-
         } else {
 
-            Log.i("testingNearest", "Im here")
-
-            val response: HttpResponse = client.get("https://frost.met.no/sources/v0.jsonld?elements=$elementName") {
+            val response: HttpResponse = client.get("https://frost.met.no/sources/v0.jsonld?types=SensorSystem&elements=$elementName") {
                 header(HttpHeaders.Authorization, authHeader)
                 header(HttpHeaders.Accept, "application/json")
             }
+
             println(elementName.toString())
-            println(response.bodyAsText())  // Log the actual response
+
 
 
             val body: List<SensorSystem> = response.body<SourceResponse>().data
-            var nearestDistance = 0.0
+            var nearestDistance = Double.MAX_VALUE
             var nextNearestSensor = ""
 
-
             body.forEach { sensor ->
-                val calcDist = calculateDistanceBetweenCoords(Coordinates(sensor.geometry.coordinates[0], sensor.geometry.coordinates[1]), coordinates)
-                if (nearestDistance == 0.0) {
-                    nearestDistance = calcDist
-                    nextNearestSensor = sensor.id
-                } else if (calcDist < nearestDistance)  {
-                    nearestDistance = calcDist
-                    nextNearestSensor = sensor.id
+                if (sensor.id.contains("SN")) {
+                    val calcDist = calculateDistanceBetweenCoords(
+                        Coordinates(sensor.geometry.coordinates[0], sensor.geometry.coordinates[1]),
+                        coordinates
+                    )
+                    if (calcDist < nearestDistance) {
+                        nearestDistance = calcDist
+                        nextNearestSensor = sensor.id
+                    }
                 }
             }
+
+            Log.i("testingend", "finished here")
             return nextNearestSensor
         }
 
@@ -143,8 +144,11 @@ class FrostDatasource {
             header(HttpHeaders.Authorization, authHeader)
             header(HttpHeaders.Accept, "application/json")
         }
-        println(response.bodyAsText())  // Log the actual response
 
+        if (response.status.value != 200) {
+            sensorId = fetchNearestSource(coordinates, elementName).toString()
+            return fetchObservationDataFromFrost(coordinates, elementName, referenceTime)
+        }
         val observationResponse: ObservationResponse = response.body()
 
         return observationResponse.data
