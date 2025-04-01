@@ -242,6 +242,7 @@ fun ElectricityCard(viewModel: HomeScreenViewModel) {
     }
 }
 
+
 @Composable
 fun SwitchContent() {
     val homeScreenViewModel = HomeScreenViewModel()
@@ -261,6 +262,22 @@ fun SwitchContent() {
             SavingsCard()
         }
     }
+
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(top = 16.dp)
+    ) {
+        SlidePageButton(
+            selected = !isFlipped,
+            onClick = { isFlipped = false }
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+
+        SlidePageButton(
+            selected = isFlipped,
+            onClick = { isFlipped = true }
+        )
+    }
 }
 
 
@@ -270,147 +287,6 @@ fun SavingsCard() {
     ElectricityBillOverview()
 }
 
-@Composable
-fun TimeSpan() {
-    Card(
-        modifier = Modifier
-            .height(20.dp)
-            .width(325.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFE4C283))
-
-    ) {
-
-    }
-}
-
-@Composable
-fun WithoutSolarPanels() {
-    Box(
-        modifier = Modifier
-            .offset(y = 10.dp)
-            .border(1.dp, YellowerBorder, shape = RoundedCornerShape(20.dp))
-    ) {
-        Card(
-            modifier = Modifier
-                .height(100.dp)
-                .width(85.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Panels)
-        ) {
-
-            Column(
-                Modifier
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceEvenly
-
-            ) {
-                Image (
-                    painter = painterResource(R.drawable.withoutsolar),
-                    contentDescription = null,
-                    modifier = Modifier.size(60.dp)
-                )
-
-                Text(
-                    text = "4003 NOK",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Black
-                )
-
-            }
-
-        }
-    }
-}
-
-
-@Composable
-fun TotalSavings() {
-    Box(
-        modifier = Modifier
-            .border(1.dp, YellowerBorder, shape = RoundedCornerShape(20.dp))
-    ) {
-        Card(
-            modifier = Modifier
-                .height(120.dp)
-                .width(85.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = SavingsYellow)
-        ) {
-
-            Column(
-                Modifier
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceEvenly
-
-            ) {
-
-                Text(
-                    text = "Spart",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-
-                Image (
-                    painter = painterResource(R.drawable.coin),
-                    contentDescription = null,
-                    modifier = Modifier.size(55.dp)
-                )
-
-
-                Text(
-                    text = "500 NOK",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Black
-                )
-
-            }
-        }
-    }
-}
-
-
-@Composable
-fun WithSolarPanels() {
-    Box(
-        modifier = Modifier
-            .offset(y = 10.dp)
-            .border(1.dp, YellowerBorder, shape = RoundedCornerShape(20.dp))
-    ) {
-        Card(
-            modifier = Modifier
-                .height(100.dp)
-                .width(85.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Panels)
-        ) {
-
-            Column(
-                Modifier
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceEvenly
-
-            ) {
-                Image (
-                    painter = painterResource(R.drawable.solar),
-                    contentDescription = null,
-                    modifier = Modifier.size(60.dp)
-                )
-
-
-                Text(
-                    text = "3500 NOK",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Black
-                )
-
-            }
-        }
-    }
-}
 
 @Composable
 fun WeatherCard(navController: NavController) {

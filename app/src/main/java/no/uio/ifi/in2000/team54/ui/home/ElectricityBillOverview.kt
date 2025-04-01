@@ -61,7 +61,7 @@ fun ElectricityBillOverview() {
                 elevation = 1.dp,
                 shape = RoundedCornerShape(20.dp)
             )
-            .width(350.dp)
+            .width(390.dp)
             .background(color = Light)
             .border(
                 color = DarkBeige,
@@ -170,7 +170,7 @@ fun ExpensesStatBox(main: Boolean, text: String, image: Int, uiState: PriceUiSta
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (main) Text("SPART", fontWeight = FontWeight.Bold)
+            if (main) Text("Spart", fontWeight = FontWeight.Bold)
             val img = painterResource(image)
             val size = if (main) 60.dp else 50.dp
             Image(
