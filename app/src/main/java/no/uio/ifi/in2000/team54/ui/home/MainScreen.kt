@@ -45,18 +45,6 @@ fun MainScreen() {
     }
 }
 
-@Composable
-fun HomeScreen(navController: NavController) {
-
-    Column(
-        Modifier.fillMaxSize().background(Background)
-    ) {
-        HomeScreenTopBar()
-        PropertyCard()
-        ElectricityCard()
-        WeatherCard(navController)
-    }
-}
 
 /*
 dependencies:

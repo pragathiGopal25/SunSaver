@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team54.ui.home
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
+import no.uio.ifi.in2000.team54.ui.theme.Background
 import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
@@ -45,6 +47,19 @@ import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
 
+
+@Composable
+fun HomeScreen(navController: NavController) {
+
+    Column(
+        Modifier.fillMaxSize().background(Background)
+    ) {
+        HomeScreenTopBar()
+        PropertyCard()
+        ElectricityCard()
+        WeatherCard(navController)
+    }
+}
 
 @Composable
 fun GreetingMessage() {
@@ -196,7 +211,7 @@ fun ElectricityCard() {
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Strøm ",
+                text = "Strømutgifter ",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.Black
 
@@ -233,7 +248,7 @@ fun SavingsCard() {
                horizontalArrangement = Arrangement.Center
            ) {
                Text(
-                   text = "Strøm ",
+                   text = "Strømutgifter ",
                    style = MaterialTheme.typography.bodyLarge,
                    color = Color.Black,
                    modifier = Modifier.padding(top = 15.dp)
@@ -280,8 +295,8 @@ fun TimeSpan() {
     ) {
 
     }
-
 }
+
 @Composable
 fun WithoutSolarPanels() {
     Box(
