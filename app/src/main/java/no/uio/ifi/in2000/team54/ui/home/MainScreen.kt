@@ -54,7 +54,8 @@ fun MainScreen() {
 
 @Composable
 fun HomeScreen() {
-    val navController = rememberNavController()
+    //val navController = rememberNavController()
+    val homeScreenViewModel = HomeScreenViewModel()
     Column(
         Modifier
             .fillMaxSize()
@@ -62,7 +63,7 @@ fun HomeScreen() {
     ) {
         HomeScreenTopBar()
         PropertyCard()
-        ElectricityCard()
+        ElectricityCard(viewModel = homeScreenViewModel)
         WeatherCard()
     }
 }

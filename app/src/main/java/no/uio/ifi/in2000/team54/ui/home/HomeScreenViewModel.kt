@@ -14,12 +14,13 @@ import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.util.calculateElectrisityProduction
 
 data class GraphDataUiState(
-    val solarIrradianceData: Map<String, List<Double>> = emptyMap(),
+    val electricityProductionData: Map<String, List<Double>> = emptyMap(),
     val loadingState: String = "Henter data... Det kan ta tid"
 )
 
 data class SolarArrayUiState( // i guess we fetch separately for different addresses
-    val name: String = "test1",
+    val arrays: List<SolarArray> = emptyList(),
+    val solarArrayInFocus: SolarArray? = null
 )
 
 class HomeScreenViewModel: ViewModel() {
@@ -35,14 +36,32 @@ class HomeScreenViewModel: ViewModel() {
     val graphDataUiState = _graphDataUiState.asStateFlow()
 
     init {
-        val solarArray = _sharedRepository.getSolarArrayByName(_solarArrayUiState.value.name)
-        if (solarArray != null) {
-            getObservationsFromRepo(solarArray)
+        getAllSolarArrays()
+        getObservationsFromRepo(solarArray = _solarArrayUiState.value.solarArrayInFocus)
+    }
+
+    private fun getAllSolarArrays() {
+        viewModelScope.launch {
+            val allArrays = _sharedRepository.getSolarArrays()
+            _solarArrayUiState.update { currentState ->
+                currentState.copy(
+                    arrays = allArrays,
+                    solarArrayInFocus = if (allArrays.isEmpty()) null else allArrays[0]
+                )
+            }
         }
     }
 
-    private fun getObservationsFromRepo(solarArray: SolarArray) {
+    private fun getObservationsFromRepo(solarArray: SolarArray?) {
         viewModelScope.launch {
+            if (solarArray == null) {
+                _graphDataUiState.update { currentState ->
+                    currentState.copy(
+                        loadingState = "Ingen solpaneler lagret"
+                    )
+                }
+                return@launch
+            }
 
             fetchedData =  _repository.getObservationData(solarArray.coordinates)
 
@@ -68,7 +87,7 @@ class HomeScreenViewModel: ViewModel() {
 
             _graphDataUiState.update { currentState ->
                 currentState.copy(
-                    solarIrradianceData = mapOf("Strøm Produksjon" to electricityProduction.values.toList())
+                    electricityProductionData = mapOf("Strøm Produksjon" to electricityProduction.values.toList())
                 )
             }
         }

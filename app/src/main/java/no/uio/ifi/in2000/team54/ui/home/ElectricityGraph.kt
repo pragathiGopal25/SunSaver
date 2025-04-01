@@ -3,6 +3,7 @@ package no.uio.ifi.in2000.team54.ui.home
 import android.text.Layout
 import android.util.Log
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -18,17 +19,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
-import com.patrykandpatrick.vico.compose.cartesian.layer.point
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.common.component.fixed
-import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.component.shapeComponent
@@ -71,11 +69,12 @@ fun EletricityGraphContainer(
 ) {
 
     val graphDataUiState by viewModel.graphDataUiState.collectAsStateWithLifecycle()
-
-    if (graphDataUiState.solarIrradianceData == emptyMap<String, List<Double>>()) {
-        Text(text = graphDataUiState.loadingState)
+    if (graphDataUiState.electricityProductionData == emptyMap<String, List<Double>>()) {
+        Box(modifier.fillMaxSize(), Alignment.Center) {
+            Text(text = graphDataUiState.loadingState)
+        }
     } else {
-        ElectricityGraph(data = graphDataUiState.solarIrradianceData)
+        ElectricityGraph(data = graphDataUiState.electricityProductionData)
     }
 
 }

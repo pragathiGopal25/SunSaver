@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.GreyText
@@ -169,7 +168,7 @@ fun PropertyCard() {
 }
 
 @Composable
-fun ElectricityCard() {
+fun ElectricityCard(viewModel: HomeScreenViewModel) {
 
     Card(
         modifier = Modifier
@@ -185,20 +184,22 @@ fun ElectricityCard() {
             containerColor = Light,
         )
     ) {
-        Row(
-            Modifier.padding(10.dp)
-        ) {
-            Text(
-                text = "Strøm ",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = "& Sparing",
-                style = MaterialTheme.typography.bodyLarge,
-                color = YellowText
-            )
+        Column {
+            Row(
+                Modifier.padding(10.dp)
+            ) {
+                Text(
+                    text = "Strøm ",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "& Sparing",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = YellowText
+                )
+            }
+            EletricityGraphContainer(viewModel = viewModel)
         }
-
     }
 }
 
