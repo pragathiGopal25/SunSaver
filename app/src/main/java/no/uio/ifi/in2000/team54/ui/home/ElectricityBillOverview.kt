@@ -29,7 +29,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,12 +48,11 @@ import no.uio.ifi.in2000.team54.ui.theme.LightYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 
-val viewModel = ElectricityPriceViewModel()
+val viewModel = HomeScreenViewModel()
 
 @Composable
 fun ElectricityBillOverview() {
-    val uiState by viewModel.uiState.collectAsState()
-    var pageState by remember { mutableStateOf("1") }
+    val uiState by viewModel.priceUiState.collectAsState()
     Box(
         modifier = Modifier
             .shadow(
@@ -94,7 +92,7 @@ fun ElectricityBillOverview() {
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
             ) {
-                TimeScopeSegmentedButton(viewModel)
+                TimeScopeSegmentedButton(viewModel, uiState)
             }
             Spacer(Modifier.padding(10.dp))
             Row(
@@ -108,19 +106,12 @@ fun ElectricityBillOverview() {
                 ExpensesStatBox(false, "${uiState.solarPrice}", R.drawable.solar, uiState)
             }
             Spacer(Modifier.padding(10.dp))
-            Row {
-                SlidePageButton({ pageState = "1" }, pageState == "1")
-                Spacer(Modifier.padding(8.dp))
-                SlidePageButton({ pageState = "2" }, pageState == "2")
-                Spacer(Modifier.padding(8.dp))
-                SlidePageButton({ pageState = "3" }, pageState == "3")
-            }
         }
     }
 }
 
 @Composable
-fun IndeterminateCircularIndicator(uiState: PriceUiState) {
+fun IndeterminateCircularIndicator(uiState: HomeScreenViewModel.PriceUiState) {
     if (!uiState.loading) return
     CircularProgressIndicator(
         modifier = Modifier.width(23.dp),
@@ -148,7 +139,12 @@ fun SlidePageButton(onClick: () -> Unit, selected: Boolean) {
 }
 
 @Composable
-fun ExpensesStatBox(main: Boolean, text: String, image: Int, uiState: PriceUiState) {
+fun ExpensesStatBox(
+    main: Boolean,
+    text: String,
+    image: Int,
+    uiState: HomeScreenViewModel.PriceUiState
+) {
     Box(
         modifier = Modifier
             .shadow(
@@ -192,9 +188,20 @@ fun ExpensesStatBox(main: Boolean, text: String, image: Int, uiState: PriceUiSta
 }
 
 @Composable
-fun TimeScopeSegmentedButton(viewModel: ElectricityPriceViewModel) {
+fun TimeScopeSegmentedButton(
+    viewModel: HomeScreenViewModel,
+    uiState: HomeScreenViewModel.PriceUiState
+) {
     var selectedIndex by remember { mutableIntStateOf(0) }
     val options = listOf("Dag", "Måned", "År")
+
+    val map = mapOf(
+        HomeScreenViewModel.Scope.DAY to 0,
+        HomeScreenViewModel.Scope.MONTH to 1,
+        HomeScreenViewModel.Scope.YEAR to 2
+    )
+
+    if (map[uiState.scope] != selectedIndex) selectedIndex = map[uiState.scope]!!
 
     SingleChoiceSegmentedButtonRow {
         options.forEachIndexed { index, label ->
@@ -205,7 +212,7 @@ fun TimeScopeSegmentedButton(viewModel: ElectricityPriceViewModel) {
                 ),
                 onClick = {
                     selectedIndex = index
-                    viewModel.changeTimeScope(Scope.entries[selectedIndex])
+                    viewModel.changeTimeScope(HomeScreenViewModel.Scope.entries[selectedIndex])
                 },
                 selected = index == selectedIndex,
                 icon = {},

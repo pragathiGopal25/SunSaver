@@ -5,14 +5,33 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasource) {
-    fun fakeAvgKwh(): Double = 50.6 //Enebolig kWh produsert daglig avg
+    // https://forbrukerguiden.no/normalt-stromforbruk/
+    fun fakeAvgKwh(): Double = 44.43 //Avg kWh for 120kvm enebolig per dag
 
 
-    //Get the average electricity price
+    //Get the average electricity price with and without solar panel
     // The avg is in NOK per kWh
-    suspend fun getPriceData(days: Int, area: String): Double {
-        return getPriceDataInterval(days, area).average() * days //* avg kWh usage per day
+    suspend fun getPriceData(days: Int, area: String, solarProduction: Double): List<Double> {
+        val avgPrice = getPriceDataInterval(days, area).average()
+        return listOf((fakeAvgKwh() - solarProduction) * days * avgPrice, avgPrice * days * fakeAvgKwh())
     }
+
+    //Get which month the calculations base themselves on
+    @SuppressLint("SimpleDateFormat")
+    fun getMonth(): String {
+        val pattern = "yyyy/MM-dd"
+        val simpleDateFormat = SimpleDateFormat(pattern)
+        val currentDate = simpleDateFormat.format(Date())
+
+        for (i in 0..14) {
+            decrementDate(currentDate)
+        }
+
+        val info = currentDate.split("-", "/")
+        val month = info[1]
+        return month
+    }
+
 
     @SuppressLint("SimpleDateFormat")
     suspend fun getPriceDataInterval(days: Int, area: String): List<Double> {
@@ -22,8 +41,8 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
         var currentDate = simpleDateFormat.format(Date())
 
         for (i in 0..<days) {
-            if (days in 2..30 && i % 2 != 0) continue //Limit requests
-            if (days > 30 && i % 7 != 0) continue //Limit requests
+            if (days in 2..30 && i % 3 != 0) continue //Limit requests
+            if (days > 30 && i % 14 != 0) continue //Limit requests
             datasource.getElectricityPrices(area, currentDate).forEach {
                 nokPerKwh.add(it.nokPrKiloWh)
             }

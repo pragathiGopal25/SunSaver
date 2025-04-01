@@ -60,6 +60,7 @@ class FrostDatasource {
             storedLatitude = coordinates.latitude
             storedLongitude = coordinates.longitude
         }
+        sensorId = "SN18700"
 
         if (coordinates.latitude != storedLatitude || coordinates.longitude != storedLongitude) { // coordiantes changed, so sensor needs to be updated.
             sensorId = fetchNearestSource(coordinates)
