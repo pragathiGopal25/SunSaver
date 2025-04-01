@@ -13,14 +13,14 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
-import no.uio.ifi.in2000.team54.data.shared.SharedRepository
+import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 
 class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
-    private val _sharedRepository: SharedRepository = SharedRepository()
+    private val _sharedRepository = RepositoryProvider.sharedRepository
 
     private val _mapAddress = MutableStateFlow(
         AddressState(null)

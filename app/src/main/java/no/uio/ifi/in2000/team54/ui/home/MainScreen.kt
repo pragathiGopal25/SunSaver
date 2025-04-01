@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,7 +24,8 @@ import no.uio.ifi.in2000.team54.ui.theme.Background
 fun MainScreen() {
 
     val navController = rememberNavController()
-    val viewModel = ManageSolarArrayViewModel()
+    val manageSolarArrayViewModel = remember { ManageSolarArrayViewModel() }
+    val homeScreenViewModel = remember { HomeScreenViewModel() }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -43,9 +45,9 @@ fun MainScreen() {
             startDestination = "home",
             modifier = Modifier.padding(innerpadding)
         ) {
-            composable("home") { HomeScreen() }
+            composable("home") { HomeScreen(homeScreenViewModel) }
             composable("stats") { StatScreen() }
-            composable("managesolararray") { ManageSolarArrayScreen(viewModel, navController) }
+            composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController) }
             composable("weather") { WeatherScreen() }
             composable("settings") { SettingsScreen() }
         }
@@ -53,9 +55,8 @@ fun MainScreen() {
 }
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(homeScreenViewModel: HomeScreenViewModel) {
     //val navController = rememberNavController()
-    val homeScreenViewModel = HomeScreenViewModel()
     Column(
         Modifier
             .fillMaxSize()
