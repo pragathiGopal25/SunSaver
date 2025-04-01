@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.ui.home
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,15 +20,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +47,7 @@ import no.uio.ifi.in2000.team54.ui.theme.Background
 import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
+import no.uio.ifi.in2000.team54.ui.theme.LightYellow
 import no.uio.ifi.in2000.team54.ui.theme.Lighter
 import no.uio.ifi.in2000.team54.ui.theme.Panels
 import no.uio.ifi.in2000.team54.ui.theme.SavingsYellow
@@ -57,7 +67,7 @@ fun HomeScreen(navController: NavController) {
     ) {
         HomeScreenTopBar()
         PropertyCard()
-        ElectricityCard(homeViewModel)
+        SwitchContent()
         WeatherCard(navController)
     }
 }
@@ -227,65 +237,37 @@ fun ElectricityCard(viewModel: HomeScreenViewModel) {
                 )
             }
             EletricityGraphContainer(viewModel = viewModel)
+
         }
     }
 }
 
 @Composable
-fun SavingsCard() {
+fun SwitchContent() {
+    val homeScreenViewModel = HomeScreenViewModel()
+    var isFlipped by remember { mutableStateOf(false) }
 
-    Card(
+    Box(
         modifier = Modifier
-            .padding(15.dp)
             .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
             .height(250.dp)
-            .width(409.dp),
-        colors = CardDefaults.cardColors( containerColor = Light )
+            .width(409.dp)
+            .clickable { isFlipped = !isFlipped },
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                Modifier.padding(horizontal = 10.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Strømutgifter ",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Black,
-                    modifier = Modifier.padding(top = 15.dp)
-
-                )
-                Text(
-                    text = "& Sparing",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = YellowText,
-                    modifier = Modifier.padding(top = 15.dp)
-                )
-            }
-
-            Spacer(Modifier.padding(5.dp))
-
-            TimeSpan()
-
-            Spacer(Modifier.padding(5.dp))
-
-
-            Row  {
-                Spacer(Modifier.padding(5.dp))
-
-                WithoutSolarPanels()
-                Spacer(Modifier.padding(5.dp))
-
-                TotalSavings()
-                Spacer(Modifier.padding(5.dp))
-
-                WithSolarPanels()
-            }
+        if (!isFlipped) {
+            ElectricityCard(homeScreenViewModel)
+        } else {
+            SavingsCard()
         }
     }
+}
+
+
+@Composable
+fun SavingsCard() {
+
+    ElectricityBillOverview()
 }
 
 @Composable
@@ -300,6 +282,7 @@ fun TimeSpan() {
 
     }
 }
+
 @Composable
 fun WithoutSolarPanels() {
     Box(
@@ -331,6 +314,7 @@ fun WithoutSolarPanels() {
                 Text(
                     text = "4003 NOK",
                     style = MaterialTheme.typography.bodySmall,
+                    color = Color.Black
                 )
 
             }
@@ -365,7 +349,8 @@ fun TotalSavings() {
                 Text(
                     text = "Spart",
                     style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
                 )
 
                 Image (
@@ -378,6 +363,7 @@ fun TotalSavings() {
                 Text(
                     text = "500 NOK",
                     style = MaterialTheme.typography.bodySmall,
+                    color = Color.Black
                 )
 
             }
@@ -418,6 +404,7 @@ fun WithSolarPanels() {
                 Text(
                     text = "3500 NOK",
                     style = MaterialTheme.typography.bodySmall,
+                    color = Color.Black
                 )
 
             }
@@ -431,7 +418,7 @@ fun WeatherCard(navController: NavController) {
     Card(
         modifier = Modifier
             .height(80.dp)
-            .width(403.dp)
+            .width(409.dp)
             .padding(15.dp)
             .border(1.dp, WeatherBorder, shape = RoundedCornerShape(20.dp))
             .clickable { navController.navigate("weather") },
@@ -479,5 +466,5 @@ fun WeatherCard(navController: NavController) {
 @Preview
 @Composable
 fun PreviewSavingsCard() {
-    SavingsCard()
+    SwitchContent()
 }
