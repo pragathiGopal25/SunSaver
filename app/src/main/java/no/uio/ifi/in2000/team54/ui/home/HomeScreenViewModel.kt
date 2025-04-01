@@ -34,13 +34,13 @@ class HomeScreenViewModel: ViewModel() {
     private lateinit var fetchedData: FrostRepository.FetchAllData
 
     private val _graphDataUiState = MutableStateFlow(GraphDataUiState())
-    private val items: StateFlow<List<SolarArray>> = _sharedRepository.itemList // save to SolarArraysUiState?
 
+    val solarArrays: StateFlow<List<SolarArray>> = _sharedRepository.solarArrays // save to SolarArraysUiState?
     val graphDataUiState = _graphDataUiState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            items.filter { it.isNotEmpty() }
+            solarArrays.filter { it.isNotEmpty() }
                 .distinctUntilChanged()
                 .collect { list ->
                     val firstItem2 = list.firstOrNull()
