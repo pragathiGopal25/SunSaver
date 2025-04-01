@@ -1,9 +1,9 @@
 package no.uio.ifi.in2000.team54.data.shared
 
 import no.uio.ifi.in2000.team54.domain.Coordinates
-import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
+import no.uio.ifi.in2000.team54.enums.SolarPanelType
 
 class SharedRepository {
     // todo: Connect to Room database and store all values there
@@ -31,19 +31,24 @@ class SharedRepository {
         coordinates = Coordinates(59.9423, 10.72)
     )
 
-    private val solarArrays: MutableList<SolarArray> = mutableListOf(testSolarArray)
+    private val _solarArrays: MutableList<SolarArray> = mutableListOf(testSolarArray)
 
-    fun addSolarArray(newSolarArray: SolarArray) {
-        solarArrays.add(newSolarArray)
-        // todo: check if exists, update then (probably need to add an id then)
+    fun getSolarArrays(): List<SolarArray> {
+        return _solarArrays
     }
 
+    fun addSolarArray(newSolarArray: SolarArray) {
+        _solarArrays.add(newSolarArray)
+        // todo: check if exists, update then (probably need to add an id then)
+    }
+    /*
     fun getSolarArrayByName(name: String): SolarArray? {
-        return solarArrays.find { it.name == name }
+        return _solarArrays.find { it.name == name }
     }
 
     fun deleteSolarArray(newSolarArray: SolarArray) {
         // todo
     }
+     */
 }
 

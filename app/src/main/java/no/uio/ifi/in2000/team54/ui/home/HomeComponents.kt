@@ -51,12 +51,13 @@ import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
 @Composable
 fun HomeScreen(navController: NavController) {
 
+    val homeViewModel: HomeScreenViewModel = HomeScreenViewModel()
     Column(
         Modifier.fillMaxSize().background(Background)
     ) {
         HomeScreenTopBar()
         PropertyCard()
-        ElectricityCard()
+        ElectricityCard(homeViewModel)
         WeatherCard(navController)
     }
 }
@@ -192,7 +193,7 @@ fun PropertyCard() {
 
 
 @Composable
-fun ElectricityCard() {
+fun ElectricityCard(viewModel: HomeScreenViewModel) {
 
     Card(
         modifier = Modifier
@@ -200,30 +201,33 @@ fun ElectricityCard() {
             .clip(RoundedCornerShape(20.dp))
             .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
             .height(250.dp)
-            .width(395.dp),
-        colors = CardDefaults.cardColors( containerColor = Light )
+            .width(395.dp)
+            .padding(15.dp)
+            .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp)),
 
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
+        colors = CardDefaults.cardColors(
+            contentColor = Color.Black,
+            containerColor = Light,
+        )
     ) {
-        Row(
-            Modifier
-                .padding(10.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Strømutgifter ",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.Black
-
-
-            )
-            Text(
-                text = "& Sparing",
-                style = MaterialTheme.typography.bodyLarge,
-                color = YellowText
-            )
+        Column {
+            Row(
+                Modifier.padding(10.dp)
+            ) {
+                Text(
+                    text = "Strømutgifter ",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = "& Sparing",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = YellowText
+                )
+            }
+            EletricityGraphContainer(viewModel = viewModel)
         }
-
     }
 }
 
@@ -239,48 +243,48 @@ fun SavingsCard() {
             .width(395.dp),
         colors = CardDefaults.cardColors( containerColor = Light )
     ) {
-       Column(
-           Modifier.fillMaxWidth(),
-           horizontalAlignment = Alignment.CenterHorizontally
-       ) {
-           Row(
-               Modifier.padding(horizontal = 10.dp).fillMaxWidth(),
-               horizontalArrangement = Arrangement.Center
-           ) {
-               Text(
-                   text = "Strømutgifter ",
-                   style = MaterialTheme.typography.bodyLarge,
-                   color = Color.Black,
-                   modifier = Modifier.padding(top = 15.dp)
+        Column(
+            Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                Modifier.padding(horizontal = 10.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Strømutgifter ",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.Black,
+                    modifier = Modifier.padding(top = 15.dp)
 
-               )
-               Text(
-                   text = "& Sparing",
-                   style = MaterialTheme.typography.bodyLarge,
-                   color = YellowText,
-                   modifier = Modifier.padding(top = 15.dp)
-               )
-           }
+                )
+                Text(
+                    text = "& Sparing",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = YellowText,
+                    modifier = Modifier.padding(top = 15.dp)
+                )
+            }
 
-           Spacer(Modifier.padding(5.dp))
+            Spacer(Modifier.padding(5.dp))
 
-           TimeSpan()
+            TimeSpan()
 
-           Spacer(Modifier.padding(5.dp))
+            Spacer(Modifier.padding(5.dp))
 
 
-           Row  {
-               Spacer(Modifier.padding(5.dp))
+            Row  {
+                Spacer(Modifier.padding(5.dp))
 
-               WithoutSolarPanels()
-               Spacer(Modifier.padding(5.dp))
+                WithoutSolarPanels()
+                Spacer(Modifier.padding(5.dp))
 
-               TotalSavings()
-               Spacer(Modifier.padding(5.dp))
+                TotalSavings()
+                Spacer(Modifier.padding(5.dp))
 
-               WithSolarPanels()
-           }
-       }
+                WithSolarPanels()
+            }
+        }
     }
 }
 
@@ -296,7 +300,6 @@ fun TimeSpan() {
 
     }
 }
-
 @Composable
 fun WithoutSolarPanels() {
     Box(
@@ -421,7 +424,6 @@ fun WithSolarPanels() {
         }
     }
 }
-
 
 @Composable
 fun WeatherCard(navController: NavController) {

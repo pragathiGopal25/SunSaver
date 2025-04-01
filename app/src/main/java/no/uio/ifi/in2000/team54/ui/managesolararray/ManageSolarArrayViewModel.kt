@@ -14,9 +14,9 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
 import no.uio.ifi.in2000.team54.data.shared.SharedRepository
+import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
-import no.uio.ifi.in2000.team54.domain.SolarArray
 
 class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
@@ -29,7 +29,8 @@ class ManageSolarArrayViewModel : ViewModel() {
         SearchAddressState("")
     )
 
-    val mapAddress: StateFlow<SearchAddressState> = _mapSearchAddress.asStateFlow()
+    val mapAddress: StateFlow<AddressState> = _mapAddress.asStateFlow()
+    val mapSearchAddress: StateFlow<SearchAddressState> = _mapSearchAddress.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val mapRoofSections = _mapAddress

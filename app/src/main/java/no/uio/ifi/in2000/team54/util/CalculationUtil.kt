@@ -78,10 +78,10 @@ private fun calculateSolarEnergy( // beregne gjennomsnittlig forventet innkommen
 
 private fun snowLoss(snowCoverage: Double): Double {
     return when (snowCoverage) {
-        1.0 -> 0.90
-        2.0 -> 0.70
-        3.0 -> 0.40
-        4.0 -> 0.10
+        1.0 -> 0.98
+        2.0 -> 0.96
+        3.0 -> 0.93
+        4.0 -> 0.90
         else -> 1.0
     }
 }
@@ -122,16 +122,16 @@ private fun directionImpact(azimuth: Double): Double {
 }
 
 private val monthlySunHoursAvg = mapOf( // todo: Get from datasource!!
-    "01" to 20.0,
-    "02" to 50.0,
-    "03" to 100.0,
-    "04" to 140.0,
-    "05" to 180.0,
-    "06" to 200.0,
-    "07" to 190.0,
-    "08" to 160.0,
-    "09" to 110.0,
-    "10" to 70.0,
-    "11" to 30.0,
-    "12" to 15.0
+    "01" to 74.0,
+    "02" to 90.0,
+    "03" to 150.0,
+    "04" to 200.0,
+    "05" to 210.0,
+    "06" to 230.0,
+    "07" to 210.0,
+    "08" to 180.0,
+    "09" to 150.0,
+    "10" to 90.0,
+    "11" to 60.0,
+    "12" to 55.0
 )

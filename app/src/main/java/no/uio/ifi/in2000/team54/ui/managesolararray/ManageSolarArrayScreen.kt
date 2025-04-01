@@ -83,6 +83,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
+import androidx.navigation.NavController
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.CameraOptions
@@ -100,12 +101,11 @@ import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.R
-import no.uio.ifi.in2000.team54.domain.Coordinates
+import no.uio.ifi.in2000.team54.domain.RoofSection
+import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
-import no.uio.ifi.in2000.team54.domain.RoofSection
-import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
@@ -124,7 +124,7 @@ private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
 enum class ArraySettingsMenuAnchors { Bottom, Top }
 
 @Composable
-fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel) {
+fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: NavController) {
     val roofSections = remember { mutableStateListOf<RoofSection>() }
 
     val mapViewportState = rememberMapViewportState {
@@ -139,12 +139,12 @@ fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel) {
             .fillMaxSize()
     ) {
         Map(mapState, mapViewportState, viewModel, roofSections)
-        BackButton()
+        BackButton(navController)
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            ArraySettingsMenu(mapState, mapViewportState, viewModel, roofSections)
+            ArraySettingsMenu(mapState, mapViewportState, viewModel, navController, roofSections)
         }
     }
 }
@@ -229,7 +229,7 @@ private fun Map(
 }
 
 @Composable
-private fun BackButton() {
+private fun BackButton(navController: NavController) {
     Icon(
         Icons.AutoMirrored.Default.ArrowBack,
         contentDescription = "Gå tilbake",
@@ -242,7 +242,7 @@ private fun BackButton() {
             .background(LightestYellow)
             .padding(7.dp)
             .clickable {
-                // TODO navigate home
+                navController.navigate("home")
             }
     )
 }
@@ -253,6 +253,7 @@ private fun ArraySettingsMenu(
     mapState: MapState,
     mapViewportState: MapViewportState,
     viewModel: ManageSolarArrayViewModel,
+    navController: NavController,
     roofSections: SnapshotStateList<RoofSection>
 ) {
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
@@ -292,6 +293,7 @@ private fun ArraySettingsMenu(
                 mapViewportState,
                 draggableState,
                 viewModel,
+                navController,
                 roofSections
             )
         }
@@ -331,6 +333,7 @@ private fun ArraySettingsContent(
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
     viewModel: ManageSolarArrayViewModel,
+    navController: NavController,
     roofSections: SnapshotStateList<RoofSection>
 ) {
     var solarPanelType by remember { mutableStateOf(SolarPanelType.PREMIUM) }
@@ -351,7 +354,7 @@ private fun ArraySettingsContent(
             roofSections,
             { solarPanelType = it }
         )
-        SaveButton(solarPanelType, roofSections, viewModel)
+        SaveButton(solarPanelType, roofSections, viewModel, navController)
     }
 }
 
@@ -621,8 +624,11 @@ private fun PriceText(price: Double) {
 private fun SaveButton(
     solarPanelType: SolarPanelType,
     roofSections: List<RoofSection>,
-    viewModel: ManageSolarArrayViewModel
+    viewModel: ManageSolarArrayViewModel,
+    navController: NavController
 ) {
+    val address by viewModel.mapAddress.collectAsState()
+
     var name by remember { mutableStateOf("") }
     var openSaveDialog by remember { mutableStateOf(false) }
 
@@ -631,9 +637,19 @@ private fun SaveButton(
             onDismissRequest = { openSaveDialog = false },
             onSave = {
                 openSaveDialog = false
-                viewModel.addSolarArray(SolarArray(name, solarPanelType, roofSections, Coordinates(59.9423, 10.72))) // todo: retrieve from map
 
-                // TODO navigate home
+                // TODO require user to write an address
+
+                viewModel.addSolarArray(
+                    SolarArray(
+                        name,
+                        solarPanelType,
+                        roofSections,
+                        address.address!!.pos.toCoordinates()
+                    )
+                ) // todo: retrieve from map
+
+                navController.navigate("home")
             },
             name,
             onNameChange = { name = it }
@@ -731,7 +747,7 @@ private fun SearchField(
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
 
-    val addressState = viewModel.mapAddress.collectAsState()
+    val addressState = viewModel.mapSearchAddress.collectAsState()
     val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsState()
     var showSuggestions by remember { mutableStateOf(false) }
 
