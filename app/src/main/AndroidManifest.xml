@@ -10,13 +10,13 @@
     android:label="@string/app_name"
     android:roundIcon="@mipmap/ic_launcher_round"
     android:supportsRtl="true"
-    android:theme="@style/Theme.Team54"
+    android:theme="@style/theme.MySplashScreen"
     tools:targetApi="31">
     <activity
       android:exported="true"
       android:label="@string/app_name"
       android:name="no.uio.ifi.in2000.team54.MainActivity"
-      android:theme="@style/Theme.Team54">
+      android:theme="@style/theme.MySplashScreen">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
 

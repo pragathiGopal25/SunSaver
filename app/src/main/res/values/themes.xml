@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+  <style name = "theme.MySplashScreen" parent = "Theme.SplashScreen">
+    <item name = "windowSplashScreenBackground">@color/white</item>
+    <item name = "windowSplashScreenAnimatedIcon">@drawable/avd_sunlogo</item>
+    <item name = "windowSplashScreenAnimationDuration">1000</item>
+    <item name="postSplashScreenTheme">@style/Theme.Team54</item>
+  </style>
   <style name="Theme.Team54" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
