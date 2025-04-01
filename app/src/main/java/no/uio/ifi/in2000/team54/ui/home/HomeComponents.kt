@@ -201,9 +201,7 @@ fun ElectricityCard(viewModel: HomeScreenViewModel) {
             .clip(RoundedCornerShape(20.dp))
             .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
             .height(250.dp)
-            .width(395.dp)
-            .padding(15.dp)
-            .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp)),
+            .width(395.dp),
 
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
@@ -212,7 +210,9 @@ fun ElectricityCard(viewModel: HomeScreenViewModel) {
             containerColor = Light,
         )
     ) {
-        Column {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Row(
                 Modifier.padding(10.dp)
             ) {
@@ -240,7 +240,7 @@ fun SavingsCard() {
             .clip(RoundedCornerShape(20.dp))
             .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
             .height(250.dp)
-            .width(395.dp),
+            .width(409.dp),
         colors = CardDefaults.cardColors( containerColor = Light )
     ) {
         Column(
@@ -431,7 +431,7 @@ fun WeatherCard(navController: NavController) {
     Card(
         modifier = Modifier
             .height(80.dp)
-            .width(395.dp)
+            .width(403.dp)
             .padding(15.dp)
             .border(1.dp, WeatherBorder, shape = RoundedCornerShape(20.dp))
             .clickable { navController.navigate("weather") },
