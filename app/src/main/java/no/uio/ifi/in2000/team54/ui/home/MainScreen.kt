@@ -1,15 +1,12 @@
 package no.uio.ifi.in2000.team54.ui.home
 
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -19,7 +16,6 @@ import no.uio.ifi.in2000.team54.ui.home.pages.StatScreen
 import no.uio.ifi.in2000.team54.ui.home.pages.WeatherScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayViewModel
-import no.uio.ifi.in2000.team54.ui.theme.Background
 
 @Composable
 fun MainScreen() {
@@ -46,7 +42,7 @@ fun MainScreen() {
             startDestination = "home",
             modifier = Modifier.padding(innerpadding)
         ) {
-            composable("home") { HomeScreen(navController, homeScreenViewModel) }
+            composable("home") { HomeScreen(homeViewModel = homeScreenViewModel, navController = navController) }
             composable("stats") { StatScreen() }
             composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController) }
             composable("weather") { WeatherScreen() }
