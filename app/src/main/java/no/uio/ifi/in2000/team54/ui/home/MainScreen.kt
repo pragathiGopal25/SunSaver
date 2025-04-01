@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import no.uio.ifi.in2000.team54.ui.home.pages.SettingsScreen
 import no.uio.ifi.in2000.team54.ui.home.pages.StatScreen
@@ -24,9 +25,16 @@ fun MainScreen() {
     val navController = rememberNavController()
     val viewModel = ManageSolarArrayViewModel()
 
-    Scaffold (
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
-        bottomBar = { NavBar(navController)}
+        bottomBar = {
+            val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+            if (currentRoute.equals("managesolararray")) {
+                return@Scaffold
+            }
+
+            NavBar(navController)
+        }
 
     ) { innerpadding ->
 
@@ -37,7 +45,7 @@ fun MainScreen() {
         ) {
             composable("home") { HomeScreen() }
             composable("stats") { StatScreen() }
-            composable("managesolararray") { ManageSolarArrayScreen(viewModel) }
+            composable("managesolararray") { ManageSolarArrayScreen(viewModel, navController) }
             composable("weather") { WeatherScreen() }
             composable("settings") { SettingsScreen() }
         }
@@ -48,7 +56,9 @@ fun MainScreen() {
 fun HomeScreen() {
     val navController = rememberNavController()
     Column(
-        Modifier.fillMaxSize().background(Background)
+        Modifier
+            .fillMaxSize()
+            .background(Background)
     ) {
         HomeScreenTopBar()
         PropertyCard()
