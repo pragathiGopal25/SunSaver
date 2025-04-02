@@ -92,35 +92,29 @@ class HomeScreenViewModel : ViewModel() {
                 val monthlyCloud = fetchedData.monthlyCloud
                 val monthlySolarIrradiance = fetchedData.monthlyRadiation
 
-            _graphDataUiState.update { currentState ->
-                currentState.copy(
-                    loadingState = "Beregner..."
-                )
-            }
-
-            //Don't calculate the same data twice
-            if (!solarArrayLoadedData.containsKey(solarArray)) {
-                Log.i("test", "starting calculation")
-                val electricityProduction: Map<String, Double> = calculateElectricityProduction(
-                    monthlyTemps = monthlyTemps,
-                    monthlyCloud = monthlyCloud,
-                    monthlySnow = monthlySnow,
-                    monthlyRadiance = monthlySolarIrradiance,
-                    solarArray = solarArray
-                )
-                solarArrayLoadedData[solarArray] = electricityProduction
-            }
-
-            _graphDataUiState.update { currentState ->
-                currentState.copy(
-                    electricityProductionData = mapOf("Strøm Produksjon" to solarArrayLoadedData[solarArray]!!.values.toList())
-
-                )
-
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
-                        electricityProductionData = mapOf("Strømproduksjon" to electricityProduction.values.toList()),
+                        loadingState = "Beregner..."
                     )
+                }
+
+                //Don't calculate the same data twice
+                if (!solarArrayLoadedData.containsKey(solarArray)) {
+                    Log.i("test", "starting calculation")
+                    val electricityProduction: Map<String, Double> = calculateElectricityProduction(
+                        monthlyTemps = monthlyTemps,
+                        monthlyCloud = monthlyCloud,
+                        monthlySnow = monthlySnow,
+                        monthlyRadiance = monthlySolarIrradiance,
+                        solarArray = solarArray
+                    )
+                    solarArrayLoadedData[solarArray] = electricityProduction
+
+                    _graphDataUiState.update { currentState ->
+                        currentState.copy(
+                            electricityProductionData = mapOf("Strømproduksjon" to electricityProduction.values.toList()),
+                        )
+                    }
                 }
             } catch (ex: Exception) {
                 _graphDataUiState.update { currentState ->
