@@ -84,12 +84,13 @@ class HomeScreenViewModel : ViewModel() {
                     loadingState = "Henter data... det kan ta tid"
                 )
             }
-            fetchedData =  _repository.getObservationData(solarArray.coordinates)
+            try {
+                fetchedData = _repository.getObservationData(solarArray.coordinates)
 
-            val monthlyTemps = fetchedData.monthlyTemps
-            val monthlySnow = fetchedData.monthlySnow
-            val monthlyCloud = fetchedData.monthlyCloud
-            val monthlySolarIrradiance = fetchedData.monthlyRadiation
+                val monthlyTemps = fetchedData.monthlyTemps
+                val monthlySnow = fetchedData.monthlySnow
+                val monthlyCloud = fetchedData.monthlyCloud
+                val monthlySolarIrradiance = fetchedData.monthlyRadiation
 
             _graphDataUiState.update { currentState ->
                 currentState.copy(
@@ -115,6 +116,18 @@ class HomeScreenViewModel : ViewModel() {
                     electricityProductionData = mapOf("Strøm Produksjon" to solarArrayLoadedData[solarArray]!!.values.toList())
 
                 )
+
+                _graphDataUiState.update { currentState ->
+                    currentState.copy(
+                        electricityProductionData = mapOf("Strømproduksjon" to electricityProduction.values.toList()),
+                    )
+                }
+            } catch (ex: Exception) {
+                _graphDataUiState.update { currentState ->
+                    currentState.copy(
+                        loadingState = "Noe gikk galt."
+                    )
+                }
             }
         }
     }
