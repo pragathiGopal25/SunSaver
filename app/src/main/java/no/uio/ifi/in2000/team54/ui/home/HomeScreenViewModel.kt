@@ -67,31 +67,39 @@ class HomeScreenViewModel: ViewModel() {
                     loadingState = "Henter data... det kan ta tid"
                 )
             }
-            fetchedData =  _repository.getObservationData(solarArray.coordinates)
+            try {
+                fetchedData = _repository.getObservationData(solarArray.coordinates)
 
-            val monthlyTemps = fetchedData.monthlyTemps
-            val monthlySnow = fetchedData.monthlySnow
-            val monthlyCloud = fetchedData.monthlyCloud
-            val monthlySolarIrradiance = fetchedData.monthlyRadiation
+                val monthlyTemps = fetchedData.monthlyTemps
+                val monthlySnow = fetchedData.monthlySnow
+                val monthlyCloud = fetchedData.monthlyCloud
+                val monthlySolarIrradiance = fetchedData.monthlyRadiation
 
-            _graphDataUiState.update { currentState ->
-                currentState.copy(
-                    loadingState = "Beregner..."
+                _graphDataUiState.update { currentState ->
+                    currentState.copy(
+                        loadingState = "Beregner..."
+                    )
+                }
+
+                val electricityProduction: Map<String, Double> = calculateElectrisityProduction(
+                    monthlyTemps = monthlyTemps,
+                    monthlyCloud = monthlyCloud,
+                    monthlySnow = monthlySnow,
+                    monthlyRadiance = monthlySolarIrradiance,
+                    solarArray = solarArray
                 )
-            }
 
-            val electricityProduction: Map<String, Double> = calculateElectrisityProduction(
-                monthlyTemps = monthlyTemps,
-                monthlyCloud = monthlyCloud,
-                monthlySnow = monthlySnow,
-                monthlyRadiance = monthlySolarIrradiance,
-                solarArray = solarArray
-            )
-
-            _graphDataUiState.update { currentState ->
-                currentState.copy(
-                    electricityProductionData = mapOf("Strømproduksjon" to electricityProduction.values.toList()),
-                )
+                _graphDataUiState.update { currentState ->
+                    currentState.copy(
+                        electricityProductionData = mapOf("Strømproduksjon" to electricityProduction.values.toList()),
+                    )
+                }
+            } catch (ex: Exception) {
+                _graphDataUiState.update { currentState ->
+                    currentState.copy(
+                        loadingState = "Noe gikk galt."
+                    )
+                }
             }
         }
     }
