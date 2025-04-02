@@ -1,31 +1,23 @@
 package no.uio.ifi.in2000.team54.data.frost
 
+import android.util.Base64
+import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
-import android.util.Base64
-import android.util.Log
 import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import no.uio.ifi.in2000.team54.domain.Coordinates
-import no.uio.ifi.in2000.team54.model.frost.AvailableObservation
 import no.uio.ifi.in2000.team54.model.frost.AvailableObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.ObservationData
 import no.uio.ifi.in2000.team54.model.frost.ObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.SensorSystem
 import no.uio.ifi.in2000.team54.model.frost.SourceResponse
-import kotlin.math.atan
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 class FrostDatasource {
     private val client = HttpClient(CIO) {
@@ -137,10 +129,10 @@ class FrostDatasource {
         var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
 
         if (elementName == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
-            Log.i("testMan", "man")
             url = "$url&qualities=0" // no data of other qualities
         }
 
+        url = "$url&fields=sourceId%2CelementId%2Cvalue%2Cunit%2CqualityCode%2CreferenceTime" // restric amount of data retrieved
 
         try {
             response = client.get(url) {

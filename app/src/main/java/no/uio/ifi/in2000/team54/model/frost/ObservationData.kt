@@ -14,11 +14,6 @@ data class Observation(
     val elementId: String,
     val value: Double,
     val unit: String,
-    val timeOffset: String,
-    val timeResolution: String,
-    val timeSeriesId: Double,
-    val performanceCategory: String,
-    val exposureCategory: String,
     val qualityCode: Double,
 )
 
