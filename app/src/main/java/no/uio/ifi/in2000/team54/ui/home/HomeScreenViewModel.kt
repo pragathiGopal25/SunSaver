@@ -10,13 +10,15 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
+import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
 import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.pvgis.PVGISRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.SolarArray
-import no.uio.ifi.in2000.team54.util.calculateElectrisityProduction
+import no.uio.ifi.in2000.team54.util.calculateElectricityProduction
 
-data class GraphDataUiState( // only for ElectrisityGraph
+data class GraphDataUiState( // only for ElectricityGraph
     val electricityProductionData: Map<String, List<Double>> = emptyMap(),
     val loadingState: String = "Ingen solceller lagret",
 )
@@ -26,7 +28,7 @@ data class SolarArrayUiState( // i guess we fetch separately for different addre
     val solarArrayInFocus: SolarArray? = null
 )
 
-class HomeScreenViewModel: ViewModel() {
+class HomeScreenViewModel : ViewModel() {
     private val _repository = FrostRepository()
     private val _pvgisRepo = PVGISRepository() // probably will delete later
     private val _sharedRepository = RepositoryProvider.sharedRepository
@@ -34,18 +36,33 @@ class HomeScreenViewModel: ViewModel() {
     private lateinit var fetchedData: FrostRepository.FetchAllData
 
     private val _graphDataUiState = MutableStateFlow(GraphDataUiState())
-    private val items: StateFlow<List<SolarArray>> = _sharedRepository.itemList // save to SolarArraysUiState?
 
+    val solarArrays: StateFlow<List<SolarArray>> = _sharedRepository.solarArrays // save to SolarArraysUiState?
     val graphDataUiState = _graphDataUiState.asStateFlow()
+
+    private val _priceUiState = MutableStateFlow(PriceUiState(0.0, 0.0, 0.0, false, Scope.DAY))
+    private val priceData = ElectricityPriceRepository(ElectricityPriceDatasource())
+    val priceUiState: StateFlow<PriceUiState> = _priceUiState.asStateFlow()
+
+    private val scopeToDays = mapOf(Scope.DAY to 1, Scope.MONTH to 30, Scope.YEAR to 365)
+    private val realPriceMap = mutableMapOf<Int, Double>()
+    private val priceMap = mutableMapOf<Int, List<Double>>()
+    private val solarPriceMap = mutableMapOf<Int, Double>()
+    private var solarArrayLoadedData = mutableMapOf<SolarArray, Map<String, Double>>()
+    private val calculated = false
+
 
     init {
         viewModelScope.launch {
-            items.filter { it.isNotEmpty() }
+            solarArrays.filter { it.isNotEmpty() }
                 .distinctUntilChanged()
-                .collect { list ->
-                    val firstItem2 = list.firstOrNull()
-                    if (firstItem2 != null) {
-                        getObservationsFromRepo(firstItem2)
+                .collect { solarArrays ->
+                    val firstSolarArray = solarArrays.firstOrNull()
+                    if (firstSolarArray != null) {
+                        getObservationsFromRepo(firstSolarArray)
+                        Scope.entries.forEach {
+                            loadData(scopeToDays[it]!!, firstSolarArray)
+                        }
                     }
                 }
         }
@@ -75,18 +92,29 @@ class HomeScreenViewModel: ViewModel() {
                 val monthlyCloud = fetchedData.monthlyCloud
                 val monthlySolarIrradiance = fetchedData.monthlyRadiation
 
-                _graphDataUiState.update { currentState ->
-                    currentState.copy(
-                        loadingState = "Beregner..."
-                    )
-                }
+            _graphDataUiState.update { currentState ->
+                currentState.copy(
+                    loadingState = "Beregner..."
+                )
+            }
 
-                val electricityProduction: Map<String, Double> = calculateElectrisityProduction(
+            //Don't calculate the same data twice
+            if (!solarArrayLoadedData.containsKey(solarArray)) {
+                Log.i("test", "starting calculation")
+                val electricityProduction: Map<String, Double> = calculateElectricityProduction(
                     monthlyTemps = monthlyTemps,
                     monthlyCloud = monthlyCloud,
                     monthlySnow = monthlySnow,
                     monthlyRadiance = monthlySolarIrradiance,
                     solarArray = solarArray
+                )
+                solarArrayLoadedData[solarArray] = electricityProduction
+            }
+
+            _graphDataUiState.update { currentState ->
+                currentState.copy(
+                    electricityProductionData = mapOf("Strøm Produksjon" to solarArrayLoadedData[solarArray]!!.values.toList())
+
                 )
 
                 _graphDataUiState.update { currentState ->
@@ -111,7 +139,109 @@ class HomeScreenViewModel: ViewModel() {
             Log.i("testSolar", monthlyRadiance.toString())
         }
     }
+
+    private fun loadData(days: Int, solarArray: SolarArray) {
+        viewModelScope.launch {
+            try {
+                _priceUiState.value =
+                    _priceUiState.value.copy(
+                        loading = true
+                    )
+
+                if (!calculated) {
+                    fetchedData = _repository.getObservationData(solarArray.coordinates)
+
+                    val monthlyTemps = fetchedData.monthlyTemps
+                    val monthlySnow = fetchedData.monthlySnow
+                    val monthlyCloud = fetchedData.monthlyCloud
+                    val monthlySolarIrradiance = fetchedData.monthlyRadiation
+
+                    val electricityProduction: Map<String, Double> = calculateElectricityProduction(
+                        monthlyTemps = monthlyTemps,
+                        monthlyCloud = monthlyCloud,
+                        monthlySnow = monthlySnow,
+                        monthlyRadiance = monthlySolarIrradiance,
+                        solarArray = solarArray
+                    )
+                    solarArrayLoadedData[solarArray] = electricityProduction
+                }
+
+                _priceUiState.value =
+                    _priceUiState.value.copy(
+                        loading = true
+                    )
+                if (!priceMap.containsKey(days)) {
+                    priceMap[days] = priceData.getPriceData(
+                        days,
+                        "NO1",
+                        solarArrayLoadedData[solarArray]!![priceData.getMonth()]!!
+                    )
+                    realPriceMap[days] = priceMap[days]!![1]
+                    solarPriceMap[days] = priceMap[days]!![0]
+                }
+            } finally {
+                seePrices(days)
+                val day = Scope.entries.filter { scopeToDays[it] == days }[0]
+                _priceUiState.value =
+                    _priceUiState.value.copy(
+                        scope = day,
+                        loading = false
+                    )
+            }
+        }
+    }
+
+    private fun seePrices(days: Int) {
+        viewModelScope.launch {
+            try {
+                _priceUiState.value =
+                    _priceUiState.value.copy(
+                        loading = true
+                    )
+
+                val realPrice = realPriceMap[days]
+                val solarPrice = solarPriceMap[days]
+
+                if (realPrice != null) {
+                    if (solarPrice != null) {
+                        _priceUiState.value =
+                            _priceUiState.value.copy(
+                                realPrice = (Math.round(realPrice * 10) / 10.0),
+                                solarPrice = (Math.round(solarPrice * 10) / 10.0),
+                                saved = Math.round((realPrice - solarPrice) * 10) / 10.0,
+                                loading = false
+                            )
+                    }
+                }
+            } finally {
+                val day = Scope.entries.filter { scopeToDays[it] == days }[0]
+                _priceUiState.value =
+                    _priceUiState.value.copy(
+                        scope = day
+                    )
+            }
+        }
+    }
+
+    fun changeTimeScope(scope: Scope) {
+        viewModelScope.launch {
+            try {
+                seePrices(scopeToDays[scope]!!)
+            } finally {
+
+            }
+        }
+    }
+
+    data class PriceUiState(
+        val realPrice: Double,
+        val solarPrice: Double,
+        val saved: Double,
+        val loading: Boolean,
+        val scope: Scope
+    )
+
+    enum class Scope {
+        DAY, MONTH, YEAR
+    }
 }
-
-
-
