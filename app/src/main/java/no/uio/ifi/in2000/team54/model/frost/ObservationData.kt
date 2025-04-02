@@ -23,6 +23,25 @@ data class Observation(
 )
 
 
+
+
+@Serializable
+data class AvailableObservationResponse(
+    val data: List<AvailableObservation> // This maps the "data" field in the JSON
+)
+
+@Serializable
+data class AvailableObservation(
+    val sourceId: String,
+    val validFrom: String,
+    val timeOffset: String,
+    val timeResolution: String,
+    val timeSeriesId: Int,
+    val elementId: String,
+    val unit: String
+)
+
+
 @Serializable
 data class ObservationResponse(
     val data: List<ObservationData>

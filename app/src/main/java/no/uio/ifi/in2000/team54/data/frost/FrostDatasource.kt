@@ -14,6 +14,8 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import no.uio.ifi.in2000.team54.domain.Coordinates
+import no.uio.ifi.in2000.team54.model.frost.AvailableObservation
+import no.uio.ifi.in2000.team54.model.frost.AvailableObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.ObservationData
 import no.uio.ifi.in2000.team54.model.frost.ObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.SensorSystem
@@ -52,56 +54,30 @@ class FrostDatasource {
         "radiation" to "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)"
     )
 
-    private var sensorMap: MutableMap<String, String> = mutableMapOf()
+    private var sensorMap: MutableMap<String, MutableList<String>> = mutableMapOf()
 
     private suspend fun fetchNearestSource(
         coordinates: Coordinates,
-        element: String? = null,
-        elementName: Map<String, String> = emptyMap()
-    ): MutableMap<String, String> {
-
-        var nameUrl = ""
-
-        if (element == null) {
-            nameMap.values.forEach { value ->
-                nameUrl += if (value == nameMap.values.last()) {
-                    value
-                } else {
-                    "$value%2C"
-                }
-            }
-        } else {
-            nameUrl = element
-        }
-
+        element: String,
+    ): MutableMap<String, MutableList<String>> {
 
 
         try {
             val response: HttpResponse =
-                client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))&elements=$nameUrl&nearestmaxcount=1") {
+                client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))&elements=$element&nearestmaxcount=5") {
                     header(HttpHeaders.Authorization, authHeader)
                     header(HttpHeaders.Accept, "application/json")
                 }
 
             if (response.status.value != 200) { // Cannot find nearest sensor for ALL urls, try individual URLS now
-                elementName.values.forEach { value ->
-                    sensorMap[value] = fetchNearestSource(coordinates, value).get(value) ?: ""
-                }
-
-                return sensorMap
+                return mutableMapOf()
 
             } else {
                 val body: List<SensorSystem> = response.body<SourceResponse>().data
 
-                if (element == null) {
-                    elementName.values.forEach { value ->
-                        sensorMap[value] = body[0].id
-                    }
-
-                } else {
-                    sensorMap[element] = body[0].id
+                body.forEach{value ->
+                    sensorMap.getOrPut(element) { mutableListOf() }.add(value.id)
                 }
-
                 return sensorMap
             }
         } catch (e: Exception) {
@@ -119,7 +95,7 @@ class FrostDatasource {
         elementName: String,
         referenceTime: String
     ): List<ObservationData> {
-        sensorMap = fetchNearestSource(coordinates, elementName = nameMap)
+        sensorMap = fetchNearestSource(coordinates, elementName)
 
         if(coordinates.latitude != storedLatitude || coordinates.longitude != storedLongitude) {
             storedLatitude = coordinates.latitude
@@ -127,8 +103,37 @@ class FrostDatasource {
         }
 
 
-        var sensorId = sensorMap[elementName]
+        var sensorIds = sensorMap[elementName]
+        Log.i("TestingAllSensors", sensorIds.toString())
+        var sensorUrl = ""
 
+
+        if (sensorIds != null) {
+            sensorIds.forEach { value ->
+                sensorUrl += if (value == nameMap.values.last()) {
+                    value
+                } else {
+                    "$value%2C"
+                }
+            }
+        }
+
+        var response: HttpResponse
+
+        // find out which of the sensors are available for the time series.
+        val getAvailableSensors = "https://frost.met.no/observations/availableTimeSeries/v0.jsonld?sources=$sensorUrl&referencetime=2022-12-31%2F2024-12-31&elements=$elementName"
+
+        response = client.get(getAvailableSensors) {
+            header(HttpHeaders.Authorization, authHeader)
+            header(HttpHeaders.Accept, "application/json")
+        }
+
+        val availableObservationResponse: AvailableObservationResponse = response.body()
+        val availableObservations = availableObservationResponse.data
+        val sensorId = availableObservations.firstOrNull()?.sourceId ?: return emptyList()
+        Log.i("testingSensors", "element: $elementName, sensors: $sensorId")
+
+        // use the new sensorId, which is also the closest with available data for the reference time to retrieve observation data.
         var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
 
         if (elementName == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
@@ -136,8 +141,6 @@ class FrostDatasource {
             url = "$url&qualities=0" // no data of other qualities
         }
 
-
-        var response: HttpResponse
 
         try {
             response = client.get(url) {
@@ -149,15 +152,6 @@ class FrostDatasource {
             return emptyList()  // Return an empty list or handle the error
         }
 
-        if (response.status.value != 200) { // temporary. If sensor doesnt have data for given reference time, just utilize main sensor.
-            sensorId = "SN18700"
-            url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
-
-            response =  client.get(url) {
-                header(HttpHeaders.Authorization, authHeader)
-                header(HttpHeaders.Accept, "application/json")
-            }
-        }
         val observationResponse: ObservationResponse = response.body()
 
         return observationResponse.data
