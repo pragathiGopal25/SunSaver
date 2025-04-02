@@ -37,81 +37,81 @@ class FrostDatasource {
     }
 
     private val raw = "b8d04ecc-dc8a-40a9-942e-2acfb8aba15d" + ":" // client id for team54@uio.no
-    private val encoded: String = Base64.encodeToString(raw.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
+    private val encoded: String =
+        Base64.encodeToString(raw.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
     private val authHeader = "Basic $encoded"
 
 
-    private var sensorId = ""
     private var storedLatitude = 0.0
     private var storedLongitude = 0.0
 
-    // calculate distance between two coordinates in on a globe:
-    // Haversine formula: https://community.esri.com/t5/coordinate-reference-systems-blog/distance-on-a-sphere-the-haversine-formula/ba-p/902128
-    private suspend fun calculateDistanceBetweenCoords(coordinates1:Coordinates, coordinates2: Coordinates): Double  {
-        val earthRadius = 6371.0 // in km
+    private val nameMap = mapOf(
+        "temp" to "mean(air_temperature%20P1M)",
+        "cloud" to "mean(cloud_area_fraction%20P1D)",
+        "snow" to "mean(snow_coverage_type%20P1M)",
+        "radiation" to "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)"
+    )
 
-        val distanceBetweenLats = Math.toRadians(coordinates2.latitude - coordinates1.latitude)
-        val distanceBetweenLongs = Math.toRadians(coordinates2.longitude - coordinates1.longitude)
+    private var sensorMap: MutableMap<String, String> = mutableMapOf()
 
-        // a represents the square of half of the chord length between two points on a sphere
-        // helps measure how far apart two points are on the curved surface of the Earth
-        val a = sin(distanceBetweenLats/2).pow(2) + cos(Math.toRadians(coordinates1.latitude)) * cos(Math.toRadians(coordinates2.latitude)) * sin(distanceBetweenLongs/2).pow(2)
+    private suspend fun fetchNearestSource(
+        coordinates: Coordinates,
+        element: String? = null,
+        elementName: Map<String, String> = emptyMap()
+    ): MutableMap<String, String> {
 
-        // c is the central angle between the two points which is measured in radians
-        val c = 2* atan2(sqrt(a), sqrt(1 -a))
+        var nameUrl = ""
 
-        return earthRadius * c
-    }
-
-    private suspend fun fetchNearestSource(coordinates:Coordinates, elementName: String? =null): String? {
-
-        if (elementName == null) {
-
-            val response: HttpResponse = client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))") {
-                header(HttpHeaders.Authorization, authHeader)
-                header(HttpHeaders.Accept, "application/json")
-            }
-
-            if (response.status.value  != 200) {
-                return null
-            } else {
-                val body: List<SensorSystem> = response.body<SourceResponse>().data
-                return body[0].id
-            }
-
-        } else {
-
-            val response: HttpResponse = client.get("https://frost.met.no/sources/v0.jsonld?types=SensorSystem&elements=$elementName") {
-                header(HttpHeaders.Authorization, authHeader)
-                header(HttpHeaders.Accept, "application/json")
-            }
-
-            println(elementName.toString())
-
-
-
-            val body: List<SensorSystem> = response.body<SourceResponse>().data
-            var nearestDistance = Double.MAX_VALUE
-            var nextNearestSensor = ""
-
-            body.forEach { sensor ->
-                if (sensor.id.contains("SN")) {
-                    val calcDist = calculateDistanceBetweenCoords(
-                        Coordinates(sensor.geometry.coordinates[0], sensor.geometry.coordinates[1]),
-                        coordinates
-                    )
-                    if (calcDist < nearestDistance) {
-                        nearestDistance = calcDist
-                        nextNearestSensor = sensor.id
-                    }
+        if (element == null) {
+            nameMap.values.forEach { value ->
+                nameUrl += if (value == nameMap.values.last()) {
+                    value
+                } else {
+                    "$value%2C"
                 }
             }
+        } else {
+            nameUrl = element
+        }
 
-            Log.i("testingend", "finished here")
-            return nextNearestSensor
+
+
+        try {
+            val response: HttpResponse =
+                client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))&elements=$nameUrl&nearestmaxcount=1") {
+                    header(HttpHeaders.Authorization, authHeader)
+                    header(HttpHeaders.Accept, "application/json")
+                }
+
+            if (response.status.value != 200) { // Cannot find nearest sensor for ALL urls, try individual URLS now
+                elementName.values.forEach { value ->
+                    sensorMap[value] = fetchNearestSource(coordinates, value).get(value) ?: ""
+                }
+
+                return sensorMap
+
+            } else {
+                val body: List<SensorSystem> = response.body<SourceResponse>().data
+
+                if (element == null) {
+                    elementName.values.forEach { value ->
+                        sensorMap[value] = body[0].id
+                    }
+
+                } else {
+                    sensorMap[element] = body[0].id
+                }
+
+                return sensorMap
+            }
+        } catch (e: Exception) {
+            Log.e("fetchNearestSource", "Error fetching nearest source: ${e.message}", e)
+
+            return mutableMapOf()
         }
 
     }
+
 
 
     suspend fun fetchObservationDataFromFrost(
@@ -119,18 +119,15 @@ class FrostDatasource {
         elementName: String,
         referenceTime: String
     ): List<ObservationData> {
-        if(sensorId == "" || coordinates.latitude != storedLatitude || coordinates.longitude != storedLongitude) {
+        sensorMap = fetchNearestSource(coordinates, elementName = nameMap)
 
-           if (fetchNearestSource(coordinates) ==  null) {
-               sensorId = fetchNearestSource(coordinates, elementName).toString()
-           } else {
-               sensorId = fetchNearestSource(coordinates).toString()
-           }
+        if(coordinates.latitude != storedLatitude || coordinates.longitude != storedLongitude) {
             storedLatitude = coordinates.latitude
             storedLongitude = coordinates.longitude
         }
-       // sensorId = "SN18700"
 
+
+        var sensorId = sensorMap[elementName]
 
         var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
 
@@ -138,16 +135,28 @@ class FrostDatasource {
             Log.i("testMan", "man")
             url = "$url&qualities=0" // no data of other qualities
         }
-        Log.i("testLink", url)
 
-        val response: HttpResponse = client.get(url) {
-            header(HttpHeaders.Authorization, authHeader)
-            header(HttpHeaders.Accept, "application/json")
+
+        var response: HttpResponse
+
+        try {
+            response = client.get(url) {
+                header(HttpHeaders.Authorization, authHeader)
+                header(HttpHeaders.Accept, "application/json")
+            }
+        } catch (e: Exception) {
+            Log.e("fetchObservationData", "Error fetching data for timeline $referenceTime", e)
+            return emptyList()  // Return an empty list or handle the error
         }
 
-        if (response.status.value != 200) {
-            sensorId = fetchNearestSource(coordinates, elementName).toString()
-            return fetchObservationDataFromFrost(coordinates, elementName, referenceTime)
+        if (response.status.value != 200) { // temporary. If sensor doesnt have data for given reference time, just utilize main sensor.
+            sensorId = "SN18700"
+            url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
+
+            response =  client.get(url) {
+                header(HttpHeaders.Authorization, authHeader)
+                header(HttpHeaders.Accept, "application/json")
+            }
         }
         val observationResponse: ObservationResponse = response.body()
 
