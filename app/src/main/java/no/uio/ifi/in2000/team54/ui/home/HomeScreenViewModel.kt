@@ -18,7 +18,8 @@ import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.util.calculateElectricityProduction
 
-data class GraphDataUiState( // only for ElectricityGraph
+data class GraphDataUiState(
+    // only for ElectricityGraph
     val electricityProductionData: Map<String, List<Double>> = emptyMap(),
     val loadingState: String = "Ingen solceller lagret",
 )
@@ -37,7 +38,8 @@ class HomeScreenViewModel : ViewModel() {
 
     private val _graphDataUiState = MutableStateFlow(GraphDataUiState())
 
-    val solarArrays: StateFlow<List<SolarArray>> = _sharedRepository.solarArrays // save to SolarArraysUiState?
+    val solarArrays: StateFlow<List<SolarArray>> =
+        _sharedRepository.solarArrays // save to SolarArraysUiState?
     val graphDataUiState = _graphDataUiState.asStateFlow()
 
     private val _priceUiState = MutableStateFlow(PriceUiState(0.0, 0.0, 0.0, false, Scope.DAY))
@@ -109,12 +111,12 @@ class HomeScreenViewModel : ViewModel() {
                         solarArray = solarArray
                     )
                     solarArrayLoadedData[solarArray] = electricityProduction
+                }
 
-                    _graphDataUiState.update { currentState ->
-                        currentState.copy(
-                            electricityProductionData = mapOf("Strømproduksjon" to electricityProduction.values.toList()),
-                        )
-                    }
+                _graphDataUiState.update { currentState ->
+                    currentState.copy(
+                        electricityProductionData = mapOf("Strømproduksjon" to solarArrayLoadedData[solarArray]!!.values.toList()),
+                    )
                 }
             } catch (ex: Exception) {
                 _graphDataUiState.update { currentState ->
