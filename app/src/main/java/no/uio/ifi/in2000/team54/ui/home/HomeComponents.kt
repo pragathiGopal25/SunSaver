@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
@@ -41,13 +41,10 @@ import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
 import no.uio.ifi.in2000.team54.ui.theme.Lighter
-import no.uio.ifi.in2000.team54.ui.theme.Panels
-import no.uio.ifi.in2000.team54.ui.theme.SavingsYellow
 import no.uio.ifi.in2000.team54.ui.theme.WeatherBlue
 import no.uio.ifi.in2000.team54.ui.theme.WeatherBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
-import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
 
 
 @Composable
@@ -251,22 +248,6 @@ fun SwitchContent(homeScreenViewModel: HomeScreenViewModel) {
             SavingsCard()
         }
     }
-
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.padding(top = 16.dp)
-    ) {
-        SlidePageButton(
-            selected = !isFlipped,
-            onClick = { isFlipped = false }
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-
-        SlidePageButton(
-            selected = isFlipped,
-            onClick = { isFlipped = true }
-        )
-    }
 }
 
 
@@ -327,9 +308,10 @@ fun WeatherCard(navController: NavController) {
     }
 }
 
-/*
+
 @Preview
 @Composable
 fun PreviewSavingsCard() {
-    SwitchContent()
-}*/
+    val vm = HomeScreenViewModel()
+    SwitchContent(vm)
+}
