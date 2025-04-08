@@ -81,10 +81,10 @@ fun HomeScreenTopBar() {
             }
 
             Image(
-                painter = painterResource(R.drawable.sun),
+                painter = painterResource(R.drawable.mediumsizelogo),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(130.dp)
+                    .size(120.dp)
                     .align(Alignment.TopEnd)
                     .offset(x = (-25).dp),
                 contentScale = ContentScale.Crop
