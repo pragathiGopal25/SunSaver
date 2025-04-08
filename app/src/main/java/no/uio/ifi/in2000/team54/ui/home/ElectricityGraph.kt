@@ -69,14 +69,13 @@ fun EletricityGraphContainer(
 ) {
 
     val graphDataUiState by viewModel.graphDataUiState.collectAsStateWithLifecycle()
-    if (graphDataUiState.electricityProductionData == emptyMap<String, List<Double>>()) {
+    if (graphDataUiState.electricityProductionData.isEmpty()) {
         Box(modifier.fillMaxSize(), Alignment.Center) {
             Text(text = graphDataUiState.loadingState)
         }
     } else {
         ElectricityGraph(data = graphDataUiState.electricityProductionData)
     }
-
 }
 
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
