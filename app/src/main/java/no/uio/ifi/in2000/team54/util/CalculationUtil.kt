@@ -5,7 +5,7 @@ import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import kotlin.math.abs
 
-fun calculateElectrisityProduction(
+fun calculateElectricityProduction(
     monthlyCloud: Map<String, Double>,
     monthlySnow: Map<String, Double>,
     monthlyRadiance: Map<String, Double>,

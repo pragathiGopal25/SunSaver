@@ -139,7 +139,7 @@ fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: 
             .fillMaxSize()
     ) {
         Map(mapState, mapViewportState, viewModel, roofSections)
-        BackButton(navController)
+        BackButton(viewModel, navController)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -229,7 +229,7 @@ private fun Map(
 }
 
 @Composable
-private fun BackButton(navController: NavController) {
+private fun BackButton(viewModel: ManageSolarArrayViewModel, navController: NavController) {
     Icon(
         Icons.AutoMirrored.Default.ArrowBack,
         contentDescription = "Gå tilbake",
@@ -242,6 +242,7 @@ private fun BackButton(navController: NavController) {
             .background(LightestYellow)
             .padding(7.dp)
             .clickable {
+                viewModel.setMapAddress("")
                 navController.navigate("home")
             }
     )
@@ -649,6 +650,7 @@ private fun SaveButton(
                     )
                 ) // todo: retrieve from map
 
+                viewModel.setMapAddress("")
                 navController.navigate("home")
             },
             name,

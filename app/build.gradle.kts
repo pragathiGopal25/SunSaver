@@ -49,6 +49,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     implementation(libs.androidx.navigation.compose)
+
     testImplementation(libs.junit)
 
     androidTestImplementation(libs.androidx.junit)
