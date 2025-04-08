@@ -9,7 +9,7 @@ import no.uio.ifi.in2000.team54.ui.theme.Team54Theme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen().setKeepOnScreenCondition{true}
+        installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
             Team54Theme {
