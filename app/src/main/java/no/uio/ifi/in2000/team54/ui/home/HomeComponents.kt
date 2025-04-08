@@ -112,7 +112,7 @@ fun HomeScreenTopBar() {
             }
 
             Image(
-                painter = painterResource(R.drawable.sun),
+                painter = painterResource(R.drawable.final_applogo),
                 contentDescription = null,
                 modifier = Modifier
                     .size(130.dp)
