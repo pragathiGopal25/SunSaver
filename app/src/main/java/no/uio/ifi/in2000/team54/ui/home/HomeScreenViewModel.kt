@@ -53,7 +53,7 @@ class HomeScreenViewModel : ViewModel() {
     private var solarArrayLoadedData = mutableMapOf<SolarArray, Map<String, Double>>()
     private val calculated = false
 
-
+// ny branch
     init {
         viewModelScope.launch {
             solarArrays.filter { it.isNotEmpty() }
