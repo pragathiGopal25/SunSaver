@@ -34,7 +34,7 @@ class HomeScreenViewModel : ViewModel() {
     private val _pvgisRepo = PVGISRepository() // probably will delete later
     private val _sharedRepository = RepositoryProvider.sharedRepository
 
-    private lateinit var fetchedData: FrostRepository.FetchAllData
+   // private lateinit var fetchedData: FrostRepository.FetchAllData
 
     private val _graphDataUiState = MutableStateFlow(GraphDataUiState())
 
@@ -70,12 +70,12 @@ class HomeScreenViewModel : ViewModel() {
         }
     }
 
-    private fun getObservationsFromRepo(solarArray: SolarArray?) {
+    suspend private fun getObservationsFromRepo(solarArray: SolarArray?) {
         viewModelScope.launch {
             if (solarArray == null) { // safety
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
-                        loadingState = "Ingen solpaneler lagret"
+                        loadingState = "Ingen solpaneler er lagret"
                     )
                 }
                 return@launch
@@ -83,20 +83,19 @@ class HomeScreenViewModel : ViewModel() {
 
             _graphDataUiState.update { currentState ->
                 currentState.copy(
-                    loadingState = "Henter data... det kan ta tid"
+                    loadingState = "Henter data... dette kan ta tid"
                 )
             }
             try {
-                fetchedData = _repository.getObservationData(solarArray.coordinates)
 
-                val monthlyTemps = fetchedData.monthlyTemps
-                val monthlySnow = fetchedData.monthlySnow
-                val monthlyCloud = fetchedData.monthlyCloud
-                val monthlySolarIrradiance = fetchedData.monthlyRadiation
+                val monthlyTemps = _repository.getTempData(solarArray.coordinates)
+                val monthlySnow = _repository.getSnowData(solarArray.coordinates)
+                val monthlyCloud = _repository.getCloudData(solarArray.coordinates)
+                val monthlySolarIrradiance = _repository.getRadiationData(solarArray.coordinates)
 
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
-                        loadingState = "Beregner..."
+                        loadingState = "Beregner estimert strømforbruk..."
                     )
                 }
 
@@ -104,10 +103,10 @@ class HomeScreenViewModel : ViewModel() {
                 if (!solarArrayLoadedData.containsKey(solarArray)) {
                     Log.i("test", "starting calculation")
                     val electricityProduction: Map<String, Double> = calculateElectricityProduction(
-                        monthlyTemps = monthlyTemps,
-                        monthlyCloud = monthlyCloud,
-                        monthlySnow = monthlySnow,
-                        monthlyRadiance = monthlySolarIrradiance,
+                        monthlyTemps = monthlyTemps.monthlyTemps,
+                        monthlyCloud = monthlyCloud.monthlyCloud,
+                        monthlySnow = monthlySnow.monthlySnow,
+                        monthlyRadiance = monthlySolarIrradiance.monthlyRadiation,
                         solarArray = solarArray
                     )
                     solarArrayLoadedData[solarArray] = electricityProduction
@@ -146,18 +145,18 @@ class HomeScreenViewModel : ViewModel() {
                 }
 
                 if (!calculated) {
-                    fetchedData = _repository.getObservationData(solarArray.coordinates)
+                   // fetchedData = _repository.getObservationData(solarArray.coordinates)
 
-                    val monthlyTemps = fetchedData.monthlyTemps
-                    val monthlySnow = fetchedData.monthlySnow
-                    val monthlyCloud = fetchedData.monthlyCloud
-                    val monthlySolarIrradiance = fetchedData.monthlyRadiation
+                    val monthlyTemps = _repository.getTempData(solarArray.coordinates)
+                    val monthlySnow = _repository.getSnowData(solarArray.coordinates)
+                    val monthlyCloud = _repository.getCloudData(solarArray.coordinates)
+                    val monthlySolarIrradiance = _repository.getRadiationData(solarArray.coordinates)
 
                     val electricityProduction: Map<String, Double> = calculateElectricityProduction(
-                        monthlyTemps = monthlyTemps,
-                        monthlyCloud = monthlyCloud,
-                        monthlySnow = monthlySnow,
-                        monthlyRadiance = monthlySolarIrradiance,
+                        monthlyTemps = monthlyTemps.monthlyTemps,
+                        monthlyCloud = monthlyCloud.monthlyCloud,
+                        monthlySnow = monthlySnow.monthlySnow,
+                        monthlyRadiance = monthlySolarIrradiance.monthlyRadiation,
                         solarArray = solarArray
                     )
                     solarArrayLoadedData[solarArray] = electricityProduction

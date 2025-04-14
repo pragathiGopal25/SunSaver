@@ -15,45 +15,68 @@ class FrostRepository() {
 
     private val dateInterval = "2022-12-31/2024-12-31"
 
-    // store fetched data from data source in an object
-    data class FetchAllData (
-        var monthlyTemps: Map<String, Double> = emptyMap(),
-        var monthlyCloud: Map<String, Double> = emptyMap(),
-        var monthlySnow: Map<String, Double> = emptyMap(),
-        var monthlyRadiation: Map<String, Double> = emptyMap()
-    )
+    // store fetched data from data source in separate objects
 
-    suspend fun getObservationData(coordinates: Coordinates): FetchAllData {
-        // creates an object of the data class FetchAllData
+    data class tempData( var monthlyTemps: Map<String, Double> = emptyMap() )
+    suspend fun getTempData(coordinates: Coordinates): tempData {
+        // creates an object of the data class tempData
         // the frost API response is to be stores in the variables in this object.
-        val fetchData = FetchAllData()
+        val data = tempData()
         nameMap.forEach { (name, elementName) ->
             when (name) {
-                "temp" -> fetchData.monthlyTemps = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
-                "cloud" ->  fetchData.monthlyCloud = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
-                "snow" -> fetchData.monthlySnow = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
-                "radiation" -> fetchData.monthlyRadiation = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
+                "temp" -> data.monthlyTemps = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
             }
         }
-
-        return fetchData
+        return data
     }
 
+    data class cloudData( var monthlyCloud: Map<String, Double> = emptyMap() )
+    suspend fun getCloudData(coordinates: Coordinates): cloudData {
+        val data = cloudData()
+        nameMap.forEach { (name, elementName) ->
+            when (name) {
+                "cloud" -> data.monthlyCloud = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
+            }
+        }
+        return data
+    }
+
+    data class snowData( var monthlySnow: Map<String, Double> = emptyMap() )
+    suspend fun getSnowData(coordinates: Coordinates): snowData {
+        val data = snowData()
+        nameMap.forEach { (name, elementName) ->
+            when (name) {
+                "snow" -> data.monthlySnow = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
+            }
+        }
+        return data
+    }
+
+    data class radiationData( var monthlyRadiation: Map<String, Double> = emptyMap())
+    suspend fun getRadiationData(coordinates: Coordinates): radiationData {
+        val data = radiationData()
+        nameMap.forEach { (name, elementName) ->
+            when (name) {
+                "radiation" -> data.monthlyRadiation = getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
+            }
+        }
+        return data
+    }
+
+
     // function that calculates and returns monthly average values for the data
-    private fun getMonthlyAverageValues (observationList: List<ObservationData>): Map<String, Double>{
-        val averageMonthly = mutableMapOf<String,MutableList<Double>>()
+    private fun getMonthlyAverageValues (observationList: List<ObservationData>): Map<String, Double> {
+        val averageMonthly = mutableMapOf<String, MutableList<Double>>()
         // note that each month here is stores as "01", "02" etc and not as "Jan", "Feb" ...
         observationList.forEach {
             val month = it.referenceTime.split("-")[1]
-            it.observations.forEach { obs -> averageMonthly.getOrPut(month) { mutableListOf() }.add(obs.value) } // extracts month from date
+            it.observations.forEach { obs ->
+                averageMonthly.getOrPut(month) { mutableListOf() }.add(obs.value)
+            } // extracts month from date
         }
 
-        val monthlyValues = averageMonthly.mapValues { (_, values) -> values.sum() / values.size}
+        val monthlyValues = averageMonthly.mapValues { (_, values) -> values.sum() / values.size }
 
         return monthlyValues.toSortedMap()
     }
-
-
-
-
 }
