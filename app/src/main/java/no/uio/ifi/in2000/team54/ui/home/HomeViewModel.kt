@@ -70,7 +70,7 @@ class HomeScreenViewModel : ViewModel() {
         }
     }
 
-    suspend private fun getObservationsFromRepo(solarArray: SolarArray?) {
+    private fun getObservationsFromRepo(solarArray: SolarArray?) {
         viewModelScope.launch {
             if (solarArray == null) { // safety
                 _graphDataUiState.update { currentState ->
