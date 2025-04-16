@@ -786,6 +786,8 @@ private fun SearchField(
         SearchTextField(
             address = addressState.value.query,
             onAddressChange = { address ->
+                // TODO search doesnt work with keyboard in emulator
+                println("address change: $address")
                 viewModel.setMapAddress(address)
             },
             onDone = {
@@ -810,8 +812,7 @@ private fun SearchField(
                     keyboardController?.hide()
                     focusManager.clearFocus()
                     selectSuggestion(suggestion)
-                },
-                onDismissRequest = { showSuggestions = false }
+                }
             )
         }
     }
@@ -881,12 +882,10 @@ private fun SearchTextField(
 @Composable
 private fun SuggestionsPopup(
     suggestions: List<Address>,
-    onSuggestionClick: (Address) -> Unit,
-    onDismissRequest: () -> Unit
+    onSuggestionClick: (Address) -> Unit
 ) {
     Popup(
         alignment = Alignment.TopStart,
-        onDismissRequest = onDismissRequest
     ) {
         Column(
             modifier = Modifier
