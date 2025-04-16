@@ -65,7 +65,6 @@ class ManageSolarArrayViewModel : ViewModel() {
     }
 
     fun setMapAddress(query: String) {
-        println("updating address")
         _mapSearchAddress.value = _mapSearchAddress.value.copy(
             query = query
         )

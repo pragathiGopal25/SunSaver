@@ -786,8 +786,6 @@ private fun SearchField(
         SearchTextField(
             address = addressState.value.query,
             onAddressChange = { address ->
-                // TODO search doesnt work with keyboard in emulator
-                println("address change: $address")
                 viewModel.setMapAddress(address)
             },
             onDone = {
