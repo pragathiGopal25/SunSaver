@@ -91,11 +91,6 @@ class FrostDatasource {
     ): List<ObservationData> {
         sensorMap = fetchNearestSource(coordinates, elementName)
 
-        //TODO: can be deleted, does not serve purpose
-        if(coordinates.latitude != storedLatitude || coordinates.longitude != storedLongitude) {
-            storedLatitude = coordinates.latitude
-            storedLongitude = coordinates.longitude
-        }
 
         // stores the list of sensorIds in this variable
         var sensorIds = sensorMap[elementName]
@@ -157,7 +152,6 @@ class FrostDatasource {
         val observationResponse: ObservationResponse = response.body()
 
         return observationResponse.data
-
 
     }
 }

@@ -1,8 +1,13 @@
 package no.uio.ifi.in2000.team54.ui.home
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,8 +20,10 @@ import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
 import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.pvgis.PVGISRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
+import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.util.calculateElectricityProduction
+import java.util.Arrays.mismatch
 
 data class GraphDataUiState(
     // only for ElectricityGraph
@@ -34,7 +41,11 @@ class HomeScreenViewModel : ViewModel() {
     private val _pvgisRepo = PVGISRepository() // probably will delete later
     private val _sharedRepository = RepositoryProvider.sharedRepository
 
-   // private lateinit var fetchedData: FrostRepository.FetchAllData
+    // private lateinit var fetchedData: FrostRepository.FetchAllData
+
+    private var _allData = MutableLiveData<Map<String, Double>>()
+    val allData: LiveData<Map<String, Double>> get() = _allData
+
 
     private val _graphDataUiState = MutableStateFlow(GraphDataUiState())
 
@@ -53,7 +64,7 @@ class HomeScreenViewModel : ViewModel() {
     private var solarArrayLoadedData = mutableMapOf<SolarArray, Map<String, Double>>()
     private val calculated = false
 
-// ny branch
+    // ny branch
     init {
         viewModelScope.launch {
             solarArrays.filter { it.isNotEmpty() }
@@ -83,7 +94,7 @@ class HomeScreenViewModel : ViewModel() {
 
             _graphDataUiState.update { currentState ->
                 currentState.copy(
-                    loadingState = "Henter data... dette kan ta tid"
+                    loadingState = "Henter data... dette kan ta litt tid"
                 )
             }
             try {
@@ -123,6 +134,37 @@ class HomeScreenViewModel : ViewModel() {
                         loadingState = "Noe gikk galt."
                     )
                 }
+            }
+        }
+    }
+
+    // asynkronisert kombinering av data
+    suspend fun fetchedData(coordinates: Coordinates) {
+
+        // Start alle kallene parallelt
+        coroutineScope {
+            try {
+                val asyncTemp = async { _repository.getTempData(coordinates) }
+                val asyncCloud = async { _repository.getCloudData(coordinates) }
+                val asyncSnow = async { _repository.getSnowData(coordinates) }
+                val asyncRadiation = async { _repository.getRadiationData(coordinates) }
+
+                val tempData = asyncTemp.await()
+                val cloudData = asyncCloud.await()
+                val snowData = asyncSnow.await()
+                val radiationData = asyncRadiation.await()
+
+                val temporaryMap = mutableMapOf<String, Double>()
+
+                temporaryMap.putAll(tempData.monthlyTemps)
+                temporaryMap.putAll(cloudData.monthlyCloud)
+                temporaryMap.putAll(snowData.monthlySnow)
+                temporaryMap.putAll(radiationData.monthlyRadiation)
+
+                _allData.value = temporaryMap
+
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

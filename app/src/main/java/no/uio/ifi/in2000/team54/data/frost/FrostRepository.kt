@@ -64,6 +64,7 @@ class FrostRepository() {
     }
 
 
+
     // function that calculates and returns monthly average values for the data
     private fun getMonthlyAverageValues (observationList: List<ObservationData>): Map<String, Double> {
         val averageMonthly = mutableMapOf<String, MutableList<Double>>()
