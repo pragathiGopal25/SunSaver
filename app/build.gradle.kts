@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     kotlin("plugin.serialization") version "2.1.20"
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -72,4 +73,14 @@ dependencies {
 
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)
+
+    //Room
+    implementation(libs.androidx.room.runtime) // Room database
+    implementation(libs.androidx.room.ktx) // Kotlin Extensions and Coroutines support for Room
+    ksp(libs.androidx.room.compiler) // KSP is an API for parsing Kotlin annotations
+    testImplementation(libs.androidx.room.testing) // testing
+
+    // Testing
+    androidTestImplementation(libs.androidx.espresso.core.v351)
+    androidTestImplementation(libs.androidx.junit.v115)
 }
