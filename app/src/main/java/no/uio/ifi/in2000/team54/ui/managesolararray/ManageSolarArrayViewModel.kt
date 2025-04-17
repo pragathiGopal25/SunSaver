@@ -36,7 +36,12 @@ class ManageSolarArrayViewModel : ViewModel() {
     val mapRoofSections = _mapAddress
         .filter { state -> state.address != null }
         .mapLatest { state ->
-            val roofSections = repository.getRoofSections(state.address!!)
+            val roofSections = try {
+                repository.getRoofSections(state.address!!)
+            } catch (e: Exception) {
+                // if it fails to get the roof information, don't display any in the map
+                emptyList()
+            }
             MapRoofSectionsState(roofSections)
         }
         .stateIn(
@@ -49,7 +54,11 @@ class ManageSolarArrayViewModel : ViewModel() {
     val mapSearchAddressSuggestions = _mapSearchAddress
         .debounce(250)
         .mapLatest { state ->
-            val suggestions = repository.getAddressSuggestions(state.query)
+            val suggestions = try {
+                repository.getAddressSuggestions(state.query)
+            } catch (e: Exception) {
+                emptyList() // could not find any addresses for the users input
+            }
             AddressSuggestionsState(suggestions)
         }
         .stateIn(
@@ -88,5 +97,5 @@ data class SearchAddressState(
 )
 
 data class AddressSuggestionsState(
-    val suggestions: List<Address>
+    val suggestions: List<Address>,
 )
