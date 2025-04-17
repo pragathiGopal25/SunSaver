@@ -107,7 +107,6 @@ import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
-import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightYellow
@@ -475,7 +474,7 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
                     .fillMaxWidth()
             ) {
                 RoofSectionRow("Areal", "%.1fm²".format(section.area))
-                RoofSectionRow("Helning", "%.1f°".format(section.incline))
+                RoofSectionRow("Helning ", "%.1f°".format(section.incline))
                 RoofSectionRow("Paneler", section.panels.toString())
             }
         }
@@ -627,26 +626,34 @@ private fun SaveButton(
     viewModel: ManageSolarArrayViewModel,
     navController: NavController
 ) {
-    val address by viewModel.mapAddress.collectAsState()
+    val addressState by viewModel.mapAddress.collectAsState()
 
     var name by remember { mutableStateOf("") }
     var power by remember { mutableStateOf("54.5") }
     var openSaveDialog by remember { mutableStateOf(false) }
+    var validate by remember { mutableStateOf(false) }
 
     if (openSaveDialog) {
         SaveDialog(
-            onDismissRequest = { openSaveDialog = false },
-            onSave = {
+            viewModel,
+            onDismissRequest = {
                 openSaveDialog = false
+                validate = false
+            },
+            onSave = {
+                if (name.isEmpty() || power.isEmpty() || addressState.address == null) {
+                    validate = true
+                    return@SaveDialog
+                }
 
-                // TODO require user to write an address
+                openSaveDialog = false
 
                 viewModel.addSolarArray(
                     SolarArray(
                         name,
                         solarPanelType,
                         roofSections,
-                        address.address!!.pos.toCoordinates(),
+                        addressState.address!!.pos.toCoordinates(),
                         power.toDouble()
                     )
                 )
@@ -654,6 +661,7 @@ private fun SaveButton(
                 viewModel.setMapAddress("")
                 navController.navigate("home")
             },
+            validate,
             name,
             power,
             onNameChange = { name = it },
@@ -683,13 +691,19 @@ private fun SaveButton(
 
 @Composable
 private fun SaveDialog(
+    viewModel: ManageSolarArrayViewModel,
     onDismissRequest: () -> Unit,
     onSave: () -> Unit,
+    validate: Boolean,
     name: String,
     power: String,
     onNameChange: (String) -> Unit,
     onPowerChange: (String) -> Unit
 ) {
+    val addressState by viewModel.mapAddress.collectAsState()
+
+    val isValid = !validate || (name.isNotEmpty() && power.isNotEmpty() && addressState.address != null)
+
     Dialog(onDismissRequest) {
         Column(
             modifier = Modifier
@@ -721,26 +735,39 @@ private fun SaveDialog(
                 onValueChange = onNameChange,
                 label = "Navn",
                 placeholder = "Navn på anlegget",
+                validate = validate,
             )
             NumberInputField(
                 value = power,
                 onValueChange = onPowerChange,
                 label = "Strømforbruk (kWh)",
                 placeholder = "Daglig strømforbruk",
+                validate = validate
             )
+            if (validate && addressState.address == null) {
+                Text(
+                    text = "Du må fylle inn en adresse for å lagre.",
+                    textAlign = TextAlign.Center,
+                    fontSize = 14.sp,
+                    color = Red,
+                    modifier = Modifier
+                        .padding(top = 5.dp)
+                        .fillMaxWidth()
+                )
+            }
             OutlinedButton(
                 onClick = onSave,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Light
                 ),
                 contentPadding = PaddingValues(2.dp),
-                border = BorderStroke(1.dp, DarkYellow),
+                border = BorderStroke(1.dp, if (isValid) DarkYellow else Red),
                 modifier = Modifier
                     .defaultMinSize(100.dp, 30.dp)
             ) {
                 Text(
                     "Lagre",
-                    color = Color.Black,
+                    color = if (isValid) Color.Black else Red,
                     fontSize = 14.sp
                 )
             }
@@ -852,7 +879,7 @@ private fun SearchTextField(
                 Box {
                     if (address.isEmpty()) {
                         Text(
-                            text = "Søk addresse",
+                            text = "Søk adresse",
                             style = LocalTextStyle.current.copy(
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                                 fontSize = 15.sp
@@ -931,6 +958,8 @@ private fun ManageRoofSectionCard(
     var incline by remember(isEditing) { mutableStateOf("") }
     var direction by remember(isEditing) { mutableStateOf("") }
     var panels by remember(isEditing) { mutableStateOf("") }
+    var validate by remember(isEditing) { mutableStateOf(false) }
+    val isValid = !validate || (area.isNotEmpty() && incline.isNotEmpty() && direction.isNotEmpty() && panels.isNotEmpty())
 
     if (isEditing && !isEditingInitialized) {
         isEditingInitialized = true
@@ -964,6 +993,7 @@ private fun ManageRoofSectionCard(
                 onValueChange = { area = it },
                 label = "Areal",
                 placeholder = "Areal i kvadratmeter",
+                validate = validate,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -973,6 +1003,7 @@ private fun ManageRoofSectionCard(
                 onValueChange = { incline = it },
                 label = "Helning",
                 placeholder = "Helning i grader",
+                validate = validate,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -987,6 +1018,7 @@ private fun ManageRoofSectionCard(
                 onValueChange = { direction = it },
                 label = "Retning",
                 placeholder = "Retning i grader",
+                validate = validate,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -996,6 +1028,7 @@ private fun ManageRoofSectionCard(
                 onValueChange = { panels = it },
                 label = "Paneler",
                 placeholder = "Antall paneler",
+                validate = validate,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -1004,6 +1037,11 @@ private fun ManageRoofSectionCard(
         Button(
             onClick = {
                 keyboardController?.hide()
+
+                if (area.isEmpty() || incline.isEmpty() || direction.isEmpty() || panels.isEmpty()) {
+                    validate = true
+                    return@Button
+                }
 
                 val newSection = RoofSection(
                     area.toDouble(),
@@ -1020,6 +1058,7 @@ private fun ManageRoofSectionCard(
 
                 onSave()
 
+                validate = false
                 area = ""
                 incline = ""
                 direction = ""
@@ -1028,14 +1067,14 @@ private fun ManageRoofSectionCard(
             colors = ButtonDefaults.buttonColors(
                 containerColor = Light
             ),
-            border = BorderStroke(1.dp, DarkBeige),
+            border = BorderStroke(1.dp, if (isValid) DarkYellow else Red),
             modifier = Modifier
                 .defaultMinSize(100.dp, 30.dp),
             contentPadding = PaddingValues(0.dp),
         ) {
             Text(
                 if (isEditing) "Lagre" else "Legg til",
-                color = Color.Black,
+                color = if (isValid) Color.Black else Red,
                 fontSize = 14.sp
             )
         }
@@ -1100,6 +1139,7 @@ private fun NumberInputField(
     onValueChange: (String) -> Unit,
     label: String,
     placeholder: String,
+    validate: Boolean,
     modifier: Modifier = Modifier
 ) {
     CustomTextField(
@@ -1109,6 +1149,7 @@ private fun NumberInputField(
         onValueChange = { if (it.isNumber()) onValueChange(it) },
         label = label,
         placeholder = placeholder,
+        validate = validate,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Done
