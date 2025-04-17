@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.ui.home
 
+import android.R.attr.data
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -43,9 +44,7 @@ class HomeScreenViewModel : ViewModel() {
 
     // private lateinit var fetchedData: FrostRepository.FetchAllData
 
-    private var _allData = MutableLiveData<Map<String, Double>>()
-    val allData: LiveData<Map<String, Double>> get() = _allData
-
+    private var _allData = MutableLiveData<Map<String, Map<String, Double>>>()
 
     private val _graphDataUiState = MutableStateFlow(GraphDataUiState())
 
@@ -72,7 +71,12 @@ class HomeScreenViewModel : ViewModel() {
                 .collect { solarArrays ->
                     val firstSolarArray = solarArrays.firstOrNull()
                     if (firstSolarArray != null) {
-                        getObservationsFromRepo(firstSolarArray)
+
+                        val job = async { fetchedData(firstSolarArray.coordinates) }
+                        job.await()
+
+                        getWeatherData(firstSolarArray)
+
                         Scope.entries.forEach {
                             loadData(scopeToDays[it]!!, firstSolarArray)
                         }
@@ -81,12 +85,16 @@ class HomeScreenViewModel : ViewModel() {
         }
     }
 
-    private fun getObservationsFromRepo(solarArray: SolarArray?) {
+    private fun getWeatherData(solarArray: SolarArray?) {
+
         viewModelScope.launch {
+
+            val data = _allData.value
+
             if (solarArray == null) { // safety
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
-                        loadingState = "Ingen solpaneler er lagret"
+                        loadingState = "Ingen solanlegg er oppretter"
                     )
                 }
                 return@launch
@@ -97,12 +105,13 @@ class HomeScreenViewModel : ViewModel() {
                     loadingState = "Henter data... dette kan ta litt tid"
                 )
             }
+
             try {
 
-                val monthlyTemps = _repository.getTempData(solarArray.coordinates)
-                val monthlySnow = _repository.getSnowData(solarArray.coordinates)
-                val monthlyCloud = _repository.getCloudData(solarArray.coordinates)
-                val monthlySolarIrradiance = _repository.getRadiationData(solarArray.coordinates)
+                val monthlyTemp = data?.get("Temp") ?: return@launch
+                val monthlyCloud = data["Cloud"] ?: return@launch
+                val monthlySnow = data["Snow"] ?: return@launch
+                val monthlyRadiation = data["Radiation"] ?: return@launch
 
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
@@ -110,14 +119,15 @@ class HomeScreenViewModel : ViewModel() {
                     )
                 }
 
+
                 //Don't calculate the same data twice
                 if (!solarArrayLoadedData.containsKey(solarArray)) {
-                    Log.i("test", "starting calculation")
+                    Log.i("Test", "starting calculation")
                     val electricityProduction: Map<String, Double> = calculateElectricityProduction(
-                        monthlyTemps = monthlyTemps.monthlyTemps,
-                        monthlyCloud = monthlyCloud.monthlyCloud,
-                        monthlySnow = monthlySnow.monthlySnow,
-                        monthlyRadiance = monthlySolarIrradiance.monthlyRadiation,
+                        monthlyTemps = monthlyTemp,
+                        monthlyCloud = monthlyCloud,
+                        monthlySnow = monthlySnow,
+                        monthlyRadiance = monthlyRadiation,
                         solarArray = solarArray
                     )
                     solarArrayLoadedData[solarArray] = electricityProduction
@@ -128,19 +138,21 @@ class HomeScreenViewModel : ViewModel() {
                         electricityProductionData = mapOf("Strømproduksjon" to solarArrayLoadedData[solarArray]!!.values.toList()),
                     )
                 }
-            } catch (ex: Exception) {
+
+            } catch (e: Exception) {
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
                         loadingState = "Noe gikk galt."
                     )
                 }
             }
+
         }
     }
 
     // asynkronisert kombinering av data
-    suspend fun fetchedData(coordinates: Coordinates) {
 
+    suspend fun fetchedData(coordinates: Coordinates) {
         // Start alle kallene parallelt
         coroutineScope {
             try {
@@ -154,14 +166,15 @@ class HomeScreenViewModel : ViewModel() {
                 val snowData = asyncSnow.await()
                 val radiationData = asyncRadiation.await()
 
-                val temporaryMap = mutableMapOf<String, Double>()
+                val temporaryMap = mutableMapOf<String, Map<String, Double>>()
 
-                temporaryMap.putAll(tempData.monthlyTemps)
-                temporaryMap.putAll(cloudData.monthlyCloud)
-                temporaryMap.putAll(snowData.monthlySnow)
-                temporaryMap.putAll(radiationData.monthlyRadiation)
+                temporaryMap["Temp"] = tempData.monthlyTemps
+                temporaryMap["Cloud"] = cloudData.monthlyCloud
+                temporaryMap["Snow"] = snowData.monthlySnow
+                temporaryMap["Radiation"] = radiationData.monthlyRadiation
 
                 _allData.value = temporaryMap
+                Log.i("All_Data", _allData.value.toString())
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -186,24 +199,24 @@ class HomeScreenViewModel : ViewModel() {
                     )
                 }
 
-                if (!calculated) {
-                   // fetchedData = _repository.getObservationData(solarArray.coordinates)
-
-                    val monthlyTemps = _repository.getTempData(solarArray.coordinates)
-                    val monthlySnow = _repository.getSnowData(solarArray.coordinates)
-                    val monthlyCloud = _repository.getCloudData(solarArray.coordinates)
-                    val monthlySolarIrradiance = _repository.getRadiationData(solarArray.coordinates)
+                // Hvis værdata allerede er hentet, bruk dem fra _allData
+                val data = _allData.value
+                if (data != null && data.isNotEmpty()) {
+                    // Bruk hentede data fra _allData
+                    val monthlyTemp = data["Temp"] ?: return@launch
+                    val monthlyCloud = data["Cloud"] ?: return@launch
+                    val monthlySnow = data["Snow"] ?: return@launch
+                    val monthlyRadiation = data["Radiation"] ?: return@launch
 
                     val electricityProduction: Map<String, Double> = calculateElectricityProduction(
-                        monthlyTemps = monthlyTemps.monthlyTemps,
-                        monthlyCloud = monthlyCloud.monthlyCloud,
-                        monthlySnow = monthlySnow.monthlySnow,
-                        monthlyRadiance = monthlySolarIrradiance.monthlyRadiation,
+                        monthlyTemps = monthlyTemp,
+                        monthlyCloud = monthlyCloud,
+                        monthlySnow = monthlySnow,
+                        monthlyRadiance = monthlyRadiation,
                         solarArray = solarArray
                     )
                     solarArrayLoadedData[solarArray] = electricityProduction
                 }
-
 
                 if (!priceMap.containsKey(days)) {
                     priceMap[days] = priceData.getPriceData(
