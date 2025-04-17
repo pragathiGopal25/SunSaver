@@ -151,10 +151,9 @@ class HomeScreenViewModel : ViewModel() {
     }
 
     // asynkronisert kombinering av data
-
     suspend fun fetchedData(coordinates: Coordinates) {
-        // Start alle kallene parallelt
-        coroutineScope {
+
+        coroutineScope { // Starter alle kallene parallellt
             try {
                 val asyncTemp = async { _repository.getTempData(coordinates) }
                 val asyncCloud = async { _repository.getCloudData(coordinates) }
