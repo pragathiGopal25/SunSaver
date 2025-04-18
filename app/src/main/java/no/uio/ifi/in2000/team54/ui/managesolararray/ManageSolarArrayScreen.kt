@@ -112,7 +112,6 @@ import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
-import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 import no.uio.ifi.in2000.team54.ui.theme.Red
 import no.uio.ifi.in2000.team54.util.calculateSubsidy
 import no.uio.ifi.in2000.team54.util.isNumber
@@ -275,7 +274,7 @@ private fun ArraySettingsMenu(
             animationSpec = tween(durationMillis = 100),
         )*/
         AnchoredDraggableState(
-            initialValue = ArraySettingsMenuAnchors.Top,
+            initialValue = ArraySettingsMenuAnchors.Bottom,
             anchors = anchors,
             positionalThreshold = { it },
             velocityThreshold = { 0f },
@@ -631,6 +630,7 @@ private fun SaveButton(
     val address by viewModel.mapAddress.collectAsState()
 
     var name by remember { mutableStateOf("") }
+    var power by remember { mutableStateOf("1574.5") }
     var openSaveDialog by remember { mutableStateOf(false) }
 
     if (openSaveDialog) {
@@ -646,15 +646,18 @@ private fun SaveButton(
                         name,
                         solarPanelType,
                         roofSections,
-                        address.address!!.pos.toCoordinates()
+                        address.address!!.pos.toCoordinates(),
+                        power.toDouble()
                     )
-                ) // todo: retrieve from map
+                )
 
                 viewModel.setMapAddress("")
                 navController.navigate("home")
             },
             name,
-            onNameChange = { name = it }
+            power,
+            onNameChange = { name = it },
+            onPowerChange = { power = it }
         )
     }
 
@@ -683,14 +686,16 @@ private fun SaveDialog(
     onDismissRequest: () -> Unit,
     onSave: () -> Unit,
     name: String,
-    onNameChange: (String) -> Unit
+    power: String,
+    onNameChange: (String) -> Unit,
+    onPowerChange: (String) -> Unit
 ) {
     Dialog(onDismissRequest) {
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(15.dp))
-                .background(RandomBeige)
-                .border(1.dp, BrightYellow, RoundedCornerShape(15.dp))
+                .background(Light)
+                .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Text(
@@ -716,6 +721,12 @@ private fun SaveDialog(
                 onValueChange = onNameChange,
                 label = "Navn",
                 placeholder = "Navn på anlegget",
+            )
+            NumberInputField(
+                value = power,
+                onValueChange = onPowerChange,
+                label = "Strømforbruk (kWh per måned)",
+                placeholder = "Månedlig strømforbruk",
             )
             OutlinedButton(
                 onClick = onSave,
@@ -799,8 +810,7 @@ private fun SearchField(
                     keyboardController?.hide()
                     focusManager.clearFocus()
                     selectSuggestion(suggestion)
-                },
-                onDismissRequest = { showSuggestions = false }
+                }
             )
         }
     }
@@ -870,12 +880,10 @@ private fun SearchTextField(
 @Composable
 private fun SuggestionsPopup(
     suggestions: List<Address>,
-    onSuggestionClick: (Address) -> Unit,
-    onDismissRequest: () -> Unit
+    onSuggestionClick: (Address) -> Unit
 ) {
     Popup(
         alignment = Alignment.TopStart,
-        onDismissRequest = onDismissRequest
     ) {
         Column(
             modifier = Modifier
