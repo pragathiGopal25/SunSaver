@@ -7,5 +7,5 @@ data class SolarArray(
     val panelType: SolarPanelType,
     val roofSections: List<RoofSection>,
     val coordinates: Coordinates,
-    val powerConsumption: Double // kWh
+    val powerConsumption: Double // kWh per month
 )

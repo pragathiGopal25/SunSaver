@@ -474,7 +474,7 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
                     .fillMaxWidth()
             ) {
                 RoofSectionRow("Areal", "%.1fm²".format(section.area))
-                RoofSectionRow("Helning ", "%.1f°".format(section.incline))
+                RoofSectionRow("Helning", "%.1f°".format(section.incline))
                 RoofSectionRow("Paneler", section.panels.toString())
             }
         }
@@ -629,7 +629,7 @@ private fun SaveButton(
     val addressState by viewModel.mapAddress.collectAsState()
 
     var name by remember { mutableStateOf("") }
-    var power by remember { mutableStateOf("54.5") }
+    var power by remember { mutableStateOf("1574.5") }
     var openSaveDialog by remember { mutableStateOf(false) }
     var validate by remember { mutableStateOf(false) }
 
@@ -740,8 +740,8 @@ private fun SaveDialog(
             NumberInputField(
                 value = power,
                 onValueChange = onPowerChange,
-                label = "Strømforbruk (kWh)",
-                placeholder = "Daglig strømforbruk",
+                label = "Strømforbruk (kWh per måned)",
+                placeholder = "Månedlig strømforbruk",
                 validate = validate
             )
             if (validate && addressState.address == null) {
