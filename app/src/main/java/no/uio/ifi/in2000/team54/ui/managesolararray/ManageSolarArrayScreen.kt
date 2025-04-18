@@ -630,7 +630,7 @@ private fun SaveButton(
     val address by viewModel.mapAddress.collectAsState()
 
     var name by remember { mutableStateOf("") }
-    var power by remember { mutableStateOf("54.5") }
+    var power by remember { mutableStateOf("1574.5") }
     var openSaveDialog by remember { mutableStateOf(false) }
 
     if (openSaveDialog) {
@@ -725,8 +725,8 @@ private fun SaveDialog(
             NumberInputField(
                 value = power,
                 onValueChange = onPowerChange,
-                label = "Strømforbruk (kWh)",
-                placeholder = "Daglig strømforbruk",
+                label = "Strømforbruk (kWh per måned)",
+                placeholder = "Månedlig strømforbruk",
             )
             OutlinedButton(
                 onClick = onSave,
