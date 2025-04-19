@@ -144,13 +144,6 @@ private fun ArraySettingsMenu(
 
     val decayAnimation = rememberSplineBasedDecay<Float>()
     val draggableState = remember {
-        /*AnchoredDraggableState(
-            initialValue = ArraySettingsMenuAnchors.Bottom,
-            anchors = anchors,
-            positionalThreshold = { it },
-            velocityThreshold = { 0f },
-            animationSpec = tween(durationMillis = 100),
-        )*/
         AnchoredDraggableState(
             initialValue = ArraySettingsMenuAnchors.Bottom,
             anchors = anchors,

@@ -38,7 +38,7 @@ fun Snackbar(snackbarState: SnackbarHostState) {
                     .border(1.dp, Red, RoundedCornerShape(15))
                     .padding(vertical = 10.dp)
                     .align(Alignment.TopCenter),
-                text = message ?: "",
+                text = message ?: "", // need to do this or it breaks the fade-out animation
                 color = Color.Black,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,

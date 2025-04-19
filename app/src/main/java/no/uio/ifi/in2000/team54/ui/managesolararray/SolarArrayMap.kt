@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -73,7 +72,6 @@ fun SolarArrayMap(
                 }
             }
 
-            //viewModel.setPos(Pos.fromPoint(point))
             false
         }
     ) {
@@ -100,7 +98,6 @@ fun SolarArrayMap(
                 ViewAnnotation(
                     options = viewAnnotationOptions {
                         geometry(Polygon.fromLngLats(listOf(points)))
-                        //geometry(Point.fromLngLat(roofSection.longitude, roofSection.latitude))
                         allowOverlap(true)
                         allowOverlapWithPuck(true)
                     }
