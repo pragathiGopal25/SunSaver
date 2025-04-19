@@ -13,7 +13,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,7 +33,6 @@ import no.uio.ifi.in2000.team54.ui.theme.Red
 
 @Composable
 fun SaveDialog(
-    viewModel: ManageSolarArrayViewModel,
     open: Boolean,
     onClose: () -> Unit,
     onSave: (name: String, power: String) -> Unit,
@@ -43,13 +41,11 @@ fun SaveDialog(
         return
     }
 
-    val addressState by viewModel.mapAddress.collectAsState()
-
     var validate by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
     var power by remember { mutableStateOf("1574.5") }
 
-    val isValid = !validate || (name.isNotEmpty() && power.isNotEmpty() && addressState.address != null)
+    val isValid = !validate || (name.isNotEmpty() && power.isNotEmpty())
 
     Dialog({
         validate = false
@@ -94,20 +90,9 @@ fun SaveDialog(
                 placeholder = "Månedlig strømforbruk",
                 validate = validate
             )
-            if (validate && addressState.address == null) {
-                Text(
-                    text = "Du må fylle inn en adresse for å lagre.",
-                    textAlign = TextAlign.Center,
-                    fontSize = 14.sp,
-                    color = Red,
-                    modifier = Modifier
-                        .padding(top = 5.dp)
-                        .fillMaxWidth()
-                )
-            }
             OutlinedButton(
                 onClick = {
-                    if (name.isEmpty() || power.isEmpty() || addressState.address == null) {
+                    if (name.isEmpty() || power.isEmpty()) {
                         validate = true
                         return@OutlinedButton
                     }

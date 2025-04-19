@@ -36,6 +36,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -43,6 +44,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -62,6 +64,7 @@ import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.rememberMapState
+import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
@@ -76,7 +79,7 @@ private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
 enum class ArraySettingsMenuAnchors { Bottom, Top }
 
 @Composable
-fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: NavController) {
+fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: NavController, snackbarState: SnackbarHostState) {
     val roofSections = remember { mutableStateListOf<RoofSection>() }
 
     val mapViewportState = rememberMapViewportState {
@@ -96,7 +99,7 @@ fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: 
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            ArraySettingsMenu(mapState, mapViewportState, viewModel, navController, roofSections)
+            ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections)
         }
     }
 }
@@ -126,6 +129,7 @@ private fun BackButton(viewModel: ManageSolarArrayViewModel, navController: NavC
 private fun ArraySettingsMenu(
     mapState: MapState,
     mapViewportState: MapViewportState,
+    snackbarState: SnackbarHostState,
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     roofSections: SnapshotStateList<RoofSection>
@@ -165,6 +169,7 @@ private fun ArraySettingsMenu(
             ArraySettingsContent(
                 mapState,
                 mapViewportState,
+                snackbarState,
                 draggableState,
                 viewModel,
                 navController,
@@ -205,6 +210,7 @@ private fun DraggableBox(
 private fun ArraySettingsContent(
     mapState: MapState,
     mapViewportState: MapViewportState,
+    snackbarState: SnackbarHostState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
@@ -214,6 +220,8 @@ private fun ArraySettingsContent(
 
     var solarPanelType by remember { mutableStateOf(SolarPanelType.PREMIUM) }
     var openSaveDialog by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
 
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
@@ -231,8 +239,24 @@ private fun ArraySettingsContent(
             roofSections,
             { solarPanelType = it }
         )
-        SaveButton { openSaveDialog = true }
-        SaveDialog(viewModel, openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
+        SaveButton {
+            if (addressState.address == null) {
+                scope.launch {
+                    snackbarState.showSnackbar("Du må fylle inn en adresse for å lagre.")
+                }
+                return@SaveButton
+            }
+
+            if (roofSections.isEmpty()) {
+                scope.launch {
+                    snackbarState.showSnackbar("Du må legge til minst én takflate for å lagre.")
+                }
+                return@SaveButton
+            }
+
+            openSaveDialog = true
+        }
+        SaveDialog(openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
             viewModel.addSolarArray(
                 SolarArray(
                     name,
