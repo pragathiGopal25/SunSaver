@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.Red
 
 @Composable
@@ -35,7 +34,7 @@ fun Snackbar(snackbarState: SnackbarHostState) {
                     .padding(4.dp)
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(15))
-                    .background(LightestYellow)
+                    .background(Red)
                     .border(1.dp, Red, RoundedCornerShape(15))
                     .padding(vertical = 10.dp)
                     .align(Alignment.TopCenter),
