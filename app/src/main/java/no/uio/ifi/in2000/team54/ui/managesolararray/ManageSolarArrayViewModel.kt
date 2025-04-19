@@ -36,18 +36,18 @@ class ManageSolarArrayViewModel : ViewModel() {
     val mapRoofSections = _mapAddress
         .filter { state -> state.address != null }
         .mapLatest { state ->
-            val roofSections = try {
-                repository.getRoofSections(state.address!!)
+            try {
+                // we know the address isn't null here because we filter out all null addresses above
+                MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
             } catch (e: Exception) {
                 // if it fails to get the roof information, don't display any in the map
-                emptyList()
+                MapRoofSectionsState(emptyList(), true)
             }
-            MapRoofSectionsState(roofSections)
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = MapRoofSectionsState(emptyList())
+            initialValue = MapRoofSectionsState(emptyList(), false)
         )
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -89,7 +89,8 @@ data class AddressState(
 )
 
 data class MapRoofSectionsState(
-    val roofSections: List<MapRoofSection>
+    val roofSections: List<MapRoofSection>,
+    val isError: Boolean
 )
 
 data class SearchAddressState(

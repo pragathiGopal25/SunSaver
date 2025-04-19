@@ -93,7 +93,7 @@ fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: 
         modifier = Modifier
             .fillMaxSize()
     ) {
-        SolarArrayMap(mapState, mapViewportState, viewModel, roofSections)
+        SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, roofSections)
         BackButton(viewModel, navController)
         Box(
             modifier = Modifier
