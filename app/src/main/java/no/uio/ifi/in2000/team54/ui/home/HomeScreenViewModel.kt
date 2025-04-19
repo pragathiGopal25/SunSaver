@@ -90,9 +90,13 @@ class HomeScreenViewModel : ViewModel() {
                 fetchedData = _repository.getObservationData(solarArray.coordinates)
 
                 val monthlyTemps = fetchedData.monthlyTemps
+                println("monthlyTemps: $monthlyTemps")
                 val monthlySnow = fetchedData.monthlySnow
+                println("monthlySnow: $monthlySnow")
                 val monthlyCloud = fetchedData.monthlyCloud
+                println("monthlyCloud: $monthlyCloud")
                 val monthlySolarIrradiance = fetchedData.monthlyRadiation
+                println("monthlySolarIrradiance: $monthlySolarIrradiance")
 
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
