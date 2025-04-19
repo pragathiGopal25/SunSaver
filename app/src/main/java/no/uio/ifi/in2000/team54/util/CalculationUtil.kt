@@ -72,7 +72,7 @@ private fun calculateSolarEnergy( // beregne gjennomsnittlig forventet innkommen
         result[it] = irradiance
 
     }
-    Log.i("testRes", result.toString())
+//    Log.i("testRes", result.toString())
     return result
 }
 
