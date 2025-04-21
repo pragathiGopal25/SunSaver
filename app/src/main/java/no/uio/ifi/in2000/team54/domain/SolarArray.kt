@@ -6,5 +6,6 @@ data class SolarArray(
     val name: String,
     val panelType: SolarPanelType,
     val roofSections: List<RoofSection>,
-    val coordinates: Coordinates
+    val coordinates: Coordinates,
+    val powerConsumption: Double // kWh per month
 )
