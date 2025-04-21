@@ -42,10 +42,10 @@ class SolarArrayDatasourceTest {
     @Test
     @Throws(Exception::class)
     fun insertAndGetASolarPanel() = runBlocking {
-        sunSaverDatasource.insertSolarArrayWithRoofSections(FakeTestData.solarArrayWithRoofSectionsA)
+        sunSaverDatasource.insertSolarArrayWithRoofSections(TestSolarArray1.solarArrayWithRoofSections)
         val solarArray: SolarArrayWithRoofSections = sunSaverDatasource.getAllSolarArrays()[0]
 
-        assertEquals(solarArray.solarArray, FakeTestData.solarArrayA)
+        assertEquals(solarArray.solarArray, TestSolarArray1.solarArray)
 
         val roofSections = solarArray.roofSections.sortedBy { it.mapId }
         assertEquals(roofSections.size, 2)
@@ -57,14 +57,14 @@ class SolarArrayDatasourceTest {
     @Test
     @Throws(Exception::class)
     fun insertAndDelete() = runBlocking {
-        sunSaverDatasource.insertSolarArrayWithRoofSections(FakeTestData.solarArrayWithRoofSectionsA)
-        sunSaverDatasource.insertSolarArrayWithRoofSections(FakeTestData.solarArrayWithRoofSectionsB)
+        sunSaverDatasource.insertSolarArrayWithRoofSections(TestSolarArray1.solarArrayWithRoofSections)
+        sunSaverDatasource.insertSolarArrayWithRoofSections(TestSolarArray2.solarArrayWithRoofSections)
         assertEquals(sunSaverDatasource.getAllSolarArrays().size, 2)
 
-        sunSaverDatasource.delete(FakeTestData.solarArrayWithRoofSectionsA)
+        sunSaverDatasource.delete(TestSolarArray1.solarArrayWithRoofSections)
         assertEquals(sunSaverDatasource.getAllSolarArrays().size, 1)
 
-        sunSaverDatasource.delete(FakeTestData.solarArrayWithRoofSectionsB)
+        sunSaverDatasource.delete(TestSolarArray2.solarArrayWithRoofSections)
         assertEquals(sunSaverDatasource.getAllSolarArrays().size, 0)
     }
 }
