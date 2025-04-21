@@ -44,7 +44,7 @@ import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 
 
 @Composable
-fun ElectricityPriceContainer(viewModel: HomeScreenViewModel) {
+fun ElectricityPriceContainer(viewModel: HomeViewModel) {
     val uiState by viewModel.priceUiState.collectAsState()
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -79,7 +79,7 @@ fun ElectricityPriceContainer(viewModel: HomeScreenViewModel) {
 }
 
 @Composable
-fun IndeterminateCircularIndicator(uiState: HomeScreenViewModel.PriceUiState) {
+fun IndeterminateCircularIndicator(uiState: HomeViewModel.PriceUiState) {
     if (!uiState.loading) return
     CircularProgressIndicator(
         modifier = Modifier.width(23.dp),
@@ -93,7 +93,7 @@ fun ExpensesStatBox(
     main: Boolean,
     text: String,
     image: Int,
-    uiState: HomeScreenViewModel.PriceUiState
+    uiState: HomeViewModel.PriceUiState
 ) {
     if (uiState.error) {
         Text("Det oppstod en feil i beregningen av strømkostnader")
@@ -143,16 +143,16 @@ fun ExpensesStatBox(
 
 @Composable
 fun TimeScopeSegmentedButton(
-    viewModel: HomeScreenViewModel,
-    uiState: HomeScreenViewModel.PriceUiState
+    viewModel: HomeViewModel,
+    uiState: HomeViewModel.PriceUiState
 ) {
     var selectedIndex by remember { mutableIntStateOf(0) }
     val options = listOf("Dag", "Måned", "År")
 
     val map = mapOf(
-        HomeScreenViewModel.Scope.DAY to 0,
-        HomeScreenViewModel.Scope.MONTH to 1,
-        HomeScreenViewModel.Scope.YEAR to 2
+        HomeViewModel.Scope.DAY to 0,
+        HomeViewModel.Scope.MONTH to 1,
+        HomeViewModel.Scope.YEAR to 2
     )
 
     if (map[uiState.scope] != selectedIndex) selectedIndex = map[uiState.scope]!!
@@ -166,7 +166,7 @@ fun TimeScopeSegmentedButton(
                 ),
                 onClick = {
                     selectedIndex = index
-                    viewModel.changeTimeScope(HomeScreenViewModel.Scope.entries[selectedIndex])
+                    viewModel.changeTimeScope(HomeViewModel.Scope.entries[selectedIndex])
                 },
                 selected = index == selectedIndex,
                 icon = {},

@@ -36,11 +36,7 @@ class FrostDatasource {
         Base64.encodeToString(raw.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
     private val authHeader = "Basic $encoded"
 
-
-    private var storedLatitude = 0.0
-    private var storedLongitude = 0.0
-
-    private val nameMap = mapOf(
+     val nameMap = mapOf(
         "temp" to "mean(air_temperature%20P1M)",
         "cloud" to "mean(cloud_area_fraction%20P1D)",
         "snow" to "mean(snow_coverage_type%20P1M)",
@@ -53,7 +49,6 @@ class FrostDatasource {
         coordinates: Coordinates,
         element: String,
     ): MutableMap<String, MutableList<String>> {
-
 
         try {
             val response: HttpResponse =
@@ -81,7 +76,6 @@ class FrostDatasource {
         }
 
     }
-
 
 
     suspend fun fetchObservationDataFromFrost(
@@ -131,12 +125,10 @@ class FrostDatasource {
         // use the new sensorId, which is also the closest with available data for the reference time to retrieve observation data.
         var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
 
-        // TODO: can be optimized by sending it in through the repo instead
         if (elementName == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
             url = "$url&qualities=0" // no data of other qualities
         }
 
-        // TODO: this could also maybe be sent in through the repo
         url = "$url&fields=sourceId%2CelementId%2Cvalue%2Cunit%2CqualityCode%2CreferenceTime" // restric amount of data retrieved
 
         try {
@@ -152,6 +144,5 @@ class FrostDatasource {
         val observationResponse: ObservationResponse = response.body()
 
         return observationResponse.data
-
     }
 }

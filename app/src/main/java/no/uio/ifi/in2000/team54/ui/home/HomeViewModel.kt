@@ -1,12 +1,9 @@
 package no.uio.ifi.in2000.team54.ui.home
 
-import android.R.attr.data
 import android.util.Log
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,12 +21,11 @@ import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.util.calculateElectricityProduction
-import java.util.Arrays.mismatch
 
 data class GraphDataUiState(
     // only for ElectricityGraph
     val electricityProductionData: Map<String, List<Double>> = emptyMap(),
-    val loadingState: String = "Ingen solceller lagret",
+    val loadingState: String = "Ingen solanlegg er opprettet",
 )
 
 data class SolarArrayUiState( // i guess we fetch separately for different addresses
@@ -37,12 +33,10 @@ data class SolarArrayUiState( // i guess we fetch separately for different addre
     val solarArrayInFocus: SolarArray? = null
 )
 
-class HomeScreenViewModel : ViewModel() {
+class HomeViewModel : ViewModel() {
     private val _repository = FrostRepository()
     private val _pvgisRepo = PVGISRepository() // probably will delete later
     private val _sharedRepository = RepositoryProvider.sharedRepository
-
-    // private lateinit var fetchedData: FrostRepository.FetchAllData
 
     private var _allData = MutableLiveData<Map<String, Map<String, Double>>>()
 
@@ -61,9 +55,7 @@ class HomeScreenViewModel : ViewModel() {
     private val priceMap = mutableMapOf<Int, List<Double>>()
     private val solarPriceMap = mutableMapOf<Int, Double>()
     private var solarArrayLoadedData = mutableMapOf<SolarArray, Map<String, Double>>()
-    private val calculated = false
 
-    // ny branch
     init {
         viewModelScope.launch {
             solarArrays.filter { it.isNotEmpty() }
@@ -72,8 +64,7 @@ class HomeScreenViewModel : ViewModel() {
                     val firstSolarArray = solarArrays.firstOrNull()
                     if (firstSolarArray != null) {
 
-                        val job = async { fetchedData(firstSolarArray.coordinates) }
-                        job.await()
+                       fetchedData(firstSolarArray.coordinates)
 
                         getWeatherData(firstSolarArray)
 
@@ -98,12 +89,6 @@ class HomeScreenViewModel : ViewModel() {
                     )
                 }
                 return@launch
-            }
-
-            _graphDataUiState.update { currentState ->
-                currentState.copy(
-                    loadingState = "Henter data... dette kan ta litt tid"
-                )
             }
 
             try {
@@ -155,6 +140,11 @@ class HomeScreenViewModel : ViewModel() {
 
         coroutineScope { // Starter alle kallene parallellt
             try {
+                _graphDataUiState.update { currentState ->
+                    currentState.copy(
+                        loadingState = "Henter data... dette kan ta litt tid"
+                    )
+                }
                 val asyncTemp = async { _repository.getTempData(coordinates) }
                 val asyncCloud = async { _repository.getCloudData(coordinates) }
                 val asyncSnow = async { _repository.getSnowData(coordinates) }
@@ -200,8 +190,9 @@ class HomeScreenViewModel : ViewModel() {
 
                 // Hvis værdata allerede er hentet, bruk dem fra _allData
                 val data = _allData.value
-                if (data != null && data.isNotEmpty()) {
-                    // Bruk hentede data fra _allData
+
+                if (data != null && data.isNotEmpty()) { // Bruk hentede data fra _allData
+
                     val monthlyTemp = data["Temp"] ?: return@launch
                     val monthlyCloud = data["Cloud"] ?: return@launch
                     val monthlySnow = data["Snow"] ?: return@launch
