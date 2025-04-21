@@ -62,6 +62,7 @@ class HomeViewModel : ViewModel() {
                 .distinctUntilChanged()
                 .collect { solarArrays ->
                     val firstSolarArray = solarArrays.firstOrNull()
+
                     if (firstSolarArray != null) {
 
                        fetchedData(firstSolarArray.coordinates)
@@ -95,17 +96,35 @@ class HomeViewModel : ViewModel() {
 
                 val monthlyTemp = data?.get("Temp") ?: run {
 
-                    throw NullPointerException()
+                    _graphDataUiState.update {
+                        it.copy(loadingState = "Temperaturdata mangler.")
+                    }
+
                     return@launch
                 }
-                val monthlyCloud = data["Cloud"] ?: return@launch
-                val monthlySnow = data["Snow"] ?: return@launch
-                val monthlyRadiation = data["Radiation"] ?: return@launch
+                val monthlyCloud = data["Cloud"] ?:  run {
 
-                _graphDataUiState.update { currentState ->
-                    currentState.copy(
-                        loadingState = "Beregner estimert strømforbruk..."
-                    )
+                    _graphDataUiState.update {
+                        it.copy(loadingState = "Data for skydekke mangler.")
+                    }
+
+                    return@launch
+                }
+
+                val monthlySnow = data["Snow"] ?: run {
+
+                    _graphDataUiState.update {
+                        it.copy(loadingState = "Snødata mangler.")
+                    }
+                    return@launch
+                }
+                val monthlyRadiation = data["Radiation"] ?: run {
+
+                    _graphDataUiState.update {
+                        it.copy(loadingState = "Data for stråling mangler.")
+                    }
+
+                    return@launch
                 }
 
 
@@ -147,7 +166,7 @@ class HomeViewModel : ViewModel() {
             try {
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
-                        loadingState = "Henter data... dette kan ta litt tid"
+                        loadingState = "Beregner estimert strømforbruk ..."
                     )
                 }
                 val asyncTemp = async { _repository.getData(coordinates, "temp") }
