@@ -134,7 +134,7 @@ class HomeViewModel : ViewModel() {
                     currentState.copy(
                         loadingState = "Noe gikk galt med innhenting av data."
                     )
-
+                }
             }
 
         }
