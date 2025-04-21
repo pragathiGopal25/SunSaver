@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.team54
 
 import no.uio.ifi.in2000.team54.util.isNumber
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test

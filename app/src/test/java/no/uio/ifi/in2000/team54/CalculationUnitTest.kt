@@ -4,7 +4,7 @@ import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
-import no.uio.ifi.in2000.team54.util.calculateElectricityProduction
+import no.uio.ifi.in2000.team54.util.calculateMonthlyElectricityProduction
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -105,11 +105,11 @@ class HomeViewModelUnitTest {
             "11" to 0.05703600000000001,
             "12" to 0.05228300000000001
         )
-        val result = calculateElectricityProduction(
+        val result = calculateMonthlyElectricityProduction(
             monthlyCloud = monthlyCloud,
             monthlySnow = monthlySnow,
             monthlyRadiance = monthlyRadiance,
-            monthlyTemps = monthlyTemps,
+            monthlyTemperatures = monthlyTemps,
             solarArray = testArray
         )
 

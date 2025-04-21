@@ -16,7 +16,7 @@ import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.pvgis.PVGISRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.SolarArray
-import no.uio.ifi.in2000.team54.util.calculateElectricityProduction
+import no.uio.ifi.in2000.team54.util.calculateMonthlyElectricityProduction
 
 data class GraphDataUiState(
     // only for ElectricityGraph
@@ -107,8 +107,8 @@ class HomeScreenViewModel : ViewModel() {
                 //Don't calculate the same data twice
                 if (!solarArrayLoadedData.containsKey(solarArray)) {
                     Log.i("test", "starting calculation")
-                    val electricityProduction: Map<String, Double> = calculateElectricityProduction(
-                        monthlyTemps = monthlyTemps,
+                    val electricityProduction: Map<String, Double> = calculateMonthlyElectricityProduction(
+                        monthlyTemperatures = monthlyTemps,
                         monthlyCloud = monthlyCloud,
                         monthlySnow = monthlySnow,
                         monthlyRadiance = monthlySolarIrradiance,
@@ -157,8 +157,8 @@ class HomeScreenViewModel : ViewModel() {
                     val monthlyCloud = fetchedData.monthlyCloud
                     val monthlySolarIrradiance = fetchedData.monthlyRadiation
 
-                    val electricityProduction: Map<String, Double> = calculateElectricityProduction(
-                        monthlyTemps = monthlyTemps,
+                    val electricityProduction: Map<String, Double> = calculateMonthlyElectricityProduction(
+                        monthlyTemperatures = monthlyTemps,
                         monthlyCloud = monthlyCloud,
                         monthlySnow = monthlySnow,
                         monthlyRadiance = monthlySolarIrradiance,
