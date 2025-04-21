@@ -36,7 +36,7 @@ class FrostDatasource {
         Base64.encodeToString(raw.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
     private val authHeader = "Basic $encoded"
 
-     val nameMap = mapOf(
+    private val nameMap = mapOf(
         "temp" to "mean(air_temperature%20P1M)",
         "cloud" to "mean(cloud_area_fraction%20P1D)",
         "snow" to "mean(snow_coverage_type%20P1M)",
@@ -107,7 +107,7 @@ class FrostDatasource {
         var response: HttpResponse
 
         // find out which of the sensors are available for the time series.
-        val getAvailableSensors = "https://frost.met.no/observations/availableTimeSeries/v0.jsonld?sources=$sensorUrl&referencetime=2022-12-31%2F2024-12-31&elements=$elementName"
+        val getAvailableSensors = "https://frost.met.no/observations/availableTimeSeries/v0.jsonld?sources=$sensorUrl&referencetime=2022-12-31%2F2024-12-31&elements=${nameMap[elementName]}"
 
         response = client.get(getAvailableSensors) {
             header(HttpHeaders.Authorization, authHeader)
@@ -123,9 +123,9 @@ class FrostDatasource {
         Log.i("testingSensors", "element: $elementName, sensors: $sensorId")
 
         // use the new sensorId, which is also the closest with available data for the reference time to retrieve observation data.
-        var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
+        var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=${nameMap[elementName]}"
 
-        if (elementName == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
+        if (nameMap[elementName] == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
             url = "$url&qualities=0" // no data of other qualities
         }
 

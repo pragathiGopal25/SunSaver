@@ -127,7 +127,7 @@ class HomeViewModel : ViewModel() {
             } catch (e: Exception) {
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
-                        loadingState = "Noe gikk galt."
+                        loadingState = "Noe gikk galt med innhenting av data."
                     )
                 }
             }
@@ -145,10 +145,10 @@ class HomeViewModel : ViewModel() {
                         loadingState = "Henter data... dette kan ta litt tid"
                     )
                 }
-                val asyncTemp = async { _repository.getTempData(coordinates) }
-                val asyncCloud = async { _repository.getCloudData(coordinates) }
-                val asyncSnow = async { _repository.getSnowData(coordinates) }
-                val asyncRadiation = async { _repository.getRadiationData(coordinates) }
+                val asyncTemp = async { _repository.getData(coordinates, "temp") }
+                val asyncCloud = async { _repository.getData(coordinates, "cloud") }
+                val asyncSnow = async { _repository.getData(coordinates, "snow") }
+                val asyncRadiation = async { _repository.getData(coordinates,"radiation") }
 
                 val tempData = asyncTemp.await()
                 val cloudData = asyncCloud.await()
@@ -157,10 +157,10 @@ class HomeViewModel : ViewModel() {
 
                 val temporaryMap = mutableMapOf<String, Map<String, Double>>()
 
-                temporaryMap["Temp"] = tempData.monthlyTemps
-                temporaryMap["Cloud"] = cloudData.monthlyCloud
-                temporaryMap["Snow"] = snowData.monthlySnow
-                temporaryMap["Radiation"] = radiationData.monthlyRadiation
+                temporaryMap["Temp"] = tempData
+                temporaryMap["Cloud"] = cloudData
+                temporaryMap["Snow"] = snowData
+                temporaryMap["Radiation"] = radiationData
 
                 _allData.value = temporaryMap
                 Log.i("All_Data", _allData.value.toString())
