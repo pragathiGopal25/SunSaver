@@ -25,4 +25,47 @@ class SunSaverDatasource @Inject constructor(
     suspend fun delete(solarArrayWithRoofSections: SolarArrayWithRoofSections) {
         sunSaverDao.delete(solarArrayWithRoofSections.solarArray)
     }
+
+    // we have two edge cases: added and deleted solar arrays
+    // the problem is that update does nothing if it doesn't find a matching key
+    // therefore we have to handle this manually in this method
+    suspend fun update(solarArrayWithRoofSections: SolarArrayWithRoofSections) {
+
+        // updating the solar array first
+        sunSaverDao.updateSolarArray(solarArrayWithRoofSections.solarArray)
+
+        // foreign key connection is lost during getting, so need to assign it again
+        val id: Long = solarArrayWithRoofSections.solarArray.id
+        // add foreign key from solar array
+        val roofSectionsWithForeignKey = solarArrayWithRoofSections.roofSections.map {
+            it.copy(solarArrayId = id)
+        }
+
+        // updating rows
+        sunSaverDao.updateRoofSections(roofSectionsWithForeignKey)
+
+        // handling edge cases
+        // case 1: we want to delete those that aren't updated
+        // get the saved ids
+        val savedRoofSections = sunSaverDao.getRoofSectionsBySolarArrayId(id)
+
+        // we want to check which ids are missing - those have to be deleted
+        val idOfUpdated = roofSectionsWithForeignKey.map {
+            it.roofSectionId
+        }.toSet()
+
+        val deletedRoofSections =
+            savedRoofSections.filter { // want to find the savedRoofSections that aren't in this list
+                it.roofSectionId !in idOfUpdated
+            }
+        // delete those
+        sunSaverDao.deleteRoofSections(deletedRoofSections)
+
+        // case 2: we want to add new roof sections.
+        // they have roofSectionId = 0
+        val addedRoofSections = roofSectionsWithForeignKey.filter {
+            it.roofSectionId == 0 // 0 is a placeholder
+        }
+        sunSaverDao.insertRoofSections(addedRoofSections)
+    }
 }

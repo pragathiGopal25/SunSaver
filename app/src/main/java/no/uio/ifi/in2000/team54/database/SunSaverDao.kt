@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 
 // Room DAOs provide methods such as update, insert, and delete data in the database.
 @Dao
@@ -28,4 +29,17 @@ interface SunSaverDao {
     // definition
     @Delete
     suspend fun delete(solarArray: SolarArrayEntity)
+
+    @Update
+    suspend fun updateSolarArray(solarArray: SolarArrayEntity)
+
+    @Update // returns number of rows updated
+    suspend fun updateRoofSections(roofSections: List<RoofSectionEntity>): Int
+
+    // helper methods for updating in datasource
+    @Delete
+    suspend fun deleteRoofSections(roofSections: List<RoofSectionEntity>)
+
+    @Query("SELECT * FROM RoofSections WHERE solarArrayId = :id")
+    suspend fun getRoofSectionsBySolarArrayId(id: Long): List<RoofSectionEntity>
 }
