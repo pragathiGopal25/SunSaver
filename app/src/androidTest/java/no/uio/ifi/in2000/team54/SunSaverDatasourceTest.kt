@@ -54,7 +54,6 @@ class SolarArrayDatasourceTest {
         assertEquals(roofSections[1].panels, 2)
     }
 
-    /*
     @Test
     @Throws(Exception::class)
     fun insertAndDelete() = runBlocking {
@@ -67,5 +66,5 @@ class SolarArrayDatasourceTest {
 
         sunSaverDatasource.delete(FakeTestData.solarArrayWithRoofSectionsB)
         assertEquals(sunSaverDatasource.getAllSolarArrays().size, 0)
-    }*/
+    }
 }

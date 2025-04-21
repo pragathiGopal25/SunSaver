@@ -21,4 +21,8 @@ class SunSaverDatasource @Inject constructor(
     suspend fun getAllSolarArrays(): List<SolarArrayWithRoofSections> {
         return sunSaverDao.getAllSolarArrays()
     }
+
+    suspend fun delete(solarArrayWithRoofSections: SolarArrayWithRoofSections) {
+        sunSaverDao.delete(solarArrayWithRoofSections.solarArray)
+    }
 }
