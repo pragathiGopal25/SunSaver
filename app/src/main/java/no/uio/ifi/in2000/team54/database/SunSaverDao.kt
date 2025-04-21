@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 // Room DAOs provide methods such as update, insert, and delete data in the database.
 @Dao
@@ -23,7 +24,7 @@ interface SunSaverDao {
     // one for getting solar arrays and the second one for roof sections
     @Transaction
     @Query("SELECT * FROM SolarArrays")
-    suspend fun getAllSolarArrays(): List<SolarArrayWithRoofSections>
+    fun getAllSolarArrays(): Flow<List<SolarArrayWithRoofSections>>
 
     // deleting solarArray will delete all roof sections because of ForeignKey.CASCADE in Entity
     // definition

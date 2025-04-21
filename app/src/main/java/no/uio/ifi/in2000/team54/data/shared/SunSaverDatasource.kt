@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.data.shared
 
+import kotlinx.coroutines.flow.Flow
 import no.uio.ifi.in2000.team54.database.SolarArrayWithRoofSections
 import no.uio.ifi.in2000.team54.database.SunSaverDao
 import javax.inject.Inject
@@ -18,7 +19,7 @@ class SunSaverDatasource @Inject constructor(
         return id
     }
 
-    suspend fun getAllSolarArrays(): List<SolarArrayWithRoofSections> {
+    fun getAllSolarArrays(): Flow<List<SolarArrayWithRoofSections>> {
         return sunSaverDao.getAllSolarArrays()
     }
 
