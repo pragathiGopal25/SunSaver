@@ -36,20 +36,29 @@ class ManageSolarArrayViewModel : ViewModel() {
     val mapRoofSections = _mapAddress
         .filter { state -> state.address != null }
         .mapLatest { state ->
-            val roofSections = repository.getRoofSections(state.address!!)
-            MapRoofSectionsState(roofSections)
+            try {
+                // we know the address isn't null here because we filter out all null addresses above
+                MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
+            } catch (e: Exception) {
+                // if it fails to get the roof information, don't display any in the map
+                MapRoofSectionsState(emptyList(), true)
+            }
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = MapRoofSectionsState(emptyList())
+            initialValue = MapRoofSectionsState(emptyList(), false)
         )
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val mapSearchAddressSuggestions = _mapSearchAddress
         .debounce(250)
         .mapLatest { state ->
-            val suggestions = repository.getAddressSuggestions(state.query)
+            val suggestions = try {
+                repository.getAddressSuggestions(state.query)
+            } catch (e: Exception) {
+                emptyList() // could not find any addresses for the users input
+            }
             AddressSuggestionsState(suggestions)
         }
         .stateIn(
@@ -80,7 +89,8 @@ data class AddressState(
 )
 
 data class MapRoofSectionsState(
-    val roofSections: List<MapRoofSection>
+    val roofSections: List<MapRoofSection>,
+    val isError: Boolean
 )
 
 data class SearchAddressState(
@@ -88,5 +98,5 @@ data class SearchAddressState(
 )
 
 data class AddressSuggestionsState(
-    val suggestions: List<Address>
+    val suggestions: List<Address>,
 )

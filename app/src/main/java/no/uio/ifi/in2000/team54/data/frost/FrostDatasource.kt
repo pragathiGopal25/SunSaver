@@ -30,6 +30,7 @@ class FrostDatasource {
         }
     }
 
+    // authentication
     private val raw = "b8d04ecc-dc8a-40a9-942e-2acfb8aba15d" + ":" // client id for team54@uio.no
     private val encoded: String =
         Base64.encodeToString(raw.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
@@ -67,6 +68,7 @@ class FrostDatasource {
             } else {
                 val body: List<SensorSystem> = response.body<SourceResponse>().data
 
+                // maps the element name to a list of strings (sensorids)
                 body.forEach{value ->
                     sensorMap.getOrPut(element) { mutableListOf() }.add(value.id)
                 }
@@ -89,18 +91,21 @@ class FrostDatasource {
     ): List<ObservationData> {
         sensorMap = fetchNearestSource(coordinates, elementName)
 
+        //TODO: can be deleted, does not serve purpose
         if(coordinates.latitude != storedLatitude || coordinates.longitude != storedLongitude) {
             storedLatitude = coordinates.latitude
             storedLongitude = coordinates.longitude
         }
 
-
+        // stores the list of sensorIds in this variable
         var sensorIds = sensorMap[elementName]
         Log.i("TestingAllSensors", sensorIds.toString())
         var sensorUrl = ""
 
 
         if (sensorIds != null) {
+            // updates the sensorUrl variable with the sensor ids in the sensorIds element
+            // between every element, but the last, a %2C is added.
             sensorIds.forEach { value ->
                 sensorUrl += if (value == nameMap.values.last()) {
                     value
@@ -120,18 +125,23 @@ class FrostDatasource {
             header(HttpHeaders.Accept, "application/json")
         }
 
+        // stores available sensor response in the AvailableObservationReponse data class
         val availableObservationResponse: AvailableObservationResponse = response.body()
         val availableObservations = availableObservationResponse.data
+
+        // retrieves the first sensor from the response, which is the most suitable (in terms of time and closest in location) for our query
         val sensorId = availableObservations.firstOrNull()?.sourceId ?: return emptyList()
         Log.i("testingSensors", "element: $elementName, sensors: $sensorId")
 
         // use the new sensorId, which is also the closest with available data for the reference time to retrieve observation data.
         var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
 
+        // TODO: can be optimized by sending it in through the repo instead
         if (elementName == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
             url = "$url&qualities=0" // no data of other qualities
         }
 
+        // TODO: this could also maybe be sent in through the repo
         url = "$url&fields=sourceId%2CelementId%2Cvalue%2Cunit%2CqualityCode%2CreferenceTime" // restric amount of data retrieved
 
         try {
@@ -143,7 +153,7 @@ class FrostDatasource {
             Log.e("fetchObservationData", "Error fetching data for timeline $referenceTime", e)
             return emptyList()  // Return an empty list or handle the error
         }
-
+        // stores the response from the api in to the ObservationResponse data class
         val observationResponse: ObservationResponse = response.body()
 
         return observationResponse.data

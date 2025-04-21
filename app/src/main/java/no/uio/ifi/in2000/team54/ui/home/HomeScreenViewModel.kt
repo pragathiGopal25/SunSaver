@@ -139,10 +139,11 @@ class HomeScreenViewModel : ViewModel() {
     private fun loadData(days: Int, solarArray: SolarArray) {
         viewModelScope.launch {
             try {
-                _priceUiState.value =
-                    _priceUiState.value.copy(
+                _priceUiState.update { currentState ->
+                    currentState.copy(
                         loading = true
                     )
+                }
 
                 if (!calculated) {
                     fetchedData = _repository.getObservationData(solarArray.coordinates)
@@ -162,10 +163,7 @@ class HomeScreenViewModel : ViewModel() {
                     solarArrayLoadedData[solarArray] = electricityProduction
                 }
 
-                _priceUiState.value =
-                    _priceUiState.value.copy(
-                        loading = true
-                    )
+
                 if (!priceMap.containsKey(days)) {
                     priceMap[days] = priceData.getPriceData(
                         days,
@@ -175,14 +173,21 @@ class HomeScreenViewModel : ViewModel() {
                     realPriceMap[days] = priceMap[days]!![1]
                     solarPriceMap[days] = priceMap[days]!![0]
                 }
-            } finally {
                 seePrices(days)
-                val day = Scope.entries.filter { scopeToDays[it] == days }[0]
-                _priceUiState.value =
-                    _priceUiState.value.copy(
-                        scope = day,
-                        loading = false
+            } catch (ex: Exception) {
+                _priceUiState.update { currentState ->
+                    currentState.copy(
+                        error = true
                     )
+                }
+            } finally {
+                val day = Scope.entries.filter { scopeToDays[it] == days }[0]
+                _priceUiState.update { currentState ->
+                    currentState.copy(
+                        loading = false,
+                        scope = day
+                    )
+                }
             }
         }
     }
@@ -190,31 +195,40 @@ class HomeScreenViewModel : ViewModel() {
     private fun seePrices(days: Int) {
         viewModelScope.launch {
             try {
-                _priceUiState.value =
-                    _priceUiState.value.copy(
+                _priceUiState.update { currentState ->
+                    currentState.copy(
                         loading = true
                     )
+                }
 
                 val realPrice = realPriceMap[days]
                 val solarPrice = solarPriceMap[days]
 
                 if (realPrice != null) {
                     if (solarPrice != null) {
-                        _priceUiState.value =
-                            _priceUiState.value.copy(
+                        _priceUiState.update { currentState ->
+                            currentState.copy(
                                 realPrice = (Math.round(realPrice * 10) / 10.0),
                                 solarPrice = (Math.round(solarPrice * 10) / 10.0),
                                 saved = Math.round((realPrice - solarPrice) * 10) / 10.0,
-                                loading = false
                             )
+                        }
                     }
+                }
+            } catch (ex: Exception) {
+                _priceUiState.update { currentState ->
+                    currentState.copy(
+                        error = true
+                    )
                 }
             } finally {
                 val day = Scope.entries.filter { scopeToDays[it] == days }[0]
-                _priceUiState.value =
-                    _priceUiState.value.copy(
-                        scope = day
+                _priceUiState.update { currentState ->
+                    currentState.copy(
+                        scope = day,
+                        loading = false
                     )
+                }
             }
         }
     }
@@ -222,9 +236,24 @@ class HomeScreenViewModel : ViewModel() {
     fun changeTimeScope(scope: Scope) {
         viewModelScope.launch {
             try {
+                _priceUiState.update { currentState ->
+                    currentState.copy(
+                        loading = true
+                    )
+                }
                 seePrices(scopeToDays[scope]!!)
+            } catch (ex: Exception) {
+                _priceUiState.update { currentState ->
+                    currentState.copy(
+                        error = true
+                    )
+                }
             } finally {
-
+                _priceUiState.update { currentState ->
+                    currentState.copy(
+                        loading = false
+                    )
+                }
             }
         }
     }
@@ -234,7 +263,8 @@ class HomeScreenViewModel : ViewModel() {
         val solarPrice: Double,
         val saved: Double,
         val loading: Boolean,
-        val scope: Scope
+        val scope: Scope,
+        val error: Boolean = false
     )
 
     enum class Scope {

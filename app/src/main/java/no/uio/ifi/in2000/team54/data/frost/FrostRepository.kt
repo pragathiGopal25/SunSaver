@@ -24,6 +24,8 @@ class FrostRepository() {
     )
 
     suspend fun getObservationData(coordinates: Coordinates): FetchAllData {
+        // creates an object of the data class FetchAllData
+        // the frost API response is to be stores in the variables in this object.
         val fetchData = FetchAllData()
         nameMap.forEach { (name, elementName) ->
             when (name) {
@@ -40,7 +42,7 @@ class FrostRepository() {
     // function that calculates and returns monthly average values for the data
     private fun getMonthlyAverageValues (observationList: List<ObservationData>): Map<String, Double>{
         val averageMonthly = mutableMapOf<String,MutableList<Double>>()
-
+        // note that each month here is stores as "01", "02" etc and not as "Jan", "Feb" ...
         observationList.forEach {
             val month = it.referenceTime.split("-")[1]
             it.observations.forEach { obs -> averageMonthly.getOrPut(month) { mutableListOf() }.add(obs.value) } // extracts month from date

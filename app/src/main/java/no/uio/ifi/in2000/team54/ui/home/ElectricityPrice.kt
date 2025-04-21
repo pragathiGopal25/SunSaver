@@ -95,6 +95,10 @@ fun ExpensesStatBox(
     image: Int,
     uiState: HomeScreenViewModel.PriceUiState
 ) {
+    if (uiState.error) {
+        Text("Det oppstod en feil i beregningen av strømkostnader")
+        return
+    }
     Box(
         modifier = Modifier
             .shadow(
