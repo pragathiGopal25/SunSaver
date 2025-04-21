@@ -9,27 +9,28 @@ import androidx.room.Relation
 // Entities represent tables
 @Entity(tableName = "SolarArrays")
 data class SolarArrayEntity(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
     val name: String,
     val panelType: String,
     val latitude: String, // repository will have to handle this mapping
-    val longtitude: String,
+    val longitude: String,
 )
 
 @Entity(tableName = "RoofSections",
     foreignKeys = [ // establishing "connection" between SolarArrayEntity and RoofSectionEntity
         ForeignKey(
             entity = SolarArrayEntity::class,
-            parentColumns = ["name"],
-            childColumns = ["solarPanelName"],
+            parentColumns = ["id"],
+            childColumns = ["solarArrayId"],
             onDelete = ForeignKey.CASCADE // if the foreign key is deleted from solar_arrays, all those rows referenced by it will also be deleted
         )
     ]
 )
 data class RoofSectionEntity (
     @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val solarPanelName: String,
+    val roofSectionId: Int = 0,
+    val solarArrayId: Long,
     val area: Double,
     val incline: Double,
     val direction: Double,
@@ -41,8 +42,8 @@ data class SolarArrayWithRoofSections( // just for mapping, not a table (thus no
     @Embedded
     val solarArray: SolarArrayEntity,
     @Relation(
-        parentColumn = "name",
-        entityColumn = "solarPanelName"
+        parentColumn = "id",
+        entityColumn = "solarArrayId"
     )
     val roofSections: List<RoofSectionEntity>
 )

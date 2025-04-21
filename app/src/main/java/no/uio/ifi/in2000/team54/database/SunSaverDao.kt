@@ -11,8 +11,9 @@ import androidx.room.Transaction
 @Dao
 interface SunSaverDao {
 
+    // returns created id
     @Insert(onConflict = OnConflictStrategy.IGNORE) // todo: check if should be changed
-    suspend fun insertSolarArray(solarArray: SolarArrayEntity)
+    suspend fun insertSolarArray(solarArray: SolarArrayEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertRoofSections(roofSections: List<RoofSectionEntity>)

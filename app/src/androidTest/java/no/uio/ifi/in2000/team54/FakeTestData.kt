@@ -4,17 +4,17 @@ import no.uio.ifi.in2000.team54.database.RoofSectionEntity
 import no.uio.ifi.in2000.team54.database.SolarArrayEntity
 import no.uio.ifi.in2000.team54.database.SolarArrayWithRoofSections
 
+// roofSectionId will be generated automatically
 object TestSolarArray1 { // immutable test data
     val solarArray = SolarArrayEntity(
         name = "test1",
         panelType = "Premium",
         latitude = "59.899563", // should be transformed by repository
-        longtitude = "10.485503"
+        longitude = "10.485503"
     )
 
     private val roofSection1 = RoofSectionEntity(
-        // id will be generated automatically
-        solarPanelName = "", // datasource has to set it
+        solarArrayId = -1, // will use to verify if insertion works as intended
         area = 23.0,
         incline = 35.0,
         direction = 120.0,
@@ -23,8 +23,7 @@ object TestSolarArray1 { // immutable test data
     )
 
     private val roofSection2 = RoofSectionEntity(
-        // id will be generated automatically
-        solarPanelName = "", // datasource has to set it
+        solarArrayId = -1,
         area = 14.0,
         incline = 35.0,
         direction = 210.0,
@@ -45,11 +44,11 @@ object TestSolarArray2 {
         name = "test2",
         panelType = "Economy",
         latitude = "59.805636",
-        longtitude = "10.806756"
+        longitude = "10.806756"
     )
 
     private val roofSection1 = RoofSectionEntity(
-        solarPanelName = "",
+        solarArrayId = -1,
         area = 20.0,
         incline = 15.0,
         direction = 23.0,
@@ -58,7 +57,7 @@ object TestSolarArray2 {
     )
 
     private val roofSection2 = RoofSectionEntity(
-        solarPanelName = "",
+        solarArrayId = -1,
         area = 20.0,
         incline = 15.0,
         direction = 203.0,

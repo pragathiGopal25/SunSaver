@@ -7,15 +7,15 @@ import javax.inject.Inject
 class SunSaverDatasource @Inject constructor(
     private val sunSaverDao: SunSaverDao
 ){
-    suspend fun insertSolarArrayWithRoofSections(solarArrayWithRoofSections: SolarArrayWithRoofSections) {
-        sunSaverDao.insertSolarArray(solarArrayWithRoofSections.solarArray)
+    suspend fun insertSolarArrayWithRoofSections(solarArrayWithRoofSections: SolarArrayWithRoofSections): Long {
+        val id: Long = sunSaverDao.insertSolarArray(solarArrayWithRoofSections.solarArray)
 
-        val roofSectionsWithForeignKey = solarArrayWithRoofSections.roofSections.map {// add foreign key from solar array
-            it.copy(
-                solarPanelName = solarArrayWithRoofSections.solarArray.name
-            )
+        // add foreign key from solar array
+        val roofSectionsWithForeignKey = solarArrayWithRoofSections.roofSections.map {
+            it.copy(solarArrayId = id)
         }
         sunSaverDao.insertRoofSections(roofSectionsWithForeignKey)
+        return id
     }
 
     suspend fun getAllSolarArrays(): List<SolarArrayWithRoofSections> {
