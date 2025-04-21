@@ -93,7 +93,11 @@ class HomeViewModel : ViewModel() {
 
             try {
 
-                val monthlyTemp = data?.get("Temp") ?: return@launch
+                val monthlyTemp = data?.get("Temp") ?: run {
+
+                    throw NullPointerException()
+                    return@launch
+                }
                 val monthlyCloud = data["Cloud"] ?: return@launch
                 val monthlySnow = data["Snow"] ?: return@launch
                 val monthlyRadiation = data["Radiation"] ?: return@launch
@@ -125,11 +129,12 @@ class HomeViewModel : ViewModel() {
                 }
 
             } catch (e: Exception) {
+                Log.e("HomeViewModel", "Feil ved innlasting av værdata", e)
                 _graphDataUiState.update { currentState ->
                     currentState.copy(
                         loadingState = "Noe gikk galt med innhenting av data."
                     )
-                }
+
             }
 
         }
