@@ -20,6 +20,7 @@ import no.uio.ifi.in2000.team54.data.pvgis.PVGISRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.domain.SolarArray
+import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.util.calculateElectricityProduction
 
 data class GraphDataUiState(
@@ -65,9 +66,9 @@ class HomeViewModel : ViewModel() {
 
                     if (firstSolarArray != null) {
 
-                       fetchedData(firstSolarArray.coordinates)
+                       getWeatherData(firstSolarArray.coordinates)
 
-                        getWeatherData(firstSolarArray)
+                        useWeatherData(firstSolarArray)
 
                         Scope.entries.forEach {
                             loadData(scopeToDays[it]!!, firstSolarArray)
@@ -77,7 +78,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private fun getWeatherData(solarArray: SolarArray?) {
+    private fun useWeatherData(solarArray: SolarArray?) {
 
         viewModelScope.launch {
 
@@ -160,7 +161,7 @@ class HomeViewModel : ViewModel() {
     }
 
     // asynkronisert kombinering av data
-    suspend fun fetchedData(coordinates: Coordinates) {
+    suspend fun getWeatherData(coordinates: Coordinates) {
 
         coroutineScope { // Starter alle kallene parallellt
             try {
@@ -169,10 +170,10 @@ class HomeViewModel : ViewModel() {
                         loadingState = "Beregner estimert strømforbruk ..."
                     )
                 }
-                val asyncTemp = async { _repository.getData(coordinates, "temp") }
-                val asyncCloud = async { _repository.getData(coordinates, "cloud") }
-                val asyncSnow = async { _repository.getData(coordinates, "snow") }
-                val asyncRadiation = async { _repository.getData(coordinates,"radiation") }
+                val asyncTemp = async { _repository.getData(coordinates, Elements.TEMP) }
+                val asyncCloud = async { _repository.getData(coordinates, Elements.CLOUD) }
+                val asyncSnow = async { _repository.getData(coordinates, Elements.SNOW) }
+                val asyncRadiation = async { _repository.getData(coordinates,Elements.IRRIDANCE) }
 
                 val tempData = asyncTemp.await()
                 val cloudData = asyncCloud.await()

@@ -13,11 +13,13 @@ import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import no.uio.ifi.in2000.team54.domain.Coordinates
+import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.model.frost.AvailableObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.ObservationData
 import no.uio.ifi.in2000.team54.model.frost.ObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.SensorSystem
 import no.uio.ifi.in2000.team54.model.frost.SourceResponse
+import kotlin.to
 
 class FrostDatasource {
     private val client = HttpClient(CIO) {
@@ -37,18 +39,18 @@ class FrostDatasource {
     private val authHeader = "Basic $encoded"
 
     private val nameMap = mapOf(
-        "temp" to "mean(air_temperature%20P1M)",
-        "cloud" to "mean(cloud_area_fraction%20P1D)",
-        "snow" to "mean(snow_coverage_type%20P1M)",
-        "radiation" to "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)"
+        Elements.TEMP to "mean(air_temperature%20P1M)",
+        Elements.CLOUD to "mean(cloud_area_fraction%20P1D)",
+        Elements.SNOW to "mean(snow_coverage_type%20P1M)",
+        Elements.IRRIDANCE to "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)"
     )
 
-    private var sensorMap: MutableMap<String, MutableList<String>> = mutableMapOf()
+    private var sensorMap: MutableMap<Elements, MutableList<String>> = mutableMapOf()
 
     private suspend fun fetchNearestSource(
         coordinates: Coordinates,
-        element: String,
-    ): MutableMap<String, MutableList<String>> {
+        element: Elements,
+    ): MutableMap<Elements, MutableList<String>> {
 
         try {
             val response: HttpResponse =
@@ -80,7 +82,7 @@ class FrostDatasource {
 
     suspend fun fetchObservationDataFromFrost(
         coordinates: Coordinates,
-        elementName: String,
+        elementName: Elements,
         referenceTime: String
     ): List<ObservationData> {
         sensorMap = fetchNearestSource(coordinates, elementName)

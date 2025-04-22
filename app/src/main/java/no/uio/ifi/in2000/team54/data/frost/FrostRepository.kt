@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team54.data.frost
 
 import no.uio.ifi.in2000.team54.domain.Coordinates
+import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.model.frost.ObservationData
 
 class FrostRepository() {
@@ -12,7 +13,7 @@ class FrostRepository() {
     // create an object of the data class, ex tempData
     // the frost API response is to be stores in the variables in this object.
 
-    suspend fun getData( coordinates: Coordinates, elementName: String ): Map<String, Double> {
+    suspend fun getData( coordinates: Coordinates, elementName: Elements ): Map<String, Double> {
 
         return getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
     }
