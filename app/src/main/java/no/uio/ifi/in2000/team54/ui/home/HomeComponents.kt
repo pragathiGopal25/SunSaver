@@ -65,7 +65,7 @@ import no.uio.ifi.in2000.team54.ui.theme.YellowText
 
 
 @Composable
-fun HomeScreen(homeViewModel: HomeScreenViewModel, navController: NavController) {
+fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
     Column(
         Modifier
             .fillMaxSize()
@@ -133,7 +133,7 @@ fun HomeScreenTopBar() {
 }
 
 @Composable
-fun SolarArrayList(homeViewModel: HomeScreenViewModel) {
+fun SolarArrayList(homeViewModel: HomeViewModel) {
     val solarArrays = homeViewModel.solarArrays.collectAsState()
 
     Box(
@@ -223,7 +223,7 @@ fun NoSolarArrayCard() {
 }
 
 @Composable
-fun SwitchContent(homeScreenViewModel: HomeScreenViewModel) {
+fun SwitchContent(homeViewModel: HomeViewModel) {
     var isFlipped by remember { mutableStateOf(false) }
 
     Box(
@@ -233,14 +233,20 @@ fun SwitchContent(homeScreenViewModel: HomeScreenViewModel) {
             .width(409.dp),
         contentAlignment = Alignment.Center
     ) {
+        ElectricityCard {
+            if (!isFlipped) {
+                EletricityGraphContainer(viewModel = homeViewModel)
+            } else {
+                ElectricityPriceContainer(viewModel = homeViewModel)
+            }
         ElectricityCard(
             flipped = isFlipped,
             onFlipClick = { isFlipped = !isFlipped }
         ) {
            if (!isFlipped) {
-               EletricityGraphContainer(viewModel = homeScreenViewModel)
+               EletricityGraphContainer(viewModel = homeViewModel)
            } else {
-               ElectricityPriceContainer(viewModel = homeScreenViewModel)
+               ElectricityPriceContainer(viewModel = homeViewModel)
            }
         }
     }
@@ -359,8 +365,3 @@ fun WeatherCard(navController: NavController) {
         )
     }
 }
-
-
-
-
-

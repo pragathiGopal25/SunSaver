@@ -65,7 +65,7 @@ val monthFormatter = CartesianValueFormatter { _, value, _ -> // overriding "for
 @Composable
 fun EletricityGraphContainer(
     modifier: Modifier = Modifier,
-    viewModel: HomeScreenViewModel
+    viewModel: HomeViewModel
 ) {
 
     val graphDataUiState by viewModel.graphDataUiState.collectAsStateWithLifecycle()
