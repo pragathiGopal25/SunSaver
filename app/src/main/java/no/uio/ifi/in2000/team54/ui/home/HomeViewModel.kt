@@ -19,8 +19,8 @@ import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.domain.SolarArray
+import no.uio.ifi.in2000.team54.util.calculateMonthlyElectricityProduction
 import no.uio.ifi.in2000.team54.enums.Elements
-import no.uio.ifi.in2000.team54.util.calculateElectricityProduction
 
 data class GraphDataUiState(
     // only for ElectricityGraph
@@ -129,13 +129,11 @@ class HomeViewModel : ViewModel() {
                 // TODO: fiks under implementeasjon av valg av solararray in focus
 
                 if (!solarArrayLoadedData.containsKey(solarArray)) {
-                    // Log.i("Test", "starting calculation")
-
-                    val electricityProduction: Map<String, Double> = calculateElectricityProduction(
-                        monthlyTemps = weatherData.temp,
+                    val electricityProduction: Map<String, Double> = calculateMonthlyElectricityProduction(
+                        monthlyTemperatures = weatherData.temp,
                         monthlyCloud = weatherData.cloud,
                         monthlySnow = weatherData.snow,
-                        monthlyIrradiance = weatherData.irradiance,
+                        monthlyRadiance = weatherData.irradiance,
                         solarArray = solarArray
                     )
                     solarArrayLoadedData[solarArray] = electricityProduction

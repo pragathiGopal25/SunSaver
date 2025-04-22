@@ -1,82 +1,90 @@
 package no.uio.ifi.in2000.team54.util
 
-import android.util.Log
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import kotlin.math.abs
 
-fun calculateElectricityProduction(
+//Constants used in calculations
+//This makes the code easier to maintain and read if we tweak the calculations
+private const val MINIMUM_OPTIMAL_INCLINE_ANGLE = 15.0 //Degrees
+private const val MAXIMUM_OPTIMAL_INCLINE_ANGLE = 45.0 //Degrees
+private const val INCLINE_ANGLE_EFFICIENCY_DECREASE_PER_DEGREE = 0.05
+private const val DIRECTION_EFFICIENCY_DECREASE_PER_DEGREE = 0.005
+private const val DEFAULT_PANEL_TEMPERATURE_CELSIUS = 25.0
+private const val DEFAULT_PANEL_EFFICIENCY = 0.20
+private const val TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS = 0.5 // Percentage loss per degree Celsius
+
+//Average hours of sun per month in Norway
+private val avgMonthlySunHours = mapOf( // todo: Get from datasource!!
+    "01" to 74.0,
+    "02" to 90.0,
+    "03" to 150.0,
+    "04" to 200.0,
+    "05" to 210.0,
+    "06" to 230.0,
+    "07" to 210.0,
+    "08" to 180.0,
+    "09" to 150.0,
+    "10" to 90.0,
+    "11" to 60.0,
+    "12" to 55.0
+)
+
+//Calculates the monthly electricity production for a solar array based on set factors
+fun calculateMonthlyElectricityProduction(
     monthlyCloud: Map<String, Double>,
     monthlySnow: Map<String, Double>,
-    monthlyIrradiance: Map<String, Double>,
-    monthlyTemps: Map<String, Double>,
+    monthlyRadiance: Map<String, Double>,
+    monthlyTemperatures: Map<String, Double>,
     solarArray: SolarArray
-): Map<String, Double>  {
-    val adjustedIrradiance: Map<String, Double> = calculateSolarEnergy(
-        monthlyCloud = monthlyCloud,
-        monthlySnow = monthlySnow,
-        monthlyRadiance = monthlyIrradiance
-    )
-    val resultMap = mutableMapOf<String, Double>()
-    // need to calculate per roofSection and sum up
-    // factors to consider: paneltype (watt), area, incline, direction, temperature // todo: use watts somewhere
-
+): Map<String, Double> {
+    val monthlyIrradiance = calculateAdjustedSolarIrradiance(monthlyCloud, monthlySnow, monthlyRadiance)
     val roofSections: List<RoofSection> = solarArray.roofSections
 
-    adjustedIrradiance.keys.forEach {
-        val irradiance = adjustedIrradiance[it] ?: 0.0 // W/m2
-        val sunHours = monthlySunHoursAvg[it] ?: 0.0
+    // factors to consider: paneltype (watt), area, incline, direction, temperature // todo: use watts somewhere
+    return monthlyIrradiance.mapValues { (month, irradiance) ->
+        val sunHours = avgMonthlySunHours[month] ?: 0.0
+        val temperature = monthlyTemperatures[month] ?: DEFAULT_PANEL_TEMPERATURE_CELSIUS
+        val efficiency = calculatePanelEfficiency(temperature)
 
-        val temperature = monthlyTemps[it] ?: 25.0
-        var virkningsgrad = 0.20 // average value, have to research how to adjust depending on solarpaneltype // todo
-        // https://snl.no/solceller
-        val temperaturKoeff = 0.5 // percent loss per grad Celsius
-        if (temperature > 25.0) {
-            val overTemp = temperature - 25.0
-            val tapProsent = overTemp * temperaturKoeff
-            virkningsgrad -= virkningsgrad * (tapProsent / 100.0)
-        }
-
-        // calculate the sum for roofSections
-        var resultEnergy = 0.0
-        roofSections.forEach { roofSec ->
-            resultEnergy += irradiance * sunHours* virkningsgrad * roofSec.area * directionImpact(roofSec.direction) * angleImpact(roofSec.incline)
-        }
-        resultMap[it] = resultEnergy/1000
+        // need to calculate per roofSection and sum up
+        roofSections.sumOf { roofSection ->
+            irradiance * sunHours * efficiency * roofSection.area * calculateDirectionImpact(
+                roofSection.direction
+            ) * calculateAngleImpact(roofSection.incline)
+        } / 1000.0 // Convert to kWh
     }
-
-    return resultMap
 }
 
-private fun calculateSolarEnergy( // beregne gjennomsnittlig forventet innkommende solenergi basert på influx, posisjon, skydekke og snø
+//Calculate the efficiency of the solar panel based on temperature in celsius
+//If the temperature is more than default (25 deg) the efficiency decreases
+private fun calculatePanelEfficiency(temperature: Double): Double {
+    var efficiency = DEFAULT_PANEL_EFFICIENCY
+    if (temperature > DEFAULT_PANEL_TEMPERATURE_CELSIUS) {
+        val temperatureDifference = temperature - DEFAULT_PANEL_TEMPERATURE_CELSIUS
+        val efficiencyLossPercentage = temperatureDifference * TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS
+        efficiency -= efficiency * (efficiencyLossPercentage / 100.0)
+    }
+    return efficiency
+}
+
+// Calculate and adjust average solar irradiance based on cloud cover and snow
+private fun calculateAdjustedSolarIrradiance(
     monthlyCloud: Map<String, Double>,
     monthlySnow: Map<String, Double>,
     monthlyRadiance: Map<String, Double>,
 ): Map<String, Double> {
-    val result = mutableMapOf<String, Double>()
-    monthlyRadiance.keys.forEach {
-        var irradiance = monthlyRadiance[it] ?: 0.0
-
-        // calculate snow factor
-        val snowFactor: Double? = monthlySnow[it]?.let { snowLoss(it) }
-        if (snowFactor != null) {
-            irradiance = irradiance.times(snowFactor)
-        }
-
-        // calculate cloud factor
-        val cloudFactor: Double? = monthlyCloud[it]?.let { cloudLoss(it) }
-        if (cloudFactor != null) {
-            irradiance = irradiance.times(cloudFactor)
-        }
-
-        result[it] = irradiance
-
+    return monthlyRadiance.mapValues { (month, radiance) ->
+        var adjustedIrradiance = radiance
+        val snowFactor = monthlySnow[month]?.let { calculateSnowLossFactor(it) } ?: 1.0
+        val cloudFactor = monthlyCloud[month]?.let { calculateCloudLossFactor(it) } ?: 1.0
+        adjustedIrradiance *= snowFactor * cloudFactor
+        adjustedIrradiance
     }
-    Log.i("testRes", result.toString())
-    return result
 }
 
-private fun snowLoss(snowCoverage: Double): Double {
+//Calculates the impact the snow has on solar panel efficiency
+private fun calculateSnowLossFactor(snowCoverage: Double): Double {
     return when (snowCoverage) {
         1.0 -> 0.98
         2.0 -> 0.96
@@ -86,7 +94,8 @@ private fun snowLoss(snowCoverage: Double): Double {
     }
 }
 
-private fun cloudLoss(cloudCover: Double): Double {
+//Calculates the impact the cloud cover has on solar panel efficiency
+private fun calculateCloudLossFactor(cloudCover: Double): Double {
     return when (cloudCover.toInt()) {
         0 -> 1.00
         1 -> 0.97
@@ -103,35 +112,22 @@ private fun cloudLoss(cloudCover: Double): Double {
 
 // https://www.otovo.no/blog/solcellepanel-solceller/solceller-norge-virkningsgrad/#sollys-og-innfallsvinkelhelling-av-solceller
 // todo: can be adjusted
-private fun angleImpact(angle: Double): Double {
-    if (angle in 15.0..45.0) {
+//Calculates the impact the angle of the panel has on solar panel efficiency
+private fun calculateAngleImpact(inclineAngle: Double): Double {
+    if (inclineAngle in MINIMUM_OPTIMAL_INCLINE_ANGLE..MAXIMUM_OPTIMAL_INCLINE_ANGLE) {
         return 1.0
     }
-    val diff = if (angle < 15) {
-        15 - angle
+    val angleOffset = if (inclineAngle < MINIMUM_OPTIMAL_INCLINE_ANGLE) {
+        MINIMUM_OPTIMAL_INCLINE_ANGLE - inclineAngle
     } else {
-        angle - 45
+        inclineAngle - MAXIMUM_OPTIMAL_INCLINE_ANGLE
     }
-    return maxOf(0.5, 1 - (diff * 0.05))
+    return maxOf(0.5, 1 - (angleOffset * INCLINE_ANGLE_EFFICIENCY_DECREASE_PER_DEGREE))
 }
 
 // todo: also can be adjusted
-private fun directionImpact(azimuth: Double): Double {
-    val diff = abs(180 - azimuth)
-    return maxOf(0.5, 1 - (diff * 0.005))
+//Calculates the impact the direction of the panel has on solar panel efficiency
+private fun calculateDirectionImpact(azimuth: Double): Double {
+    val directionOffset = abs(180 - azimuth)
+    return maxOf(0.5, 1 - (directionOffset * DIRECTION_EFFICIENCY_DECREASE_PER_DEGREE))
 }
-
-private val monthlySunHoursAvg = mapOf( // todo: Get from datasource!!
-    "01" to 74.0,
-    "02" to 90.0,
-    "03" to 150.0,
-    "04" to 200.0,
-    "05" to 210.0,
-    "06" to 230.0,
-    "07" to 210.0,
-    "08" to 180.0,
-    "09" to 150.0,
-    "10" to 90.0,
-    "11" to 60.0,
-    "12" to 55.0
-)
