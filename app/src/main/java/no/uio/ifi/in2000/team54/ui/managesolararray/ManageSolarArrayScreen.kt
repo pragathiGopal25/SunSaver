@@ -118,7 +118,7 @@ private fun BackButton(viewModel: ManageSolarArrayViewModel, navController: NavC
             .background(LightestYellow)
             .padding(7.dp)
             .clickable {
-                viewModel.setMapAddress("")
+                viewModel.setSearchAddress("")
                 navController.navigate("home")
             }
     )
@@ -260,7 +260,7 @@ private fun ArraySettingsContent(
                 )
             )
 
-            viewModel.setMapAddress("")
+            viewModel.setSearchAddress("")
             navController.navigate("home")
         })
     }
