@@ -47,6 +47,9 @@ class FrostDatasource {
 
     private var sensorMap: MutableMap<Elements, MutableList<String>> = mutableMapOf()
 
+    private val referenceTime = "2022-12-31/2024-12-31"
+
+
     private suspend fun fetchNearestSource(
         coordinates: Coordinates,
         element: Elements,
@@ -83,7 +86,6 @@ class FrostDatasource {
     suspend fun fetchObservationDataFromFrost(
         coordinates: Coordinates,
         elementName: Elements,
-        referenceTime: String
     ): List<ObservationData> {
         sensorMap = fetchNearestSource(coordinates, elementName)
 

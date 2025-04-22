@@ -7,7 +7,6 @@ import no.uio.ifi.in2000.team54.model.frost.ObservationData
 class FrostRepository() {
     private val datasource: FrostDatasource = FrostDatasource()
 
-    private val dateInterval = "2022-12-31/2024-12-31"
 
     // store fetched data from data source in separate objects
     // create an object of the data class, ex tempData
@@ -15,7 +14,7 @@ class FrostRepository() {
 
     suspend fun getData( coordinates: Coordinates, elementName: Elements ): Map<String, Double> {
 
-        return getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName, dateInterval))
+        return getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName))
     }
 
 
