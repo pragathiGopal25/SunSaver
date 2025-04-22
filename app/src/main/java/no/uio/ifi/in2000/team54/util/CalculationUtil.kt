@@ -8,14 +8,14 @@ import kotlin.math.abs
 fun calculateElectricityProduction(
     monthlyCloud: Map<String, Double>,
     monthlySnow: Map<String, Double>,
-    monthlyRadiance: Map<String, Double>,
+    monthlyIrradiance: Map<String, Double>,
     monthlyTemps: Map<String, Double>,
     solarArray: SolarArray
 ): Map<String, Double>  {
     val adjustedIrradiance: Map<String, Double> = calculateSolarEnergy(
         monthlyCloud = monthlyCloud,
         monthlySnow = monthlySnow,
-        monthlyRadiance = monthlyRadiance
+        monthlyRadiance = monthlyIrradiance
     )
     val resultMap = mutableMapOf<String, Double>()
     // need to calculate per roofSection and sum up

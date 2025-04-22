@@ -24,7 +24,7 @@ fun MainScreen() {
 
     val navController = rememberNavController()
     val manageSolarArrayViewModel = remember { ManageSolarArrayViewModel() }
-    val homeScreenViewModel = remember { HomeScreenViewModel() }
+    val homeViewModel = remember { HomeViewModel() }
     val snackbarState = remember { SnackbarHostState() }
 
     Scaffold(
@@ -46,7 +46,7 @@ fun MainScreen() {
             startDestination = "home",
             modifier = Modifier.padding(innerpadding)
         ) {
-            composable("home") { HomeScreen(homeViewModel = homeScreenViewModel, navController = navController) }
+            composable("home") { HomeScreen(homeViewModel = homeViewModel, navController = navController) }
             composable("stats") { StatScreen() }
             composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState) }
             composable("weather") { WeatherScreen() }
