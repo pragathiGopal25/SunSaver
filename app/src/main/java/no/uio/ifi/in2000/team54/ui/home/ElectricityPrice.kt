@@ -44,7 +44,7 @@ import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 
 
 @Composable
-fun ElectricityPriceContainer(viewModel: HomeViewModel) {
+fun PriceContainer(viewModel: HomeViewModel) {
     val uiState by viewModel.priceUiState.collectAsState()
     Box(
         modifier = Modifier.fillMaxWidth(),

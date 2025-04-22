@@ -63,7 +63,7 @@ val monthFormatter = CartesianValueFormatter { _, value, _ -> // overriding "for
 }
 
 @Composable
-fun EletricityGraphContainer(
+fun GraphContainer(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel
 ) {

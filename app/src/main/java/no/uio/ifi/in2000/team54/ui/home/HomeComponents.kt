@@ -1,6 +1,5 @@
 package no.uio.ifi.in2000.team54.ui.home
 
-import android.R.attr.onClick
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -46,6 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -57,7 +57,6 @@ import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
 import no.uio.ifi.in2000.team54.ui.theme.Lighter
-import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.WeatherBlue
 import no.uio.ifi.in2000.team54.ui.theme.WeatherBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
@@ -82,7 +81,8 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
 fun GreetingMessage() {
     Text(
         text = getGreeting(),
-        style = MaterialTheme.typography.bodyMedium
+        style = MaterialTheme.typography.bodyMedium,
+        fontSize = 18.sp
     )
 }
 
@@ -206,7 +206,7 @@ fun NoSolarArrayCard() {
                     )
                 )
             }
-            .padding(15.dp)
+            .padding(18.dp)
     ) {
         Text(
             "Ingen anlegg",
@@ -214,6 +214,9 @@ fun NoSolarArrayCard() {
             fontWeight = FontWeight.Bold,
             color = Color.Gray,
         )
+
+        Spacer(Modifier.padding(13.dp))
+
         Text(
             "Legg til et nytt anlegg ved å trykke på + symbolet på bunnen av skjermen.",
             fontSize = 12.sp,
@@ -233,44 +236,67 @@ fun SwitchContent(homeViewModel: HomeViewModel) {
             .width(409.dp),
         contentAlignment = Alignment.Center
     ) {
-        ElectricityCard {
-            if (!isFlipped) {
-                EletricityGraphContainer(viewModel = homeViewModel)
-            } else {
-                ElectricityPriceContainer(viewModel = homeViewModel)
-            }
         ElectricityCard(
             flipped = isFlipped,
             onFlipClick = { isFlipped = !isFlipped }
         ) {
-           if (!isFlipped) {
-               EletricityGraphContainer(viewModel = homeViewModel)
-           } else {
-               ElectricityPriceContainer(viewModel = homeViewModel)
-           }
+            if (!isFlipped) {
+                PriceContainer(viewModel = homeViewModel)
+
+            } else {
+                GraphContainer(viewModel = homeViewModel)
+            }
         }
     }
 }
 
-@Composable
-private fun SwitchButton( flipped: Boolean,  onClick: () -> Unit, modifier: Modifier = Modifier ) {
-    val icon =  if (flipped) {
-        Icons.AutoMirrored.Filled.ArrowBack
-    } else {
-        Icons.AutoMirrored.Filled.ArrowForward
-    }
 
+@Composable
+private fun NextCard( flipped: Boolean,  onClick: () -> Unit, modifier: Modifier = Modifier ) {
+
+  if (!flipped)
     Icon(
-        imageVector = icon,
-        contentDescription = if (flipped) "Neste kort" else "Forrige kort",
+        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+        contentDescription = "Neste kort",
         tint = DarkYellow,
-        modifier = Modifier
+        modifier = modifier
             .padding(10.dp)
             .size(35.dp)
             .clickable { onClick() }
             .padding(7.dp)
     )
+
+    // Skal kun vises før neste kort er i fokus
+
 }
+
+@Composable
+private fun PreviousCard( flipped: Boolean,  onClick: () -> Unit, modifier: Modifier = Modifier ) {
+
+    if (flipped)
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Forrige kort",
+            tint = DarkYellow,
+            modifier = modifier
+                .padding(10.dp)
+                .size(35.dp)
+                .clickable { onClick() }
+                .padding(7.dp)
+        )
+
+    // Skal kun vises når det er mulig for bruker å navigere seg tilbake
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewSwitchContent() {
+
+    val hvm = HomeViewModel()
+   SwitchContent(hvm)
+}
+
 
 @Composable
 fun ElectricityCard(
@@ -285,7 +311,7 @@ fun ElectricityCard(
             .padding(15.dp)
             .clip(RoundedCornerShape(20.dp))
             .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
-            .height(250.dp)
+            .height(262.dp)
             .width(395.dp),
 
         shape = RoundedCornerShape(20.dp),
@@ -297,6 +323,23 @@ fun ElectricityCard(
     ) {
 
         Box(modifier = Modifier.fillMaxSize() ) {
+
+            NextCard(
+                flipped = flipped,
+                onClick = onFlipClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(10.dp)
+            )
+
+            PreviousCard(
+                flipped = flipped,
+                onClick = onFlipClick,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(10.dp)
+            )
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -305,26 +348,24 @@ fun ElectricityCard(
                 ) {
                     Text(
                         text = "Strømutgifter ",
-                        style = MaterialTheme.typography.bodyLarge
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontSize = 18.sp
                     )
                     Text(
                         text = "& Sparing",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = YellowText
+                        color = YellowText,
+                        fontSize = 18.sp
                     )
                 }
                 content()
             }
-            SwitchButton(
-                flipped = flipped,
-                onClick = onFlipClick,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(10.dp)
-            )
         }
     }
 }
+
+
+
 
 @Composable
 fun WeatherCard(navController: NavController) {
