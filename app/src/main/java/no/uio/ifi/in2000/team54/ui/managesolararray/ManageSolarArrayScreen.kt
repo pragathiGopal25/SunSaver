@@ -23,8 +23,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
@@ -138,7 +140,7 @@ private fun ArraySettingsMenu(
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
 
     val anchors = DraggableAnchors {
-        ArraySettingsMenuAnchors.Bottom at screenSizePx - 750f
+        ArraySettingsMenuAnchors.Bottom at screenSizePx - 700f
         ArraySettingsMenuAnchors.Top at 150f
     }
 
@@ -209,12 +211,7 @@ private fun ArraySettingsContent(
     navController: NavController,
     roofSections: SnapshotStateList<RoofSection>
 ) {
-    val addressState by viewModel.mapAddress.collectAsState()
-
     var solarPanelType by remember { mutableStateOf(SolarPanelType.PREMIUM) }
-    var openSaveDialog by remember { mutableStateOf(false) }
-
-    val scope = rememberCoroutineScope()
 
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
@@ -226,43 +223,14 @@ private fun ArraySettingsContent(
         ArraySettingsMainSection(
             mapState,
             mapViewportState,
+            snackbarState,
             draggableState,
+            navController,
             viewModel,
             solarPanelType,
             roofSections,
             { solarPanelType = it }
         )
-        SaveButton {
-            if (addressState.address == null) {
-                scope.launch {
-                    snackbarState.showSnackbar("Du må fylle inn en adresse for å lagre.")
-                }
-                return@SaveButton
-            }
-
-            if (roofSections.isEmpty()) {
-                scope.launch {
-                    snackbarState.showSnackbar("Du må legge til minst én takflate for å lagre.")
-                }
-                return@SaveButton
-            }
-
-            openSaveDialog = true
-        }
-        SaveDialog(openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
-            viewModel.addSolarArray(
-                SolarArray(
-                    name,
-                    solarPanelType,
-                    roofSections,
-                    addressState.address!!.pos.toCoordinates(),
-                    power.toDouble()
-                )
-            )
-
-            viewModel.setMapAddress("")
-            navController.navigate("home")
-        })
     }
 }
 
@@ -271,13 +239,20 @@ private fun ArraySettingsContent(
 private fun ArraySettingsMainSection(
     mapState: MapState,
     mapViewportState: MapViewportState,
+    snackbarState: SnackbarHostState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
+    navController: NavController,
     viewModel: ManageSolarArrayViewModel,
     solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>,
     onSelectPanelType: (SolarPanelType) -> Unit
 ) {
+    val addressState by viewModel.mapAddress.collectAsState()
     var editingRoofSection by remember { mutableStateOf<Int?>(null) }
+    var openSaveDialog by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+    val scroll = rememberScrollState()
 
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -289,13 +264,49 @@ private fun ArraySettingsMainSection(
         Column(
             verticalArrangement = Arrangement.spacedBy(15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .then(
+                    if (draggableState.currentValue == ArraySettingsMenuAnchors.Top) Modifier.verticalScroll(scroll)
+                    else Modifier
+                )
         ) {
             RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
             ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
             SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
             PriceSummaryCard(viewModel, solarPanelType, roofSections)
+            SaveButton {
+                if (addressState.address == null) {
+                    scope.launch {
+                        snackbarState.showSnackbar("Du må fylle inn en adresse for å lagre.")
+                    }
+                    return@SaveButton
+                }
+
+                if (roofSections.isEmpty()) {
+                    scope.launch {
+                        snackbarState.showSnackbar("Du må legge til minst én takflate for å lagre.")
+                    }
+                    return@SaveButton
+                }
+
+                openSaveDialog = true
+            }
         }
     }
+    SaveDialog(openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
+        viewModel.addSolarArray(
+            SolarArray(
+                name,
+                solarPanelType,
+                roofSections,
+                addressState.address!!.pos.toCoordinates(),
+                power.toDouble()
+            )
+        )
+
+        viewModel.setMapAddress("")
+        navController.navigate("home")
+    })
 }
 
 @Composable
