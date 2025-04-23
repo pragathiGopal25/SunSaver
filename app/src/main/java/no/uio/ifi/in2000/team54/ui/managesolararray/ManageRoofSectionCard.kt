@@ -37,7 +37,8 @@ import no.uio.ifi.in2000.team54.ui.theme.Red
 fun ManageRoofSectionCard(
     roofSections: SnapshotStateList<RoofSection>,
     editingRoofSectionIndex: Int?,
-    onSave: () -> Unit
+    onSave: () -> Unit,
+    updateArray: String? = ""
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 

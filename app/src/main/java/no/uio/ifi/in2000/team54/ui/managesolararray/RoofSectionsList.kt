@@ -37,7 +37,12 @@ import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.Red
 
 @Composable
-fun RoofSectionsList(roofSections: SnapshotStateList<RoofSection>, onRemove: () -> Unit, onEdit: (Int) -> Unit) {
+fun RoofSectionsList(
+    roofSections: SnapshotStateList<RoofSection>,
+    onRemove: () -> Unit,
+    onEdit: (Int) -> Unit,
+    updateArray: String? = ""
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -46,9 +51,12 @@ fun RoofSectionsList(roofSections: SnapshotStateList<RoofSection>, onRemove: () 
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            if (roofSections.isEmpty()) {
+            if (roofSections.isEmpty() && updateArray == "") {
                 NoRoofSectionCard()
             } else {
+                if (updateArray != "" ){
+
+                }
                 roofSections.forEachIndexed { index, section ->
                     RoofSectionCard(
                         section,

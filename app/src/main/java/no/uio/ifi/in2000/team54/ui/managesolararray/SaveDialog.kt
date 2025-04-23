@@ -13,6 +13,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Updater
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import no.uio.ifi.in2000.team54.ui.theme.Red
 
 @Composable
 fun SaveDialog(
+    updaterArray: String? = "",
     open: Boolean,
     onClose: () -> Unit,
     onSave: (name: String, power: String) -> Unit,

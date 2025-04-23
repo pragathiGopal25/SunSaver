@@ -36,7 +36,8 @@ import java.util.Locale
 fun PriceSummaryCard(
     viewModel: ManageSolarArrayViewModel,
     solarPanelType: SolarPanelType,
-    roofSections: SnapshotStateList<RoofSection>
+    roofSections: SnapshotStateList<RoofSection>,
+    updateArray: String? = ""
 ) {
     val totalPanels = roofSections.sumOf { it.panels }
     val grossPrice = solarPanelType.totalPrice(totalPanels)

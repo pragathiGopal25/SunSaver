@@ -79,7 +79,7 @@ private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
 enum class ArraySettingsMenuAnchors { Bottom, Top }
 
 @Composable
-fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: NavController, snackbarState: SnackbarHostState) {
+fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: NavController, snackbarState: SnackbarHostState, updateArray: String? = "") {
     val roofSections = remember { mutableStateListOf<RoofSection>() }
 
     val mapViewportState = rememberMapViewportState {
@@ -99,7 +99,8 @@ fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: 
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections)
+            ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections, updateArray)
+
         }
     }
 }
@@ -132,7 +133,8 @@ private fun ArraySettingsMenu(
     snackbarState: SnackbarHostState,
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
-    roofSections: SnapshotStateList<RoofSection>
+    roofSections: SnapshotStateList<RoofSection>,
+    updateArray: String? = ""
 ) {
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
@@ -166,7 +168,8 @@ private fun ArraySettingsMenu(
                 draggableState,
                 viewModel,
                 navController,
-                roofSections
+                roofSections,
+                updateArray
             )
         }
     }
@@ -207,7 +210,8 @@ private fun ArraySettingsContent(
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
-    roofSections: SnapshotStateList<RoofSection>
+    roofSections: SnapshotStateList<RoofSection>,
+    updateArray: String? = ""
 ) {
     val addressState by viewModel.mapAddress.collectAsState()
 
@@ -230,7 +234,8 @@ private fun ArraySettingsContent(
             viewModel,
             solarPanelType,
             roofSections,
-            { solarPanelType = it }
+            { solarPanelType = it },
+            updateArray
         )
         SaveButton {
             if (addressState.address == null) {
@@ -249,7 +254,7 @@ private fun ArraySettingsContent(
 
             openSaveDialog = true
         }
-        SaveDialog(openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
+        SaveDialog(updateArray, openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
             viewModel.addSolarArray(
                 SolarArray(
                     name,
@@ -275,25 +280,28 @@ private fun ArraySettingsMainSection(
     viewModel: ManageSolarArrayViewModel,
     solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>,
-    onSelectPanelType: (SolarPanelType) -> Unit
+    onSelectPanelType: (SolarPanelType) -> Unit,
+    updateArray: String?
 ) {
     var editingRoofSection by remember { mutableStateOf<Int?>(null) }
+
+    
 
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DragHandle()
-        SearchField(mapState, mapViewportState, draggableState, viewModel)
+        SearchField(mapState, mapViewportState, draggableState, viewModel, updateArray)
         Spacer(modifier = Modifier.size(10.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
-            ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
-            SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
-            PriceSummaryCard(viewModel, solarPanelType, roofSections)
+            RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it }, updateArray)
+            ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null }, updateArray)
+            SolarPanelTypeDropdown(solarPanelType, onSelectPanelType, updateArray)
+            PriceSummaryCard(viewModel, solarPanelType, roofSections, updateArray)
         }
     }
 }
@@ -334,7 +342,11 @@ private fun SaveButton(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SolarPanelTypeDropdown(solarPanelType: SolarPanelType, onSelect: (SolarPanelType) -> Unit) {
+private fun SolarPanelTypeDropdown(
+    solarPanelType: SolarPanelType,
+    onSelect: (SolarPanelType) -> Unit,
+    updateArray: String?
+) {
     var dropdownExpanded by remember { mutableStateOf(false) }
 
     Column(

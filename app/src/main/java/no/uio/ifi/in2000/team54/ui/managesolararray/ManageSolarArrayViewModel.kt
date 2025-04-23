@@ -82,6 +82,11 @@ class ManageSolarArrayViewModel : ViewModel() {
     fun addSolarArray(newSolarArray: SolarArray) {
         _sharedRepository.addSolarArray(newSolarArray)
     }
+
+    // To Update the roof sections and other values when user edits
+    fun updateSolarArray(newSolarArray: SolarArray){
+        _sharedRepository.updateSolarArray(newSolarArray)
+    }
 }
 
 data class AddressState(

@@ -18,6 +18,8 @@ import no.uio.ifi.in2000.team54.ui.home.pages.StatScreen
 import no.uio.ifi.in2000.team54.ui.home.pages.WeatherScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 
 @Composable
 fun MainScreen() {
@@ -51,6 +53,14 @@ fun MainScreen() {
             composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState) }
             composable("weather") { WeatherScreen() }
             composable("settings") { SettingsScreen() }
+
+            composable(
+                "EditSolarPanels/{arrayName}",
+                arguments = listOf(navArgument("arrayName") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val arrayName = backStackEntry.arguments?.getString("arrayName") ?: ""
+                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, arrayName)
+            }
         }
     }
 }

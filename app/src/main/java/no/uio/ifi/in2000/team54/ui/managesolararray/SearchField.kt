@@ -58,7 +58,8 @@ fun SearchField(
     mapState: MapState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
-    viewModel: ManageSolarArrayViewModel
+    viewModel: ManageSolarArrayViewModel,
+    updateArray: String? = ""
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -67,6 +68,11 @@ fun SearchField(
     val addressState = viewModel.mapSearchAddress.collectAsState()
     val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsState()
     var showSuggestions by remember { mutableStateOf(false) }
+
+    // if user wants to edit an solar array setup
+    val savedAddress = viewModel.mapAddress.collectAsState()
+    val savedAddressString = savedAddress.value.address?.toFormatted()
+
 
     val selectSuggestion: (Address) -> Unit = remember {
         { suggestion ->
@@ -88,7 +94,7 @@ fun SearchField(
 
     Column {
         SearchTextField(
-            address = addressState.value.query,
+            address = if (updateArray == "") addressState.value.query else savedAddressString.toString(),
             onAddressChange = { address ->
                 viewModel.setMapAddress(address)
             },
