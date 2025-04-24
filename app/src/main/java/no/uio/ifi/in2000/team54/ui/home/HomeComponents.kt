@@ -223,6 +223,13 @@ fun NoSolarArrayCard() {
 }
 
 @Composable
+fun NoInternetDialog() {
+
+
+
+}
+
+@Composable
 fun SwitchContent(homeViewModel: HomeViewModel) {
     var isFlipped by remember { mutableStateOf(false) }
 
