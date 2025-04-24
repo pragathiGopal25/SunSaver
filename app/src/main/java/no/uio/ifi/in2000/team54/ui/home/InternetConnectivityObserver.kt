@@ -33,7 +33,6 @@ class InternetConnectivityObserver (
                     val connected = networkCapabilities.hasCapability(
                         NetworkCapabilities.NET_CAPABILITY_VALIDATED
                     )
-
                     trySend(connected)
                 }
 
@@ -52,7 +51,6 @@ class InternetConnectivityObserver (
                     trySend(false)
                 }
             }
-
             connectivityManager.registerDefaultNetworkCallback(callback)
 
             awaitClose {
@@ -60,5 +58,4 @@ class InternetConnectivityObserver (
                 connectivityManager.unregisterNetworkCallback(callback)
             }
         }
-
 }
