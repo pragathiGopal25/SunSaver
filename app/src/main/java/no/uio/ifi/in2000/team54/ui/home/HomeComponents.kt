@@ -241,10 +241,10 @@ fun SwitchContent(homeViewModel: HomeViewModel) {
             onFlipClick = { isFlipped = !isFlipped }
         ) {
             if (!isFlipped) {
-                PriceContainer(viewModel = homeViewModel)
+                GraphContainer(viewModel = homeViewModel)
 
             } else {
-                GraphContainer(viewModel = homeViewModel)
+                PriceContainer(viewModel = homeViewModel)
             }
         }
     }
