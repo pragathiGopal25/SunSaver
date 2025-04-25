@@ -182,7 +182,7 @@ class HomeViewModel : ViewModel() {
 
             try {
                 if (!electricityProductionMap.containsKey(solarArray)) {
-                    val electricityProduction: Map<String, Double> = //map: <måned,strømproduksjon>
+                    val electricityProduction: Map<String, Double> =
                         calculateMonthlyElectricityProduction(
                             monthlyTemperatures = weatherData.temp,
                             monthlyCloud = weatherData.cloud,
@@ -222,7 +222,7 @@ class HomeViewModel : ViewModel() {
 
     fun selectSolarArray(solarArray: SolarArray) {
         viewModelScope.launch {
-            if (homeUiState.value.solarArrays.value.isEmpty()) return@launch //Må velge fra liste
+            if (homeUiState.value.solarArrays.value.isEmpty()) return@launch
             try {
                 useWeatherData(solarArray)
                 loadElectricityPrices(solarArray)
