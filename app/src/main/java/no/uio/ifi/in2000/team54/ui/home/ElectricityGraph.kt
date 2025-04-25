@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -16,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
@@ -52,50 +52,58 @@ import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 
-val monthFormatter = CartesianValueFormatter { _, value, _ -> // overriding "format" method in CastertianValueFormatter
-    val months = listOf(
-        "Jan", "Feb", "Mar", "Apr", "Mai", "Jun",
-        "Jul", "Aug", "Sep", "Okt", "Nov", "Des"
-    )
-    val index = value.toInt().coerceIn(0, months.size - 1)  // Keep within bounds
-    months[index]
-}
+val monthFormatter =
+    CartesianValueFormatter { _, value, _ -> // overriding "format" method in CastertianValueFormatter
+        val months = listOf(
+            "Jan", "Feb", "Mar", "Apr", "Mai", "Jun",
+            "Jul", "Aug", "Sep", "Okt", "Nov", "Des"
+        )
+        val index = value.toInt().coerceIn(0, months.size - 1)  // Keep within bounds
+        months[index]
+    }
 
 @Composable
 fun EletricityGraphContainer(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel
 ) {
-
-    val graphDataUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val graphLoadingState by viewModel.graphLoadingState.collectAsStateWithLifecycle()
+    val graphDataUiState by viewModel.homeUiState.collectAsState()
+    val graphLoadingState by viewModel.graphLoadingState.collectAsState()
     if (graphDataUiState.electricityProductionData.isEmpty()) {
         Box(modifier.fillMaxSize(), Alignment.Center) {
             Text(text = graphLoadingState.loadingMessage)
         }
     } else {
-        ElectricityGraph(data = graphDataUiState.electricityProductionData)
+        ElectricityGraph(graphDataUiState = graphDataUiState)
     }
 }
 
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
 
 
-
 @Composable
-fun ElectricityGraph (
+fun ElectricityGraph(
     modifier: Modifier = Modifier,
-    data: Map<String, List<Double>>
-){
+    graphDataUiState: HomeUiState
+) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    Box(modifier = modifier,
+    Box(
+        modifier = modifier,
         contentAlignment = Alignment.Center,
-        ) {
-        LaunchedEffect(Unit) {
+    ) {
+        LaunchedEffect(graphDataUiState) {
             modelProducer.runTransaction {
-                lineSeries { data.forEach{(_, list) -> series(list)}}
-                extras { extraStore -> extraStore[LegendLabelKey] = data.keys }
+                lineSeries {
+                    graphDataUiState.electricityProductionData.forEach { (_, list) ->
+                        series(
+                            list
+                        )
+                    }
+                }
+                extras { extraStore ->
+                    extraStore[LegendLabelKey] = graphDataUiState.electricityProductionData.keys
+                }
             }
         }
 
@@ -104,20 +112,21 @@ fun ElectricityGraph (
 
         CartesianChartHost(
             rememberCartesianChart(
-                rememberLineCartesianLayer(LineCartesianLayer.LineProvider.series(
-                    lineColors.map { color ->
-                        LineCartesianLayer.rememberLine(
-                            fill = LineCartesianLayer.LineFill.double(fill(color), fill(color)),
-                            areaFill = LineCartesianLayer.AreaFill.single(
-                                Fill(
-                                ShaderProvider.verticalGradient(
-                                    ColorUtils.setAlphaComponent(0xFFF9B87D.toInt(), 102),
-                                    android.graphics.Color.TRANSPARENT,
-                                )
+                rememberLineCartesianLayer(
+                    LineCartesianLayer.LineProvider.series(
+                        lineColors.map { color ->
+                            LineCartesianLayer.rememberLine(
+                                fill = LineCartesianLayer.LineFill.double(fill(color), fill(color)),
+                                areaFill = LineCartesianLayer.AreaFill.single(
+                                    Fill(
+                                        ShaderProvider.verticalGradient(
+                                            ColorUtils.setAlphaComponent(0xFFF9B87D.toInt(), 102),
+                                            android.graphics.Color.TRANSPARENT,
+                                        )
+                                    )
+                                ),
                             )
-                            ),
-                        )
-                    })
+                        })
                 ),
                 startAxis = VerticalAxis.rememberStart(
                     title = "Strøm produsert (kWh)",
@@ -145,12 +154,15 @@ fun ElectricityGraph (
                     })
             ),
             modelProducer,
-            modifier = modifier.padding(10.dp).height(250.dp),
+            modifier = modifier
+                .padding(10.dp)
+                .height(250.dp),
             scrollState = rememberVicoScrollState(scrollEnabled = false), // disabled so it fits the box
 
         )
     }
 }
+
 /*
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
 @Composable

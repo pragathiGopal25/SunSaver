@@ -44,7 +44,7 @@ import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 
 @Composable
 fun ElectricityPriceContainer(viewModel: HomeViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.homeUiState.collectAsState()
     val loadingState by viewModel.priceLoadingState.collectAsState()
     if (loadingState.loadingMessage != "") {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -139,12 +139,12 @@ fun TimeScopeSegmentedButton(
     val options = listOf("Dag", "Måned", "År")
 
     val map = mapOf(
-        Scope.DAY to 0,
-        Scope.MONTH to 1,
-        Scope.YEAR to 2
+        TimeScope.DAY to 0,
+        TimeScope.MONTH to 1,
+        TimeScope.YEAR to 2
     )
 
-    if (map[uiState.scope] != selectedIndex) selectedIndex = map[uiState.scope]!!
+    if (map[uiState.timeScope] != selectedIndex) selectedIndex = map[uiState.timeScope]!!
 
     SingleChoiceSegmentedButtonRow {
         options.forEachIndexed { index, label ->
@@ -155,7 +155,7 @@ fun TimeScopeSegmentedButton(
                 ),
                 onClick = {
                     selectedIndex = index
-                    viewModel.changeTimeScope(Scope.entries[selectedIndex])
+                    viewModel.changeTimeScope(TimeScope.entries[selectedIndex])
                 },
                 selected = index == selectedIndex,
                 icon = {},

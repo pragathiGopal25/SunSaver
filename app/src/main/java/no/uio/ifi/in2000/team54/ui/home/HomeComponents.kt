@@ -148,25 +148,23 @@ fun SolarArrayList(homeViewModel: HomeViewModel) {
 
 @Composable
 fun SolarArrayCard(solarArray: SolarArray, viewModel: HomeViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.homeUiState.collectAsState()
     val baseModifier = Modifier
         .width(200.dp)
         .height(220.dp)
         .padding(15.dp)
         .clip(RoundedCornerShape(20.dp))
         .background(LightOrange)
-        .clickable { viewModel.selectSolarArray(solarArray)}
+        .clickable { viewModel.selectSolarArray(solarArray) }
     Box(
         modifier = Modifier
             .then(
                 if (solarArray == uiState.selectedSolarArray) {
                     baseModifier.border(4.dp, YellowerBorder, shape = RoundedCornerShape(20.dp))
-                }
-                else {
+                } else {
                     baseModifier.border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
                 }
-            )
-        ,
+            ),
     ) {
         Column {
 
