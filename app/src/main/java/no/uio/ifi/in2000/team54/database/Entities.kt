@@ -30,7 +30,7 @@ data class SolarArrayEntity(
 )
 data class RoofSectionEntity (
     @PrimaryKey(autoGenerate = true)
-    val roofSectionId: Int = 0,
+    val roofSectionId: Long = 0,
     val solarArrayId: Long,
     val area: Double,
     val incline: Double,

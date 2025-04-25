@@ -65,7 +65,7 @@ class SunSaverDatasource @Inject constructor(
         // case 2: we want to add new roof sections.
         // they have roofSectionId = 0
         val addedRoofSections = roofSectionsWithForeignKey.filter {
-            it.roofSectionId == 0 // 0 is a placeholder
+            it.roofSectionId == 0L // 0 is a placeholder
         }
         sunSaverDao.insertRoofSections(addedRoofSections)
     }
