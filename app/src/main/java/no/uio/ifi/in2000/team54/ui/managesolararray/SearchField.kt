@@ -70,7 +70,7 @@ fun SearchField(
 
     val selectSuggestion: (Address) -> Unit = remember {
         { suggestion ->
-            viewModel.setMapAddress(suggestion.toFormatted())
+            viewModel.setSearchAddress(suggestion.toFormatted())
             viewModel.setMapAddress(suggestion)
 
             scope.launch {
@@ -90,7 +90,7 @@ fun SearchField(
         SearchTextField(
             address = addressState.value.query,
             onAddressChange = { address ->
-                viewModel.setMapAddress(address)
+                viewModel.setSearchAddress(address)
             },
             onDone = {
                 keyboardController?.hide()
