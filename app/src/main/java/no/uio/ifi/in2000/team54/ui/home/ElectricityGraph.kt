@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
@@ -67,8 +68,8 @@ fun EletricityGraphContainer(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel
 ) {
-    val graphDataUiState by viewModel.homeUiState.collectAsState()
-    val graphLoadingState by viewModel.graphLoadingState.collectAsState()
+    val graphDataUiState by viewModel.homeUiState.collectAsStateWithLifecycle()
+    val graphLoadingState by viewModel.graphLoadingState.collectAsStateWithLifecycle()
     if (graphDataUiState.electricityProductionData.isEmpty()) {
         Box(modifier.fillMaxSize(), Alignment.Center) {
             Text(text = graphLoadingState.loadingMessage)
