@@ -9,8 +9,8 @@ object TestSolarArray1 { // immutable test data
     val solarArray = SolarArrayEntity(
         name = "test1",
         panelType = "Premium",
-        latitude = "59.899563", // should be transformed by repository
-        longitude = "10.485503"
+        latitude = 59.899563, // should be transformed by repository
+        longitude = 10.485503
     )
 
     private val roofSection1 = RoofSectionEntity(
@@ -43,8 +43,8 @@ object TestSolarArray2 {
     private val solarArray = SolarArrayEntity(
         name = "test2",
         panelType = "Economy",
-        latitude = "59.805636",
-        longitude = "10.806756"
+        latitude = 59.805636,
+        longitude = 10.806756
     )
 
     private val roofSection1 = RoofSectionEntity(

@@ -13,8 +13,8 @@ data class SolarArrayEntity(
     val id: Long = 0,
     val name: String,
     val panelType: String,
-    val latitude: String, // repository will have to handle this mapping
-    val longitude: String,
+    val latitude: Double, // repository will have to handle this mapping
+    val longitude: Double,
 )
 
 @Entity(tableName = "RoofSections",
