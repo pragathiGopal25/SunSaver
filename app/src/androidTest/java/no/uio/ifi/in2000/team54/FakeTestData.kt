@@ -10,7 +10,8 @@ object TestSolarArray1 { // immutable test data
         name = "test1",
         panelType = "Premium",
         latitude = 59.899563, // should be transformed by repository
-        longitude = 10.485503
+        longitude = 10.485503,
+        powerConsumption = 1200.0
     )
 
     private val roofSection1 = RoofSectionEntity(
@@ -44,7 +45,8 @@ object TestSolarArray2 {
         name = "test2",
         panelType = "Economy",
         latitude = 59.805636,
-        longitude = 10.806756
+        longitude = 10.806756,
+        powerConsumption = 1200.0
     )
 
     private val roofSection1 = RoofSectionEntity(

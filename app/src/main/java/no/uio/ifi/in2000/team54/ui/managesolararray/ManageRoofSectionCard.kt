@@ -135,6 +135,7 @@ fun ManageRoofSectionCard(
                 }
 
                 val newSection = RoofSection(
+                    id = null,
                     area.toDouble(),
                     incline.toDouble(),
                     direction.toDouble(),

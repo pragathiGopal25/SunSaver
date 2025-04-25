@@ -12,9 +12,9 @@ class HomeViewModelUnitTest {
 
     @Test
     fun testCalculationShouldReturnTrue() {
-        //TODO arrange
-
+        // arrange
         val testRoofSection = RoofSection(
+            id = 1,
             area = 10.0,
             incline = 45.0,
             direction = 10.0,
@@ -26,6 +26,7 @@ class HomeViewModelUnitTest {
             55.5, 55.5
         )
         val testArray = SolarArray(
+            id = 1,
             name = "test",
             panelType = SolarPanelType.PREMIUM,
             roofSections = testList,
@@ -90,7 +91,7 @@ class HomeViewModelUnitTest {
             "12" to 1.0
         )
 
-        //TODO act
+        // act
         val expectedResult = mapOf(
             "01" to 0.0703444,
             "02" to 0.085554,
@@ -113,7 +114,7 @@ class HomeViewModelUnitTest {
             solarArray = testArray
         )
 
-        //TODO assert
+        // assert
         expectedResult.forEach {
             assertEquals(it.value, result[it.key]!!, 0.001)
         }

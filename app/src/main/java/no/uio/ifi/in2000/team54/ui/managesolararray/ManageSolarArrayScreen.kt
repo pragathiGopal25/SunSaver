@@ -296,6 +296,7 @@ private fun ArraySettingsMainSection(
     SaveDialog(openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
         viewModel.addSolarArray(
             SolarArray(
+                id = null,
                 name,
                 solarPanelType,
                 roofSections,
