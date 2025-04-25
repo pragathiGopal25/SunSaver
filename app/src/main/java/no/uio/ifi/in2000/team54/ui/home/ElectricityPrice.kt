@@ -79,7 +79,7 @@ fun ElectricityPriceContainer(viewModel: HomeViewModel) {
 }
 
 @Composable
-fun IndeterminateCircularIndicator(uiState: HomeViewModel.PriceUiState) {
+fun IndeterminateCircularIndicator(uiState: PriceUiState) {
     if (!uiState.loading) return
     CircularProgressIndicator(
         modifier = Modifier.width(23.dp),
@@ -93,7 +93,7 @@ fun ExpensesStatBox(
     main: Boolean,
     text: String,
     image: Int,
-    uiState: HomeViewModel.PriceUiState
+    uiState: PriceUiState
 ) {
     if (uiState.error) {
         Text("Det oppstod en feil i beregningen av strømkostnader")
@@ -144,15 +144,15 @@ fun ExpensesStatBox(
 @Composable
 fun TimeScopeSegmentedButton(
     viewModel: HomeViewModel,
-    uiState: HomeViewModel.PriceUiState
+    uiState: PriceUiState
 ) {
     var selectedIndex by remember { mutableIntStateOf(0) }
     val options = listOf("Dag", "Måned", "År")
 
     val map = mapOf(
-        HomeViewModel.Scope.DAY to 0,
-        HomeViewModel.Scope.MONTH to 1,
-        HomeViewModel.Scope.YEAR to 2
+        Scope.DAY to 0,
+        Scope.MONTH to 1,
+        Scope.YEAR to 2
     )
 
     if (map[uiState.scope] != selectedIndex) selectedIndex = map[uiState.scope]!!
@@ -166,7 +166,7 @@ fun TimeScopeSegmentedButton(
                 ),
                 onClick = {
                     selectedIndex = index
-                    viewModel.changeTimeScope(HomeViewModel.Scope.entries[selectedIndex])
+                    viewModel.changeTimeScope(Scope.entries[selectedIndex])
                 },
                 selected = index == selectedIndex,
                 icon = {},

@@ -97,6 +97,7 @@ fun ElectricityGraph (
             modelProducer.runTransaction {
                 lineSeries { data.forEach{(_, list) -> series(list)}}
                 extras { extraStore -> extraStore[LegendLabelKey] = data.keys }
+                Log.i("test", data.keys.toString())
             }
         }
 
