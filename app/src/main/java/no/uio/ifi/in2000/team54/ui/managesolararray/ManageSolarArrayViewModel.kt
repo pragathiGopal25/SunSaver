@@ -12,11 +12,13 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
+import no.uio.ifi.in2000.team54.model.building.Pos
 
 class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
@@ -73,7 +75,7 @@ class ManageSolarArrayViewModel : ViewModel() {
         )
     }
 
-    fun setMapAddress(query: String) {
+    fun setSearchAddress(query: String) {
         _mapSearchAddress.value = _mapSearchAddress.value.copy(
             query = query
         )
@@ -81,6 +83,15 @@ class ManageSolarArrayViewModel : ViewModel() {
 
     fun addSolarArray(newSolarArray: SolarArray) {
         _sharedRepository.addSolarArray(newSolarArray)
+    }
+
+    fun queryAddressAtPos(pos: Pos) {
+        viewModelScope.launch {
+            val address = repository.getNearestAddressToPos(pos) ?: return@launch
+
+            setSearchAddress(address.toFormatted())
+            setMapAddress(address)
+        }
     }
 }
 
