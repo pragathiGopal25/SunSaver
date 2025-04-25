@@ -21,14 +21,12 @@ import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.util.calculateMonthlyElectricityProduction
 
-
-// Ha selectedsolararray som key i en map som er koblet til data
 data class HomeUiState(
-    val solarArrays: StateFlow<List<SolarArray>>, //fungerer som tidligere
+    val solarArrays: StateFlow<List<SolarArray>>,
     val selectedSolarArray: SolarArray?,
-    val priceData: PriceData, //oppdater data etter selected solar array
+    val priceData: PriceData,
     val electricityProductionData: Map<String, List<Double>> = emptyMap(),
-    val scope: Scope = Scope.DAY, //kan renames til mer spesifikt
+    val scope: Scope = Scope.DAY,
     val loadingState: String = ""
 )
 
@@ -232,12 +230,9 @@ class HomeViewModel : ViewModel() {
                 _uiState.update { currentState ->
                     currentState.copy(
                         selectedSolarArray = solarArray,
-                        scope = Scope.DAY,
                         priceData = priceDataMap[solarArray]!![_uiState.value.scope]!!
                     )
                 }
-//                seePrices(_uiState.value.scope, solarArray)
-
             } catch (ex: Exception) {
                 _uiState.update { currentState ->
                     currentState.copy(

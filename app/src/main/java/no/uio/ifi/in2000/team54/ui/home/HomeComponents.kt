@@ -54,6 +54,7 @@ import no.uio.ifi.in2000.team54.ui.theme.WeatherBlue
 import no.uio.ifi.in2000.team54.ui.theme.WeatherBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
+import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
 
 
 @Composable
@@ -138,7 +139,7 @@ fun SolarArrayList(homeViewModel: HomeViewModel) {
                 NoSolarArrayCard()
             } else {
                 solarArrays.value.forEach {
-                    SolarArrayCard(it)
+                    SolarArrayCard(it, homeViewModel)
                 }
             }
         }
@@ -146,38 +147,52 @@ fun SolarArrayList(homeViewModel: HomeViewModel) {
 }
 
 @Composable
-fun SolarArrayCard(solarArray: SolarArray) {
-    Column(
+fun SolarArrayCard(solarArray: SolarArray, viewModel: HomeViewModel) {
+    val uiState by viewModel.uiState.collectAsState()
+    val baseModifier = Modifier
+        .width(200.dp)
+        .height(220.dp)
+        .padding(15.dp)
+        .clip(RoundedCornerShape(20.dp))
+        .background(LightOrange)
+        .clickable { viewModel.selectSolarArray(solarArray)}
+    Box(
         modifier = Modifier
-            .width(200.dp)
-            .height(220.dp)
-            .padding(15.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
-            .background(LightOrange),
+            .then(
+                if (solarArray == uiState.selectedSolarArray) {
+                    baseModifier.border(4.dp, YellowerBorder, shape = RoundedCornerShape(20.dp))
+                }
+                else {
+                    baseModifier.border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
+                }
+            )
+        ,
     ) {
-        Image(
-            painter = painterResource(R.drawable.house),
-            contentDescription = "Hus med solcelleplaneter",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .padding(15.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Lighter)
-                .padding(15.dp)
-        )
+        Column {
 
-        Text(
-            text = solarArray.name,
-            fontSize = 20.sp,
-            color = GreyText,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 15.dp)
-        )
+            Image(
+                painter = painterResource(R.drawable.house),
+                contentDescription = "Hus med solcelleplaneter",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .padding(15.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Lighter)
+                    .padding(15.dp)
+            )
+
+            Text(
+                text = solarArray.name,
+                fontSize = 20.sp,
+                color = GreyText,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 15.dp)
+            )
+        }
     }
 }
 
