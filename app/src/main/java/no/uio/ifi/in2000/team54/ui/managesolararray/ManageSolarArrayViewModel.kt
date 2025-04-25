@@ -12,11 +12,13 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
+import no.uio.ifi.in2000.team54.model.building.Pos
 
 class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
@@ -36,20 +38,29 @@ class ManageSolarArrayViewModel : ViewModel() {
     val mapRoofSections = _mapAddress
         .filter { state -> state.address != null }
         .mapLatest { state ->
-            val roofSections = repository.getRoofSections(state.address!!)
-            MapRoofSectionsState(roofSections)
+            try {
+                // we know the address isn't null here because we filter out all null addresses above
+                MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
+            } catch (e: Exception) {
+                // if it fails to get the roof information, don't display any in the map
+                MapRoofSectionsState(emptyList(), true)
+            }
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = MapRoofSectionsState(emptyList())
+            initialValue = MapRoofSectionsState(emptyList(), false)
         )
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val mapSearchAddressSuggestions = _mapSearchAddress
         .debounce(250)
         .mapLatest { state ->
-            val suggestions = repository.getAddressSuggestions(state.query)
+            val suggestions = try {
+                repository.getAddressSuggestions(state.query)
+            } catch (e: Exception) {
+                emptyList() // could not find any addresses for the users input
+            }
             AddressSuggestionsState(suggestions)
         }
         .stateIn(
@@ -64,7 +75,7 @@ class ManageSolarArrayViewModel : ViewModel() {
         )
     }
 
-    fun setMapAddress(query: String) {
+    fun setSearchAddress(query: String) {
         _mapSearchAddress.value = _mapSearchAddress.value.copy(
             query = query
         )
@@ -73,6 +84,15 @@ class ManageSolarArrayViewModel : ViewModel() {
     fun addSolarArray(newSolarArray: SolarArray) {
         _sharedRepository.addSolarArray(newSolarArray)
     }
+
+    fun queryAddressAtPos(pos: Pos) {
+        viewModelScope.launch {
+            val address = repository.getNearestAddressToPos(pos) ?: return@launch
+
+            setSearchAddress(address.toFormatted())
+            setMapAddress(address)
+        }
+    }
 }
 
 data class AddressState(
@@ -80,7 +100,8 @@ data class AddressState(
 )
 
 data class MapRoofSectionsState(
-    val roofSections: List<MapRoofSection>
+    val roofSections: List<MapRoofSection>,
+    val isError: Boolean
 )
 
 data class SearchAddressState(
@@ -88,5 +109,5 @@ data class SearchAddressState(
 )
 
 data class AddressSuggestionsState(
-    val suggestions: List<Address>
+    val suggestions: List<Address>,
 )

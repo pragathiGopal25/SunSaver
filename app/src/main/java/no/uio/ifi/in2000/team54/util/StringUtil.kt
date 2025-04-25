@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team54.util
 
-fun String.isNumber(): Boolean {
-    val regex = """^\d*\.?\d*$""".toRegex()
-    return this.matches(regex)
+fun String.isNumber(): Boolean = when {
+    isEmpty() -> false
+    count { it == '.' } > 1 -> false
+    else -> all { it.isDigit() || it == '.' }
 }

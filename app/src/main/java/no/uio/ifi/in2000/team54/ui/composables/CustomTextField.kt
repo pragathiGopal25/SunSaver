@@ -2,9 +2,11 @@ package no.uio.ifi.in2000.team54.ui.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.ui.theme.Beige
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
+import no.uio.ifi.in2000.team54.ui.theme.Red
 
 @Composable
 fun CustomTextField(
@@ -34,24 +37,41 @@ fun CustomTextField(
     onValueChange: (String) -> Unit,
     label: String = "Label",
     placeholder: String = "",
+    validate: Boolean,
     fontSize: TextUnit = 12.sp,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    val isInvalid = validate && value.isEmpty()
+
     Column(
         modifier = containerModifier
     ) {
-        Text(
-            label,
-            fontWeight = FontWeight.Bold,
-            fontSize = 13.sp
-        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                label,
+                fontWeight = FontWeight.Bold,
+                fontSize = 13.sp
+            )
+            if (isInvalid) {
+                Text(
+                    "Må fylles ut",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    color = Red
+                )
+            }
+        }
         BasicTextField(
             modifier = modifier
                 .clip(RoundedCornerShape(15))
                 .background(Beige)
-                .border(1.dp, DarkBeige, RoundedCornerShape(15))
+                .border(1.dp, if (isInvalid) Red else DarkBeige, RoundedCornerShape(15))
                 .padding(vertical = 5.dp, horizontal = 10.dp),
             value = value,
             onValueChange = onValueChange,
