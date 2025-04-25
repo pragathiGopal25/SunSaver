@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.team54.ui.home
 
 import android.text.Layout
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -68,10 +67,11 @@ fun EletricityGraphContainer(
     viewModel: HomeViewModel
 ) {
 
-    val graphDataUiState by viewModel.graphDataUiState.collectAsStateWithLifecycle()
+    val graphDataUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val graphLoadingState by viewModel.graphLoadingState.collectAsStateWithLifecycle()
     if (graphDataUiState.electricityProductionData.isEmpty()) {
         Box(modifier.fillMaxSize(), Alignment.Center) {
-            Text(text = graphDataUiState.loadingState)
+            Text(text = graphLoadingState.loadingMessage)
         }
     } else {
         ElectricityGraph(data = graphDataUiState.electricityProductionData)
@@ -88,7 +88,6 @@ fun ElectricityGraph (
     data: Map<String, List<Double>>
 ){
     val modelProducer = remember { CartesianChartModelProducer() }
-    Log.i("testGraph", data.toString())
 
     Box(modifier = modifier,
         contentAlignment = Alignment.Center,
@@ -97,7 +96,6 @@ fun ElectricityGraph (
             modelProducer.runTransaction {
                 lineSeries { data.forEach{(_, list) -> series(list)}}
                 extras { extraStore -> extraStore[LegendLabelKey] = data.keys }
-                Log.i("test", data.keys.toString())
             }
         }
 
