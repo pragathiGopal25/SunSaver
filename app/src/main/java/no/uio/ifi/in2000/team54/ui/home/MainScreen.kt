@@ -34,7 +34,7 @@ fun MainScreen() {
         snackbarHost = { Snackbar(snackbarState) },
         bottomBar = {
             val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-            if (currentRoute.equals("managesolararray")) {
+            if (currentRoute.equals("managesolararray") || currentRoute.equals("EditSolarPanels/{arrayName}")) {
                 return@Scaffold
             }
 
@@ -50,7 +50,7 @@ fun MainScreen() {
         ) {
             composable("home") { HomeScreen(homeViewModel = homeScreenViewModel, navController = navController) }
             composable("stats") { StatScreen() }
-            composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState) }
+            composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, homeScreenViewModel) }
             composable("weather") { WeatherScreen() }
             composable("settings") { SettingsScreen() }
 
@@ -59,7 +59,7 @@ fun MainScreen() {
                 arguments = listOf(navArgument("arrayName") { type = NavType.StringType })
             ) { backStackEntry ->
                 val arrayName = backStackEntry.arguments?.getString("arrayName") ?: ""
-                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, arrayName)
+                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, homeScreenViewModel, arrayName)
             }
         }
     }

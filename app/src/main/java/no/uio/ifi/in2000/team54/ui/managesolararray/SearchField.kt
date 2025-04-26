@@ -25,6 +25,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +48,7 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
@@ -59,7 +61,7 @@ fun SearchField(
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
     viewModel: ManageSolarArrayViewModel,
-    updateArray: String? = ""
+    solarEntity: SolarArray? = null,
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -69,10 +71,23 @@ fun SearchField(
     val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsState()
     var showSuggestions by remember { mutableStateOf(false) }
 
-    // if user wants to edit an solar array setup
-    val savedAddress = viewModel.mapAddress.collectAsState()
-    val savedAddressString = savedAddress.value.address?.toFormatted()
 
+    // Use the address from the selected solar array or the search address
+    val searchAddress = remember { mutableStateOf(addressState.value.query) }
+
+    LaunchedEffect(solarEntity) {
+        if (solarEntity != null) {
+            viewModel.setCurrentSolarArray(solarEntity) // Load the solar array to edit
+            mapViewportState.easeTo(
+                CameraOptions.Builder()
+                    .center(solarEntity.address?.pos?.toPoint()) // Assuming address has `pos`
+                    .zoom(19.0)
+                    .build()
+            )
+        } else {
+            searchAddress.value = ""
+        }
+    }
 
     val selectSuggestion: (Address) -> Unit = remember {
         { suggestion ->
@@ -94,8 +109,9 @@ fun SearchField(
 
     Column {
         SearchTextField(
-            address = if (updateArray == "") addressState.value.query else savedAddressString.toString(),
+            address = searchAddress.value,
             onAddressChange = { address ->
+                searchAddress.value = address
                 viewModel.setMapAddress(address)
             },
             onDone = {

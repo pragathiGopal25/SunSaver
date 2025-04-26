@@ -39,12 +39,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -68,6 +70,7 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
+import no.uio.ifi.in2000.team54.ui.home.HomeScreenViewModel
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
@@ -79,8 +82,20 @@ private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
 enum class ArraySettingsMenuAnchors { Bottom, Top }
 
 @Composable
-fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: NavController, snackbarState: SnackbarHostState, updateArray: String? = "") {
+fun ManageSolarArrayScreen(
+    viewModel: ManageSolarArrayViewModel,
+    navController: NavController,
+    snackbarState: SnackbarHostState,
+    homeviewmodel: HomeScreenViewModel,
+    updateArray: String? = "",
+) {
     val roofSections = remember { mutableStateListOf<RoofSection>() }
+    val uiState by homeviewmodel.solarArrays.collectAsState()
+
+    val solarEntity = uiState.find { it.name == updateArray }
+    val updateRoofSections = remember { mutableStateListOf(*solarEntity?.roofSections?.toTypedArray() ?: arrayOf()) }
+
+
 
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
@@ -93,13 +108,25 @@ fun ManageSolarArrayScreen(viewModel: ManageSolarArrayViewModel, navController: 
         modifier = Modifier
             .fillMaxSize()
     ) {
-        SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, roofSections)
+        if (updateArray != "") {
+            SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, updateRoofSections)
+        } else {
+            SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, roofSections)
+
+        }
         BackButton(viewModel, navController)
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections, updateArray)
+            if (updateArray != "") {
+                viewModel.setCurrentSolarArray(solarEntity)
+
+                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, updateRoofSections, solarEntity)
+
+            } else {
+                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections)
+            }
 
         }
     }
@@ -134,8 +161,8 @@ private fun ArraySettingsMenu(
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     roofSections: SnapshotStateList<RoofSection>,
-    updateArray: String? = ""
-) {
+    solarEntity: SolarArray? = null,
+    ) {
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
 
@@ -169,7 +196,7 @@ private fun ArraySettingsMenu(
                 viewModel,
                 navController,
                 roofSections,
-                updateArray
+                solarEntity,
             )
         }
     }
@@ -211,11 +238,14 @@ private fun ArraySettingsContent(
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     roofSections: SnapshotStateList<RoofSection>,
-    updateArray: String? = ""
-) {
+    solarEntity: SolarArray? = null,
+    ) {
     val addressState by viewModel.mapAddress.collectAsState()
 
-    var solarPanelType by remember { mutableStateOf(SolarPanelType.PREMIUM) }
+    val solarPanelType = rememberSaveable {
+        mutableStateOf(solarEntity?.panelType ?: SolarPanelType.PREMIUM)
+    }
+
     var openSaveDialog by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
@@ -232,10 +262,13 @@ private fun ArraySettingsContent(
             mapViewportState,
             draggableState,
             viewModel,
-            solarPanelType,
+            solarPanelType = solarPanelType.value,
             roofSections,
-            { solarPanelType = it },
-            updateArray
+            {
+                selectedType ->
+                solarPanelType.value = selectedType
+            },
+            solarEntity,
         )
         SaveButton {
             if (addressState.address == null) {
@@ -254,16 +287,30 @@ private fun ArraySettingsContent(
 
             openSaveDialog = true
         }
-        SaveDialog(updateArray, openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
-            viewModel.addSolarArray(
+        SaveDialog( viewModel, openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
+            if (solarEntity == null) {viewModel.addSolarArray(
                 SolarArray(
                     name,
-                    solarPanelType,
+                    solarPanelType.value,
                     roofSections,
                     addressState.address!!.pos.toCoordinates(),
-                    power.toDouble()
+                    power.toDouble(),
+                    addressState.address
                 )
-            )
+            )} else {
+
+                    viewModel.updateSolarArray(
+                        SolarArray(
+                            name,
+                            solarPanelType.value,
+                            roofSections,
+                            addressState.address!!.pos.toCoordinates(),
+                            power.toDouble(),
+                            addressState.address
+                        )
+                    )
+
+            }
 
             viewModel.setMapAddress("")
             navController.navigate("home")
@@ -281,27 +328,29 @@ private fun ArraySettingsMainSection(
     solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>,
     onSelectPanelType: (SolarPanelType) -> Unit,
-    updateArray: String?
-) {
+    solarEntity: SolarArray? = null,
+
+    ) {
     var editingRoofSection by remember { mutableStateOf<Int?>(null) }
 
-    
 
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DragHandle()
-        SearchField(mapState, mapViewportState, draggableState, viewModel, updateArray)
+        SearchField(mapState, mapViewportState, draggableState, viewModel, solarEntity)
         Spacer(modifier = Modifier.size(10.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(15.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it }, updateArray)
-            ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null }, updateArray)
-            SolarPanelTypeDropdown(solarPanelType, onSelectPanelType, updateArray)
-            PriceSummaryCard(viewModel, solarPanelType, roofSections, updateArray)
+            RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
+            ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
+
+            SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
+            PriceSummaryCard(viewModel, solarPanelType, roofSections)
+
         }
     }
 }
@@ -320,7 +369,8 @@ private fun DragHandle() {
 
 @Composable
 private fun SaveButton(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+
 ) {
     OutlinedButton(
         onClick = onClick,
@@ -345,9 +395,9 @@ private fun SaveButton(
 private fun SolarPanelTypeDropdown(
     solarPanelType: SolarPanelType,
     onSelect: (SolarPanelType) -> Unit,
-    updateArray: String?
-) {
+    ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier

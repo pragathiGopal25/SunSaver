@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,11 +38,12 @@ fun PriceSummaryCard(
     viewModel: ManageSolarArrayViewModel,
     solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>,
-    updateArray: String? = ""
-) {
+    updateSolarPanel: MutableState<SolarPanelType>? = null,
+
+    ) {
     val totalPanels = roofSections.sumOf { it.panels }
-    val grossPrice = solarPanelType.totalPrice(totalPanels)
-    val subsidy = calculateSubsidy(solarPanelType, totalPanels)
+    val grossPrice = updateSolarPanel?.value?.totalPrice(totalPanels) ?: solarPanelType.totalPrice(totalPanels)
+    val subsidy = if (updateSolarPanel == null) calculateSubsidy(solarPanelType, totalPanels) else calculateSubsidy(updateSolarPanel.value, totalPanels)
 
     Box(
         modifier = Modifier

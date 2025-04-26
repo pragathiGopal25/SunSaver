@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.domain.RoofSection
+import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.ui.composables.NumberInputField
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
@@ -38,7 +39,6 @@ fun ManageRoofSectionCard(
     roofSections: SnapshotStateList<RoofSection>,
     editingRoofSectionIndex: Int?,
     onSave: () -> Unit,
-    updateArray: String? = ""
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 

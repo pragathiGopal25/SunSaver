@@ -22,6 +22,11 @@ class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
     private val _sharedRepository = RepositoryProvider.sharedRepository
 
+    private val _currentSolarArray = MutableStateFlow<SolarArray?>(null)
+    val currentSolarArray: StateFlow<SolarArray?> = _currentSolarArray.asStateFlow()
+
+
+
     private val _mapAddress = MutableStateFlow(
         AddressState(null)
     )
@@ -71,6 +76,16 @@ class ManageSolarArrayViewModel : ViewModel() {
         _mapAddress.value = _mapAddress.value.copy(
             address = address
         )
+    }
+
+    fun setCurrentSolarArray(solarArray: SolarArray?) {
+        _currentSolarArray.value = solarArray
+        // Update the search address when selecting a solar array to edit
+        _mapSearchAddress.value = SearchAddressState(solarArray?.address?.toFormatted() ?: "")
+        _mapAddress.value = _mapAddress.value.copy(
+            address = solarArray?.address
+        )
+
     }
 
     fun setMapAddress(query: String) {

@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.domain.RoofSection
+import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.Red
@@ -41,7 +42,6 @@ fun RoofSectionsList(
     roofSections: SnapshotStateList<RoofSection>,
     onRemove: () -> Unit,
     onEdit: (Int) -> Unit,
-    updateArray: String? = ""
 ) {
     Box(
         modifier = Modifier
@@ -51,12 +51,9 @@ fun RoofSectionsList(
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            if (roofSections.isEmpty() && updateArray == "") {
+            if (roofSections.isEmpty()) {
                 NoRoofSectionCard()
             } else {
-                if (updateArray != "" ){
-
-                }
                 roofSections.forEachIndexed { index, section ->
                     RoofSectionCard(
                         section,
