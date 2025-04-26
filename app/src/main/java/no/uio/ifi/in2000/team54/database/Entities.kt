@@ -36,7 +36,7 @@ data class RoofSectionEntity (
     val incline: Double,
     val direction: Double,
     val panels: Int,
-    val mapId: String,
+    val mapId: String?,
 )
 
 data class SolarArrayWithRoofSections( // just for mapping, not a table (thus no "Entity")

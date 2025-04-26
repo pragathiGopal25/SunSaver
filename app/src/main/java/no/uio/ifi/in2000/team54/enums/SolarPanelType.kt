@@ -36,5 +36,11 @@ enum class SolarPanelType(
 
     companion object {
         const val AREA = 2.5
+
+        private val displayNameMap = entries.associateBy { it.displayName }
+
+        fun fromDisplayName(name: String): SolarPanelType {
+            return displayNameMap[name]!!
+        }
     }
 }
