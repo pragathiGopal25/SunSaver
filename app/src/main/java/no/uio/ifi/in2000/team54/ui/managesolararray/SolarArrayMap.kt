@@ -62,6 +62,7 @@ fun SolarArrayMap(
 
                     roofSections.add(
                         RoofSection(
+                            id = null,
                             area,
                             targetRoofSection.incline,
                             targetRoofSection.direction,

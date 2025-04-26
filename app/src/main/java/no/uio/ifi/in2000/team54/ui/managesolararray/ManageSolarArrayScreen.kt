@@ -290,6 +290,7 @@ private fun ArraySettingsContent(
         SaveDialog( viewModel, openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
             if (solarEntity == null) {viewModel.addSolarArray(
                 SolarArray(
+                    id = null,
                     name,
                     solarPanelType.value,
                     roofSections,
@@ -301,6 +302,7 @@ private fun ArraySettingsContent(
 
                     viewModel.updateSolarArray(
                         SolarArray(
+                            id = null,
                             name,
                             solarPanelType.value,
                             roofSections,

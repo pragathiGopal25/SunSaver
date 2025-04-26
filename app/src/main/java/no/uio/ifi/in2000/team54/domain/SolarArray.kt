@@ -4,6 +4,7 @@ import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Address
 
 data class SolarArray(
+    val id: Long?,
     val name: String,
     val panelType: SolarPanelType,
     val roofSections: List<RoofSection>,
