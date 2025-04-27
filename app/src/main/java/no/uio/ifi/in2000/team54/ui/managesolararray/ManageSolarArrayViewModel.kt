@@ -22,6 +22,7 @@ class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
     private val _sharedRepository = RepositoryProvider.sharedRepository
 
+    // allows us to access the value of the current solar array object, and keep the viewmodel updated on any changes
     private val _currentSolarArray = MutableStateFlow<SolarArray?>(null)
     val currentSolarArray: StateFlow<SolarArray?> = _currentSolarArray.asStateFlow()
 
@@ -78,6 +79,7 @@ class ManageSolarArrayViewModel : ViewModel() {
         )
     }
 
+    // used in SearchField method, and it allows the ui to remember the map address when navigating between screens
     fun setCurrentSolarArray(solarArray: SolarArray?) {
         _currentSolarArray.value = solarArray
         // Update the search address when selecting a solar array to edit

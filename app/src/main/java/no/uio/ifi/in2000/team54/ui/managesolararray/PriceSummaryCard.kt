@@ -35,15 +35,13 @@ import java.util.Locale
 
 @Composable
 fun PriceSummaryCard(
-    viewModel: ManageSolarArrayViewModel,
     solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>,
-    updateSolarPanel: MutableState<SolarPanelType>? = null,
 
     ) {
     val totalPanels = roofSections.sumOf { it.panels }
-    val grossPrice = updateSolarPanel?.value?.totalPrice(totalPanels) ?: solarPanelType.totalPrice(totalPanels)
-    val subsidy = if (updateSolarPanel == null) calculateSubsidy(solarPanelType, totalPanels) else calculateSubsidy(updateSolarPanel.value, totalPanels)
+    val grossPrice = solarPanelType.totalPrice(totalPanels)
+    val subsidy = calculateSubsidy(solarPanelType, totalPanels)
 
     Box(
         modifier = Modifier

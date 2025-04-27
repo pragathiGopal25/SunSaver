@@ -39,7 +39,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -96,7 +95,6 @@ fun ManageSolarArrayScreen(
     val updateRoofSections = remember { mutableStateListOf(*solarEntity?.roofSections?.toTypedArray() ?: arrayOf()) }
 
 
-
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             center(osloCenter)
@@ -109,6 +107,8 @@ fun ManageSolarArrayScreen(
             .fillMaxSize()
     ) {
         if (updateArray != "") {
+
+            // sends the already existing roof sections of the solarentity
             SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, updateRoofSections)
         } else {
             SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, roofSections)
@@ -120,8 +120,9 @@ fun ManageSolarArrayScreen(
                 .fillMaxSize()
         ) {
             if (updateArray != "") {
+                // updates the viewmodel to focus on the current solar entity.
+                // makes it easier later to update mapaddress , and keep track of its name and other values.
                 viewModel.setCurrentSolarArray(solarEntity)
-
                 ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, updateRoofSections, solarEntity)
 
             } else {
@@ -242,6 +243,7 @@ private fun ArraySettingsContent(
     ) {
     val addressState by viewModel.mapAddress.collectAsState()
 
+    // solar panel type changes and the changes is saved across screens
     val solarPanelType = rememberSaveable {
         mutableStateOf(solarEntity?.panelType ?: SolarPanelType.PREMIUM)
     }
@@ -297,9 +299,9 @@ private fun ArraySettingsContent(
                     addressState.address!!.pos.toCoordinates(),
                     power.toDouble(),
                     addressState.address
-                )
-            )} else {
-
+                ))
+            } else {
+                // if solarentity exists then you just want to update the values not create and save a whole new one
                     viewModel.updateSolarArray(
                         SolarArray(
                             id = null,
@@ -349,9 +351,8 @@ private fun ArraySettingsMainSection(
         ) {
             RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
             ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
-
             SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
-            PriceSummaryCard(viewModel, solarPanelType, roofSections)
+            PriceSummaryCard(solarPanelType, roofSections)
 
         }
     }

@@ -75,12 +75,13 @@ fun SearchField(
     // Use the address from the selected solar array or the search address
     val searchAddress = remember { mutableStateOf(addressState.value.query) }
 
+    // recomposes everytime there is a change in the solar entity
     LaunchedEffect(solarEntity) {
         if (solarEntity != null) {
             viewModel.setCurrentSolarArray(solarEntity) // Load the solar array to edit
             mapViewportState.easeTo(
                 CameraOptions.Builder()
-                    .center(solarEntity.address?.pos?.toPoint()) // Assuming address has `pos`
+                    .center(solarEntity.address?.pos?.toPoint())
                     .zoom(19.0)
                     .build()
             )

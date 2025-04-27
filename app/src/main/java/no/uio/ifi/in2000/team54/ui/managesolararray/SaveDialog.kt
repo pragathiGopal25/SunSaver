@@ -48,6 +48,8 @@ fun SaveDialog(
     val solarEntity = viewModel.currentSolarArray.collectAsState()
 
     var validate by remember { mutableStateOf(false) }
+
+    // shows the saved name and power values. If they dont exist, shows the default values.
     var name by remember { mutableStateOf(solarEntity.value?.name ?: "")}
     var power by remember { mutableStateOf(solarEntity.value?.powerConsumption?.toString() ?: "1574.5") }
 
