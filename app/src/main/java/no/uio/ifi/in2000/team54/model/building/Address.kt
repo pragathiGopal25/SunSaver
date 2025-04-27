@@ -23,6 +23,8 @@ class Address(
     val propertyNumber: Int,
     @JsonNames("kommunenummer")
     val communityNumber: String,
+    @JsonNames("meterDistanseTilPunkt")
+    val distanceFromPoint: Double = 0.0,
 ) {
 
     fun toFormatted(): String {

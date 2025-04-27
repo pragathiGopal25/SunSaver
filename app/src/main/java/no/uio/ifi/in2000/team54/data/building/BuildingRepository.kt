@@ -2,12 +2,22 @@ package no.uio.ifi.in2000.team54.data.building
 
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
+import no.uio.ifi.in2000.team54.model.building.Pos
 
 class BuildingRepository {
     private val dataSource = BuildingDataSource()
 
     suspend fun getAddressSuggestions(address: String): List<Address> {
         return dataSource.getAddressSuggestions(address)
+    }
+
+    suspend fun getNearestAddressToPos(pos: Pos): Address? {
+        val addresses = dataSource.getAddressFromPos(pos)
+        if (addresses.isEmpty()) {
+            return null
+        }
+
+        return addresses.minBy { it.distanceFromPoint }
     }
 
     suspend fun getBuildingIds(address: Address): List<String> {

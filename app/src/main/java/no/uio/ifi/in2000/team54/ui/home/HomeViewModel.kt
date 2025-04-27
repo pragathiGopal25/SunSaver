@@ -170,7 +170,8 @@ class HomeViewModel : ViewModel() {
                     priceMap[days] = priceData.getPriceData(
                         days,
                         "NO1",
-                        solarArrayLoadedData[solarArray]!![priceData.getMonth()]!!
+                        solarArrayLoadedData[solarArray]!![priceData.getMonth()]!!,
+                        solarArray.powerConsumption
                     )
                     realPriceMap[days] = priceMap[days]!![1]
                     solarPriceMap[days] = priceMap[days]!![0]

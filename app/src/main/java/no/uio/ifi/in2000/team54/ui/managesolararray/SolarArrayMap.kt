@@ -28,6 +28,7 @@ import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
+import no.uio.ifi.in2000.team54.model.building.Pos
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightYellow
@@ -55,13 +56,16 @@ fun SolarArrayMap(
             val targetRoofSection = mapRoofSectionsState.roofSections.find {
                 it.geometry.contains(point)
             }
-
-            if (targetRoofSection != null) {
+            // if there aren't any roof sections at this position, we wan't to try to find a new address
+            if (targetRoofSection == null) {
+                viewModel.queryAddressAtPos(Pos.fromPoint(point))
+            } else {
                 if (!roofSections.removeIf { it.mapId == targetRoofSection.id }) {
                     val area = targetRoofSection.width * targetRoofSection.length
 
                     roofSections.add(
                         RoofSection(
+                            id = null,
                             area,
                             targetRoofSection.incline,
                             targetRoofSection.direction,
@@ -71,7 +75,6 @@ fun SolarArrayMap(
                     )
                 }
             }
-
             false
         }
     ) {
