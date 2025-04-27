@@ -4,7 +4,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import no.uio.ifi.in2000.team54.domain.SolarArray
+import no.uio.ifi.in2000.team54.util.toDomain
+import no.uio.ifi.in2000.team54.util.toEntity
 import javax.inject.Inject
 
 interface ISunSaverRepository {
@@ -20,20 +23,23 @@ class SharedRepository @Inject constructor(
     val solarArrays: StateFlow<List<SolarArray>> = _solarArrays.asStateFlow()
 
     override fun getAllSolarArrays(): Flow<List<SolarArray>> {
-        TODO("Not yet implemented")
+        // transforming the flow of SolarArrayWithRoofSections to a flow of SolarArray
+        return datasource.getAllSolarArrays().map { list ->
+            list.map { toDomain(it) }
+        }
     }
 
     // maps to SolarArrayWithRoofsections and calls add in Datasource
     override suspend fun addSolarArray(solarArray: SolarArray) {
-        TODO("Not yet implemented")
+        datasource.insertSolarArrayWithRoofSections(toEntity(solarArray))
     }
 
     override suspend fun deleteSolarArray(solarArray: SolarArray) {
-        TODO("Not yet implemented")
+        datasource.delete(toEntity(solarArray))
     }
 
     override suspend fun updateSolarArray(solarArray: SolarArray) {
-        TODO("Not yet implemented")
+        datasource.update(toEntity(solarArray))
     }
 }
 

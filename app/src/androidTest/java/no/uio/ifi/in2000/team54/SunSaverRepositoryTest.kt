@@ -58,7 +58,7 @@ class SunSaverRepositoryTest {
         val insertedSolarArray2 = list[1]
         // assert IDs
         assertEquals(2L, insertedSolarArray2.solarArray.id)
-        assertEquals("test3", insertedSolarArray2.solarArray.id)
+        assertEquals("test3", insertedSolarArray2.solarArray.name)
 
         insertedSolarArray2.roofSections.forEach {
             assertEquals(2L, it.solarArrayId)
