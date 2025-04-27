@@ -167,7 +167,6 @@ class HomeViewModel : ViewModel() {
                 }
 
                 if (!priceMap.containsKey(days)) {
-                    val coords = solarArray.coordinates
                     priceMap[days] = priceData.getPriceData(
                         days,
                         "NO1",
