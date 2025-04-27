@@ -5,25 +5,33 @@ enum class SolarPanelType(
     val watt: Int,
     val price: Double,
     val installationPrice: Double,
+    val length: Double,
+    val width: Double
 ) {
 
     PREMIUM(
         "Premium",
         405,
         6000.0,
-        3000.0
+        3000.0,
+        length = 1.72,
+        width = 1.13
     ),
     PERFORMANCE(
         "Performance",
         435,
         6750.0,
-        3250.0
+        3250.0,
+        length =1.74,
+        width =  1.09
     ),
     ECONOMY(
         "Economy",
         455,
         7500.0,
-        3250.0
+        3250.0,
+        length = 2.10,
+        width = 1.04
     );
 
     fun totalPrice(amount: Int): Double {

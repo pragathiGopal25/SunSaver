@@ -11,24 +11,8 @@ private const val MAXIMUM_OPTIMAL_INCLINE_ANGLE = 45.0 //Degrees
 private const val INCLINE_ANGLE_EFFICIENCY_DECREASE_PER_DEGREE = 0.05
 private const val DIRECTION_EFFICIENCY_DECREASE_PER_DEGREE = 0.005
 private const val DEFAULT_PANEL_TEMPERATURE_CELSIUS = 25.0
-private const val DEFAULT_PANEL_EFFICIENCY = 0.20
 private const val TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS = 0.5 // Percentage loss per degree Celsius
 
-//Average hours of sun per month in Norway
-private val avgMonthlySunHours = mapOf( // todo: Get from datasource!!
-    "01" to 74.0,
-    "02" to 90.0,
-    "03" to 150.0,
-    "04" to 200.0,
-    "05" to 210.0,
-    "06" to 230.0,
-    "07" to 210.0,
-    "08" to 180.0,
-    "09" to 150.0,
-    "10" to 90.0,
-    "11" to 60.0,
-    "12" to 55.0
-)
 
 //Calculates the monthly electricity production for a solar array based on set factors
 fun calculateMonthlyElectricityProduction(
@@ -44,9 +28,9 @@ fun calculateMonthlyElectricityProduction(
 
     // factors to consider: paneltype (watt), area, incline, direction, temperature // todo: use watts somewhere
     return monthlyIrradiance.mapValues { (month, irradiance) ->
-        val sunHours = avgMonthlySunHours[month] ?: 0.0
+        val sunHours = monthlySunhours[month] ?: 0.0
         val temperature = monthlyTemperatures[month] ?: DEFAULT_PANEL_TEMPERATURE_CELSIUS
-        val efficiency = calculatePanelEfficiency(temperature)
+        val efficiency = calculatePanelEfficiency(temperature, solarArray)
 
         // need to calculate per roofSection and sum up
         roofSections.sumOf { roofSection ->
@@ -59,8 +43,12 @@ fun calculateMonthlyElectricityProduction(
 
 //Calculate the efficiency of the solar panel based on temperature in celsius
 //If the temperature is more than default (25 deg) the efficiency decreases
-private fun calculatePanelEfficiency(temperature: Double): Double {
-    var efficiency = DEFAULT_PANEL_EFFICIENCY
+
+// Efficiency: https://www.photonicuniverse.com/en/resources/articles/full/7.html
+// efficieny = (panel power (kW) / panel length * panel width) *  100
+private fun calculatePanelEfficiency(temperature: Double, solarArray: SolarArray): Double {
+
+    var efficiency = ((solarArray.panelType.watt)/((solarArray.panelType.length).times(solarArray.panelType.width)))
     if (temperature > DEFAULT_PANEL_TEMPERATURE_CELSIUS) {
         val temperatureDifference = temperature - DEFAULT_PANEL_TEMPERATURE_CELSIUS
         val efficiencyLossPercentage = temperatureDifference * TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS
@@ -75,6 +63,7 @@ private fun calculateAdjustedSolarIrradiance(
     monthlySnow: Map<String, Double>,
     monthlyRadiance: Map<String, Double>,
 ): Map<String, Double> {
+
     return monthlyRadiance.mapValues { (month, radiance) ->
         var adjustedIrradiance = radiance
         val snowFactor = monthlySnow[month]?.let { calculateSnowLossFactor(it) } ?: 1.0
