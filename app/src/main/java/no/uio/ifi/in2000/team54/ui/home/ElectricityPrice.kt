@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,8 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonColors
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -45,7 +44,13 @@ import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 
 @Composable
 fun PriceContainer(viewModel: HomeViewModel) {
-    val uiState by viewModel.priceUiState.collectAsState()
+    val uiState by viewModel.homeUiState.collectAsState()
+    val loadingState by viewModel.priceLoadingState.collectAsState()
+    if (loadingState.loadingMessage != "") {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(loadingState.loadingMessage)
+        }
+    }
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
@@ -67,11 +72,11 @@ fun PriceContainer(viewModel: HomeViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                ExpensesStatBox(false, "${uiState.realPrice}", R.drawable.withoutsolar, uiState)
+                ExpensesStatBox(false, "${uiState.priceData.realPrice}", R.drawable.withoutsolar)
                 Spacer(Modifier.padding(8.dp))
-                ExpensesStatBox(true, "${uiState.saved}", R.drawable.coin, uiState)
+                ExpensesStatBox(true, "${uiState.priceData.saved}", R.drawable.coin)
                 Spacer(Modifier.padding(8.dp))
-                ExpensesStatBox(false, "${uiState.solarPrice}", R.drawable.solar, uiState)
+                ExpensesStatBox(false, "${uiState.priceData.solarPrice}", R.drawable.solar)
             }
             Spacer(Modifier.padding(10.dp))
         }
@@ -79,26 +84,11 @@ fun PriceContainer(viewModel: HomeViewModel) {
 }
 
 @Composable
-fun IndeterminateCircularIndicator(uiState: HomeViewModel.PriceUiState) {
-    if (!uiState.loading) return
-    CircularProgressIndicator(
-        modifier = Modifier.width(23.dp),
-        color = MaterialTheme.colorScheme.secondary,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-    )
-}
-
-@Composable
 fun ExpensesStatBox(
     main: Boolean,
     text: String,
     image: Int,
-    uiState: HomeViewModel.PriceUiState
 ) {
-    if (uiState.error) {
-        Text("Det oppstod en feil i beregningen av strømkostnader")
-        return
-    }
     Box(
         modifier = Modifier
             .shadow(
@@ -135,7 +125,6 @@ fun ExpensesStatBox(
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds
             )
-            IndeterminateCircularIndicator(uiState)
             Text("$text,-")
         }
     }
@@ -144,18 +133,18 @@ fun ExpensesStatBox(
 @Composable
 fun TimeScopeSegmentedButton(
     viewModel: HomeViewModel,
-    uiState: HomeViewModel.PriceUiState
+    uiState: HomeUiState
 ) {
     var selectedIndex by remember { mutableIntStateOf(0) }
     val options = listOf("Dag", "Måned", "År")
 
     val map = mapOf(
-        HomeViewModel.Scope.DAY to 0,
-        HomeViewModel.Scope.MONTH to 1,
-        HomeViewModel.Scope.YEAR to 2
+        TimeScope.DAY to 0,
+        TimeScope.MONTH to 1,
+        TimeScope.YEAR to 2
     )
 
-    if (map[uiState.scope] != selectedIndex) selectedIndex = map[uiState.scope]!!
+    if (map[uiState.timeScope] != selectedIndex) selectedIndex = map[uiState.timeScope]!!
 
     SingleChoiceSegmentedButtonRow {
         options.forEachIndexed { index, label ->
@@ -166,7 +155,7 @@ fun TimeScopeSegmentedButton(
                 ),
                 onClick = {
                     selectedIndex = index
-                    viewModel.changeTimeScope(HomeViewModel.Scope.entries[selectedIndex])
+                    viewModel.changeTimeScope(TimeScope.entries[selectedIndex])
                 },
                 selected = index == selectedIndex,
                 icon = {},

@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,7 +62,7 @@ import no.uio.ifi.in2000.team54.ui.theme.WeatherBlue
 import no.uio.ifi.in2000.team54.ui.theme.WeatherBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
-
+import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
@@ -146,7 +147,7 @@ fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
                 NoSolarArrayCard()
             } else {
                 solarArrays.value.forEach {
-                    SolarArrayCard(it, navController)
+                    SolarArrayCard(it, homeViewModel, navController)
                 }
             }
         }
@@ -156,56 +157,68 @@ fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
 @Composable
 fun SolarArrayCard(
     solarArray: SolarArray,
+    viewModel: HomeViewModel,
     navController: NavController
 ) {
-    Column(
+    val uiState by viewModel.homeUiState.collectAsState()
+    val baseModifier = Modifier
+        .width(200.dp)
+        .height(250.dp)
+        .padding(15.dp)
+        .clip(RoundedCornerShape(20.dp))
+        .background(LightOrange)
+        .clickable { viewModel.selectSolarArray(solarArray) }
+    Box(
         modifier = Modifier
-            .width(200.dp)
-            .height(250.dp)
-            .padding(15.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
-            .background(LightOrange),
+            .then(
+                if (solarArray == uiState.selectedSolarArray) {
+                    baseModifier.border(4.dp, YellowerBorder, shape = RoundedCornerShape(20.dp))
+                } else {
+                    baseModifier.border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
+                }
+            ),
     ) {
-        IconButton(
-            onClick = {
-                navController.navigate("editsolararrays/${solarArray.name}")
-            },
-            modifier = Modifier
-                .background(LightOrange)
-                .padding(top = 6.dp ,end = 4.dp)
-                .size(30.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .align(Alignment.End)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.circle),
-                contentDescription = "Redigere Anlegg",
-                tint = Color.Unspecified // if you don't want to tint it
+        Column {
+            IconButton(
+                onClick = {
+                    navController.navigate("editsolararrays/${solarArray.name}")
+                },
+                modifier = Modifier
+                    .background(LightOrange)
+                    .padding(top = 6.dp, end = 4.dp)
+                    .size(30.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .align(Alignment.End)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.circle),
+                    contentDescription = "Redigere Anlegg",
+                    tint = Color.Unspecified // if you don't want to tint it
+                )
+            }
+            Image(
+                painter = painterResource(R.drawable.house),
+                contentDescription = "Hus med solcelleplaneter",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .padding(end = 15.dp, start = 15.dp, bottom = 10.dp, top = 8.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Lighter)
+                    .padding(15.dp)
+            )
+
+            Text(
+                text = solarArray.name,
+                fontSize = 20.sp,
+                color = GreyText,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 6.dp)
             )
         }
-        Image(
-            painter = painterResource(R.drawable.house),
-            contentDescription = "Hus med solcelleplaneter",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .padding(end = 15.dp, start = 15.dp, bottom = 10.dp, top =  8.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Lighter)
-                .padding(15.dp)
-        )
-
-        Text(
-            text = solarArray.name,
-            fontSize = 20.sp,
-            color = GreyText,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 6.dp)
-        )
     }
 }
 
@@ -272,26 +285,26 @@ fun SwitchContent(homeViewModel: HomeViewModel) {
 
 
 @Composable
-private fun NextCard( flipped: Boolean,  onClick: () -> Unit, modifier: Modifier = Modifier ) {
+private fun NextCard(flipped: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
 
-  if (!flipped)
-    Icon(
-        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-        contentDescription = "Neste kort",
-        tint = DarkYellow,
-        modifier = modifier
-            .padding(10.dp)
-            .size(35.dp)
-            .clickable { onClick() }
-            .padding(7.dp)
-    )
+    if (!flipped)
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            contentDescription = "Neste kort",
+            tint = DarkYellow,
+            modifier = modifier
+                .padding(10.dp)
+                .size(35.dp)
+                .clickable { onClick() }
+                .padding(7.dp)
+        )
 
     // Skal kun vises før neste kort er i fokus
 
 }
 
 @Composable
-private fun PreviousCard( flipped: Boolean,  onClick: () -> Unit, modifier: Modifier = Modifier ) {
+private fun PreviousCard(flipped: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
 
     if (flipped)
         Icon(
@@ -314,7 +327,7 @@ private fun PreviousCard( flipped: Boolean,  onClick: () -> Unit, modifier: Modi
 fun PreviewSwitchContent() {
 
     val hvm = HomeViewModel()
-   SwitchContent(hvm)
+    SwitchContent(hvm)
 }
 
 
@@ -342,7 +355,7 @@ fun ElectricityCard(
         )
     ) {
 
-        Box(modifier = Modifier.fillMaxSize() ) {
+        Box(modifier = Modifier.fillMaxSize()) {
 
             NextCard(
                 flipped = flipped,
@@ -383,9 +396,6 @@ fun ElectricityCard(
         }
     }
 }
-
-
-
 
 @Composable
 fun WeatherCard(navController: NavController) {
