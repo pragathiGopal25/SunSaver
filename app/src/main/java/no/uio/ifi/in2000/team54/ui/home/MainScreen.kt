@@ -34,7 +34,7 @@ fun MainScreen() {
         snackbarHost = { Snackbar(snackbarState) },
         bottomBar = {
             val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-            if (currentRoute.equals("managesolararray") || currentRoute.equals("EditSolarPanels/{arrayName}")) {
+            if (currentRoute.equals("managesolararray") || currentRoute.equals("editsolararrays/{arrayName}")) {
                 return@Scaffold
             }
 
@@ -64,12 +64,3 @@ fun MainScreen() {
         }
     }
 }
-
-/*
-dependencies:
-implementation(libs.androidx.compose.material)
-
-libs.versions.toml:
-   composeMaterial = "1.4.0"
-   androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
-*/
