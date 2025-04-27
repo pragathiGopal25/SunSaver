@@ -7,7 +7,7 @@ import no.uio.ifi.in2000.team54.data.shared.SharedRepository
 import javax.inject.Inject
 
 @HiltAndroidApp
-class MyApp : Application() {
+class SunSaverApplication : Application() {
     @Inject
     lateinit var sharedRepository: SharedRepository
 

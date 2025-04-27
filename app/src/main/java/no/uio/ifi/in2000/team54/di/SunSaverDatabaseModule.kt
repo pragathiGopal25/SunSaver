@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team54.database
+package no.uio.ifi.in2000.team54.di
 
 import android.content.Context
 import androidx.room.Room
@@ -7,12 +7,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import no.uio.ifi.in2000.team54.database.SunSaverDao
+import no.uio.ifi.in2000.team54.database.SunSaverDatabase
 import javax.inject.Singleton
 
 
 @Module // depends on Room implementatations, therefore need to create a Module for this one
 @InstallIn(SingletonComponent::class)
-object DatabaseModule {
+object SunSaverDatabaseModule {
 
     @Provides
     @Singleton
