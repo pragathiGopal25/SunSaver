@@ -13,11 +13,13 @@ import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import no.uio.ifi.in2000.team54.domain.Coordinates
+import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.model.frost.AvailableObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.ObservationData
 import no.uio.ifi.in2000.team54.model.frost.ObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.SensorSystem
 import no.uio.ifi.in2000.team54.model.frost.SourceResponse
+import kotlin.to
 
 class FrostDatasource {
     private val client = HttpClient(CIO) {
@@ -36,24 +38,22 @@ class FrostDatasource {
         Base64.encodeToString(raw.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
     private val authHeader = "Basic $encoded"
 
-
-    private var storedLatitude = 0.0
-    private var storedLongitude = 0.0
-
     private val nameMap = mapOf(
-        "temp" to "mean(air_temperature%20P1M)",
-        "cloud" to "mean(cloud_area_fraction%20P1D)",
-        "snow" to "mean(snow_coverage_type%20P1M)",
-        "radiation" to "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)"
+        Elements.TEMP to "mean(air_temperature%20P1M)",
+        Elements.CLOUD to "mean(cloud_area_fraction%20P1D)",
+        Elements.SNOW to "mean(snow_coverage_type%20P1M)",
+        Elements.IRRIDANCE to "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)"
     )
 
-    private var sensorMap: MutableMap<String, MutableList<String>> = mutableMapOf()
+    private var sensorMap: MutableMap<Elements, MutableList<String>> = mutableMapOf()
+
+    private val referenceTime = "2022-12-31/2024-12-31"
+
 
     private suspend fun fetchNearestSource(
         coordinates: Coordinates,
-        element: String,
-    ): MutableMap<String, MutableList<String>> {
-
+        element: Elements,
+    ): MutableMap<Elements, MutableList<String>> {
 
         try {
             val response: HttpResponse =
@@ -83,19 +83,12 @@ class FrostDatasource {
     }
 
 
-
     suspend fun fetchObservationDataFromFrost(
         coordinates: Coordinates,
-        elementName: String,
-        referenceTime: String
+        elementName: Elements,
     ): List<ObservationData> {
         sensorMap = fetchNearestSource(coordinates, elementName)
 
-        //TODO: can be deleted, does not serve purpose
-        if(coordinates.latitude != storedLatitude || coordinates.longitude != storedLongitude) {
-            storedLatitude = coordinates.latitude
-            storedLongitude = coordinates.longitude
-        }
 
         // stores the list of sensorIds in this variable
         var sensorIds = sensorMap[elementName]
@@ -118,7 +111,7 @@ class FrostDatasource {
         var response: HttpResponse
 
         // find out which of the sensors are available for the time series.
-        val getAvailableSensors = "https://frost.met.no/observations/availableTimeSeries/v0.jsonld?sources=$sensorUrl&referencetime=2022-12-31%2F2024-12-31&elements=$elementName"
+        val getAvailableSensors = "https://frost.met.no/observations/availableTimeSeries/v0.jsonld?sources=$sensorUrl&referencetime=2022-12-31%2F2024-12-31&elements=${nameMap[elementName]}"
 
         response = client.get(getAvailableSensors) {
             header(HttpHeaders.Authorization, authHeader)
@@ -134,14 +127,12 @@ class FrostDatasource {
         Log.i("testingSensors", "element: $elementName, sensors: $sensorId")
 
         // use the new sensorId, which is also the closest with available data for the reference time to retrieve observation data.
-        var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=$elementName"
+        var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=${nameMap[elementName]}"
 
-        // TODO: can be optimized by sending it in through the repo instead
-        if (elementName == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
+        if (nameMap[elementName] == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
             url = "$url&qualities=0" // no data of other qualities
         }
 
-        // TODO: this could also maybe be sent in through the repo
         url = "$url&fields=sourceId%2CelementId%2Cvalue%2Cunit%2CqualityCode%2CreferenceTime" // restric amount of data retrieved
 
         try {
@@ -157,7 +148,5 @@ class FrostDatasource {
         val observationResponse: ObservationResponse = response.body()
 
         return observationResponse.data
-
-
     }
 }
