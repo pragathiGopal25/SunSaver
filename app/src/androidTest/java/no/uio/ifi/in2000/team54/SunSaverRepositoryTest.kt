@@ -146,7 +146,7 @@ class FakeSunSaverDatasource: ISunSaverDatasource {
     private var idCounterSolarArray = 1L
     private var idCounterRoofSection = 1L
 
-    override suspend fun insertSolarArrayWithRoofSections(
+    override suspend fun insert(
         solarArrayWithRoofSections: SolarArrayWithRoofSections
     ): Long {
 

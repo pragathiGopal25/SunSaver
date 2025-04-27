@@ -6,9 +6,7 @@ import no.uio.ifi.in2000.team54.database.SunSaverDao
 import javax.inject.Inject
 
 interface ISunSaverDatasource { // define interface (also used for testing)
-    suspend fun insertSolarArrayWithRoofSections(
-        solarArrayWithRoofSections: SolarArrayWithRoofSections
-    ): Long
+    suspend fun insert(solarArrayWithRoofSections: SolarArrayWithRoofSections): Long
     fun getAllSolarArrays(): Flow<List<SolarArrayWithRoofSections>>
     suspend fun delete(solarArrayWithRoofSections: SolarArrayWithRoofSections)
     suspend fun update(solarArrayWithRoofSections: SolarArrayWithRoofSections)
@@ -17,7 +15,7 @@ interface ISunSaverDatasource { // define interface (also used for testing)
 class SunSaverDatasource @Inject constructor(
     private val sunSaverDao: SunSaverDao
 ): ISunSaverDatasource {
-    override suspend fun insertSolarArrayWithRoofSections(solarArrayWithRoofSections: SolarArrayWithRoofSections): Long {
+    override suspend fun insert(solarArrayWithRoofSections: SolarArrayWithRoofSections): Long {
         val id: Long = sunSaverDao.insertSolarArray(solarArrayWithRoofSections.solarArray)
 
         // add foreign key from solar array
@@ -64,10 +62,9 @@ class SunSaverDatasource @Inject constructor(
             it.roofSectionId
         }.toSet()
 
-        val deletedRoofSections =
-            savedRoofSections.filter { // want to find the savedRoofSections that aren't in this list
-                it.roofSectionId !in idOfUpdated
-            }
+        // want to find the savedRoofSections that aren't in this list
+        val deletedRoofSections = savedRoofSections.filter { it.roofSectionId !in idOfUpdated }
+
         // delete those
         sunSaverDao.deleteRoofSections(deletedRoofSections)
 

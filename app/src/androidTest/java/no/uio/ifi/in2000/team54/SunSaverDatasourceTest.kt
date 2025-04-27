@@ -5,8 +5,10 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import no.uio.ifi.in2000.team54.data.shared.SunSaverDatasource
+import no.uio.ifi.in2000.team54.database.RoofSectionEntity
+import no.uio.ifi.in2000.team54.database.SolarArrayEntity
 import no.uio.ifi.in2000.team54.database.SolarArrayWithRoofSections
 import no.uio.ifi.in2000.team54.database.SunSaverDao
 import no.uio.ifi.in2000.team54.database.SunSaverDatabase
@@ -42,87 +44,103 @@ class SolarArrayDatasourceTest {
 
     @Test
     @Throws(Exception::class)
-    fun insertAndGetASolarPanel() = runBlocking {
-        val id: Long = sunSaverDatasource.insertSolarArrayWithRoofSections(TestSolarArray1.solarArrayWithRoofSections)
-        val solarArray: SolarArrayWithRoofSections = sunSaverDatasource.getAllSolarArrays().first()[0]
+    fun insertAndGetASolarPanel() = runTest  {
+        val testData: SolarArrayWithRoofSections = TestSolarArray1.solarArrayWithRoofSections
+        // insert and get
+        val id: Long = sunSaverDatasource.insert(testData)
+        val result: SolarArrayWithRoofSections = sunSaverDatasource.getAllSolarArrays().first()[0]
 
-        assertEquals(solarArray.solarArray.id, id)
-        val updatedSolarArray = updateId(TestSolarArray1.solarArrayWithRoofSections, id).solarArray
-        assertEquals(updatedSolarArray, solarArray.solarArray)
+        // assert correct id
+        assertEquals(result.solarArray.id, id)
+        // check if other fields are as expected
+        assertEqualsSolarArray(testData.solarArray, result.solarArray)
 
-        val roofSections = solarArray.roofSections.sortedBy { it.mapId }
+        val roofSections = result.roofSections.sortedBy { it.mapId }
         assertEquals(2, roofSections.size)
-        assertEquals(solarArray.solarArray.id, roofSections[0].solarArrayId)
-        assertEquals(120.0, roofSections[0].direction, 0.0)
-        assertEquals(2, roofSections[1].panels)
+
+        // we know that test roof sections are sorted by mapId (and they have a mapid)
+        val startRoofSections = testData.roofSections
+        assertEqualsRoofSection(startRoofSections[0], roofSections[0], id)
+        assertEqualsRoofSection(startRoofSections[1], roofSections[1], id)
     }
 
     @Test
     @Throws(Exception::class)
-    fun insertAndDelete() = runBlocking {
-        val id1 = sunSaverDatasource.insertSolarArrayWithRoofSections(TestSolarArray1.solarArrayWithRoofSections)
-        val id2 = sunSaverDatasource.insertSolarArrayWithRoofSections(TestSolarArray2.solarArrayWithRoofSections)
-        assertEquals(2, sunSaverDatasource.getAllSolarArrays().first().size)
+    fun insertAndDelete() = runTest {
+        val testData1 = TestSolarArray1.solarArrayWithRoofSections
+        val testData2 = TestSolarArray2.solarArrayWithRoofSections
 
-        sunSaverDatasource.delete(updateId(TestSolarArray1.solarArrayWithRoofSections, id1))
-        assertEquals(1, sunSaverDatasource.getAllSolarArrays().first().size)
+        sunSaverDatasource.insert(testData1)
+        sunSaverDatasource.insert(testData2)
 
-        sunSaverDatasource.delete(updateId(TestSolarArray2.solarArrayWithRoofSections, id2))
+        val result1 = sunSaverDatasource.getAllSolarArrays().first()
+        assertEquals(2, result1.size)
+        val toDelete = result1.find {
+            it.solarArray.name == testData1.solarArray.name
+        }!!
+        sunSaverDatasource.delete(toDelete)
+
+        val result2 = sunSaverDatasource.getAllSolarArrays().first()
+        assertEquals(1, result2.size)
+        assert(result2.find { it.solarArray.name == testData1.solarArray.name } == null)
+        assert(result2.find { it.solarArray.name == testData2.solarArray.name } != null)
+
+        sunSaverDatasource.delete(result2[0])
         assertEquals(0, sunSaverDatasource.getAllSolarArrays().first().size)
     }
 
-    // update is more tricky, so more testing
+    // update is more tricky, so more tests on it
     @Test
     @Throws(Exception::class)
-    fun updateASolarPanel() = runBlocking { // test where only the solar panel is updated
+    fun updateASolarPanel() = runTest  { // test where only a solar panel is updated
+        val testData = TestSolarArray1.solarArrayWithRoofSections
 
         // insert the actual one
-        val id = sunSaverDatasource
-            .insertSolarArrayWithRoofSections(TestSolarArray1.solarArrayWithRoofSections)
+        val id = sunSaverDatasource.insert(testData)
         val resultBefore = sunSaverDatasource.getAllSolarArrays().first()[0]
         assertEquals("Premium", resultBefore.solarArray.panelType) // small check
 
         // create an updated solar array
-        val updatedSolarArray = TestSolarArray1.solarArray.copy(panelType = "Economy")
-        val updatedParameter = TestSolarArray1
-            .solarArrayWithRoofSections.copy(solarArray = updatedSolarArray)
+        val updatedSolarArray = resultBefore.solarArray.copy(panelType = "Economy")
+        val updatedTestData = resultBefore.copy(solarArray = updatedSolarArray)
 
-        sunSaverDatasource.update(updateId(updatedParameter, id))
+        sunSaverDatasource.update(updatedTestData)
 
-        val resultAfter = sunSaverDatasource.getAllSolarArrays().first()
-        assertEquals(1, resultAfter.size) // didn't add anything
-        assertEquals("Economy", resultAfter[0].solarArray.panelType) // update succeed
+        val resultAfterList = sunSaverDatasource.getAllSolarArrays().first()
+        assertEquals(1, resultAfterList.size) // didn't add anything
+        assertEquals("Economy", resultAfterList[0].solarArray.panelType) // update succeed
 
         // roof sections shouldn't be changed
         val roofSectionsBefore = resultBefore.roofSections.sortedBy { it.mapId }
-        val roofSectionsAfter = resultAfter[0].roofSections.sortedBy { it.mapId }
-        // avoiding to check ids since they are changed from original test data
-        assertEquals(roofSectionsAfter[0].mapId, roofSectionsBefore[0].mapId)
-        assertEquals(roofSectionsAfter[1].panels, roofSectionsBefore[1].panels)
+        val roofSectionsAfter = resultAfterList[0].roofSections.sortedBy { it.mapId }
+        assertEqualsRoofSection(roofSectionsAfter[0], roofSectionsBefore[0], id)
+        assertEqualsRoofSection(roofSectionsAfter[1], roofSectionsBefore[1], id)
     }
 
     // will test if a roof section is updated correctly
     @Test
     @Throws(Exception::class)
-    fun updateARoofSection() = runBlocking {
+    fun updateARoofSection() = runTest  {
+        val testData = TestSolarArray2.solarArrayWithRoofSections
+
         // insert the actual
-        val id = sunSaverDatasource
-            .insertSolarArrayWithRoofSections(TestSolarArray2.solarArrayWithRoofSections)
+        val id = sunSaverDatasource.insert(testData)
         val resultBeforeList = sunSaverDatasource.getAllSolarArrays().first()
-        assertEquals(1, resultBeforeList.size) // do this to avoid error
+        assertEquals(1, resultBeforeList.size) // doing this to avoid error
         val resultBefore = resultBeforeList[0]
         val roofSectionsBefore = resultBefore.roofSections.sortedBy { it.mapId }
-        // small checks
+
+        // verify if no unexpected changes
         assertEquals(2, roofSectionsBefore.size)
-        assertEquals(6, roofSectionsBefore[0].panels)
+        assertEqualsRoofSection(testData.roofSections[0], roofSectionsBefore[0], id)
+        assertEqualsRoofSection(testData.roofSections[1], roofSectionsBefore[1], id)
 
         // create updated
         val updatedRoofSection = roofSectionsBefore[0].copy(panels = 10)
-        val updatedParameter = TestSolarArray2 // update the first roof
-            .solarArrayWithRoofSections
+        val updatedTestData = resultBefore // update the first roof
             .copy(roofSections = listOf(updatedRoofSection, roofSectionsBefore[1]))
 
-        sunSaverDatasource.update(updateId(updatedParameter, id))
+        sunSaverDatasource.update(updatedTestData)
 
         // assert
         val resultAfterList = sunSaverDatasource.getAllSolarArrays().first()
@@ -130,46 +148,55 @@ class SolarArrayDatasourceTest {
         val resultAfter = resultAfterList[0]
 
         // solar array shouldn't be changed
-        assertEquals(
-            updateId(TestSolarArray2.solarArrayWithRoofSections, id).solarArray,
-            resultAfter.solarArray
-        )
+        assertEqualsSolarArray(testData.solarArray, resultAfter.solarArray)
 
         // only the first roof section should be changed
         val roofSectionsAfter = resultAfter.roofSections.sortedBy { it.mapId }
-        assertEquals( 10, roofSectionsAfter[0].panels)
-        assertEquals(roofSectionsBefore[1].area, roofSectionsAfter[1].area, 0.0)
+        assertEquals(10, roofSectionsAfter[0].panels)
+        assertEqualsRoofSection(roofSectionsBefore[1], roofSectionsAfter[1], id)
     }
 
     @Test
     @Throws(Exception::class)
-    fun updateRoofSectionsAdd() = runBlocking {
-        val id = sunSaverDatasource
-            .insertSolarArrayWithRoofSections(TestSolarArray1.solarArrayWithRoofSections)
+    fun updateRoofSectionsAdd() = runTest  {
+        val testData = TestSolarArray1.solarArrayWithRoofSections
+
+        // insert
+        val id = sunSaverDatasource.insert(testData)
         val resultBeforeList = sunSaverDatasource.getAllSolarArrays().first()
         assertEquals(1, resultBeforeList.size)
+
         val resultBefore = resultBeforeList[0]
         val roofSectionsBefore = resultBefore.roofSections.sortedBy { it.mapId }
-        // small checks
-        assertEquals(2, roofSectionsBefore.size)
-        assertEquals(9, roofSectionsBefore[0].panels)
 
-        val newRoofSection = TestSolarArray2.solarArrayWithRoofSections.roofSections[0]
+        // small checks
+        assertEqualsSolarArray(testData.solarArray, resultBefore.solarArray)
+        assertEquals(2, roofSectionsBefore.size)
+        assertEqualsRoofSection(testData.roofSections[0], roofSectionsBefore[0], id)
+        assertEqualsRoofSection(testData.roofSections[1], roofSectionsBefore[1], id)
+
+        // update by adding a new roof section
+        val newRoofSection = RoofSectionEntity(
+            solarArrayId = 0,
+            area = 20.0,
+            incline = 15.0,
+            direction = 203.0,
+            panels = 8,
+            mapId = "4",
+        )
         val updatedRoofSections = roofSectionsBefore.toMutableList()
         updatedRoofSections.add(newRoofSection)
 
-        val updatedParameter = TestSolarArray1 // update roofs
-            .solarArrayWithRoofSections
-            .copy(roofSections = updatedRoofSections)
+        val updatedTestData = resultBefore.copy(roofSections = updatedRoofSections)
+        assertEquals(3, updatedTestData.roofSections.size)
 
-        assertEquals(3, updatedParameter.roofSections.size)
-        sunSaverDatasource.update(updateId(updatedParameter, id))
+        sunSaverDatasource.update(updatedTestData)
 
         val resultAfterAddedList = sunSaverDatasource.getAllSolarArrays().first()
         assertEquals(1, resultAfterAddedList.size)
+
         // solar array not changed
         assertEquals(resultAfterAddedList[0].solarArray, resultBefore.solarArray)
-
         // check if the new one is added
         val roofSectionsAfterAdded = resultAfterAddedList[0].roofSections
         assertEquals(3, roofSectionsAfterAdded.size)
@@ -178,44 +205,59 @@ class SolarArrayDatasourceTest {
 
     @Test
     @Throws(Exception::class)
-    fun updateRoofSectionsDelete() = runBlocking {
-        // add
-        val id = sunSaverDatasource
-            .insertSolarArrayWithRoofSections(TestSolarArray1.solarArrayWithRoofSections)
+    fun updateRoofSectionsDelete() = runTest {
+        val testData = TestSolarArray1.solarArrayWithRoofSections
+
+        // insert
+        val id = sunSaverDatasource.insert(testData)
         val resultBeforeList = sunSaverDatasource.getAllSolarArrays().first()
         assertEquals(1, resultBeforeList.size)
         val resultBefore = resultBeforeList[0]
         val roofSectionsBefore = resultBefore.roofSections.sortedBy { it.mapId }
         // small checks
+        assertEqualsSolarArray(testData.solarArray, resultBefore.solarArray)
         assertEquals(2, roofSectionsBefore.size)
-        assertEquals(9, roofSectionsBefore[0].panels)
-        assertEquals(2, roofSectionsBefore[1].panels)
+        assertEqualsRoofSection(testData.roofSections[0], roofSectionsBefore[0], id)
+        assertEqualsRoofSection(testData.roofSections[1], roofSectionsBefore[1], id)
 
         // update by deleting a roof section
-        val updatedParameter = TestSolarArray1 // update roofs
-            .solarArrayWithRoofSections
-            .copy(roofSections = listOf(roofSectionsBefore[1])) // delete the first one
+        val updatedTestData = resultBefore.copy(
+            roofSections = listOf(roofSectionsBefore[1]) // delete the first one
+        )
 
-        sunSaverDatasource.update(updateId(updatedParameter, id))
+        sunSaverDatasource.update(updatedTestData)
 
         val resultAfterList = sunSaverDatasource.getAllSolarArrays().first()
         assertEquals(resultAfterList.size, 1)
 
-        // again, solar array should be changed, but roof sections amount should be reduced
+        // again, solar array shouldn't be changed, but roof sections amount should be reduced
         val resultAfter = resultAfterList[0]
         assertEquals(resultBefore.solarArray, resultAfter.solarArray)
         assertEquals(1, resultAfter.roofSections.size)
-        assertEquals(roofSectionsBefore[1].mapId, resultAfter.roofSections[0].mapId)
+        assertEqualsRoofSection(roofSectionsBefore[1], resultAfter.roofSections[0], id)
     }
 
-    private fun updateId ( // after insertion
-    solarArrayWithRoofSections: SolarArrayWithRoofSections,
-    id: Long
-    ): SolarArrayWithRoofSections {
-        return solarArrayWithRoofSections.copy( // make a copy with copied solarArray
-            solarArray = solarArrayWithRoofSections.solarArray.copy( // make a copy of solar array
-                id = id
-            )
-        )
+    private fun assertEqualsSolarArray( // ignoring id-field
+        expected: SolarArrayEntity,
+        actual: SolarArrayEntity,
+    ) {
+        assertEquals(expected.name, actual.name)
+        assertEquals(expected.panelType, actual.panelType)
+        assertEquals(expected.latitude, actual.latitude, 0.0)
+        assertEquals(expected.longitude, actual.longitude, 0.0)
+        assertEquals(expected.powerConsumption, actual.powerConsumption, 0.0)
+    }
+
+    private fun assertEqualsRoofSection(
+        expected: RoofSectionEntity,
+        actual: RoofSectionEntity,
+        solarArrayId: Long,
+    ) {
+        assertEquals(solarArrayId, actual.solarArrayId)
+        assertEquals(expected.area, actual.area, 0.0)
+        assertEquals(expected.incline, actual.incline, 0.0)
+        assertEquals(expected.direction, actual.direction, 0.0)
+        assertEquals(expected.panels, actual.panels)
+        assertEquals(expected.mapId, actual.mapId)
     }
 }

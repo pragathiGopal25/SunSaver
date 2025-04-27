@@ -31,7 +31,7 @@ class SharedRepository @Inject constructor(
 
     // maps to SolarArrayWithRoofsections and calls add in Datasource
     override suspend fun addSolarArray(solarArray: SolarArray) {
-        datasource.insertSolarArrayWithRoofSections(toEntity(solarArray))
+        datasource.insert(toEntity(solarArray))
     }
 
     override suspend fun deleteSolarArray(solarArray: SolarArray) {

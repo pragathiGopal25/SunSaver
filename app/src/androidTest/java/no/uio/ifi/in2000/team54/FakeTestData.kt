@@ -10,7 +10,7 @@ import no.uio.ifi.in2000.team54.enums.SolarPanelType
 
 // roofSectionId will be generated automatically
 object TestSolarArray1 { // immutable test data
-    val solarArray = SolarArrayEntity(
+    private val solarArray = SolarArrayEntity(
         name = "test1",
         panelType = "Premium",
         latitude = 59.899563, // should be transformed by repository
