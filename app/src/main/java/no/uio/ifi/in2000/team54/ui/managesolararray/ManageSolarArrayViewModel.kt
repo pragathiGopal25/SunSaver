@@ -82,7 +82,9 @@ class ManageSolarArrayViewModel : ViewModel() {
     }
 
     fun addSolarArray(newSolarArray: SolarArray) {
-        _sharedRepository.addSolarArray(newSolarArray)
+        viewModelScope.launch {
+            _sharedRepository.addSolarArray(newSolarArray)
+        }
     }
 
     fun queryAddressAtPos(pos: Pos) {

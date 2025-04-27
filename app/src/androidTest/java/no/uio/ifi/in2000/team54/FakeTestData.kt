@@ -3,6 +3,10 @@ package no.uio.ifi.in2000.team54
 import no.uio.ifi.in2000.team54.database.RoofSectionEntity
 import no.uio.ifi.in2000.team54.database.SolarArrayEntity
 import no.uio.ifi.in2000.team54.database.SolarArrayWithRoofSections
+import no.uio.ifi.in2000.team54.domain.Coordinates
+import no.uio.ifi.in2000.team54.domain.RoofSection
+import no.uio.ifi.in2000.team54.domain.SolarArray
+import no.uio.ifi.in2000.team54.enums.SolarPanelType
 
 // roofSectionId will be generated automatically
 object TestSolarArray1 { // immutable test data
@@ -71,5 +75,54 @@ object TestSolarArray2 {
         solarArray = solarArray,
         roofSections = listOf(roofSection1, roofSection2)
 
+    )
+}
+
+
+object TestSolarArrayDomain1 {
+    private val roofSection1 = RoofSection(
+        id = null,
+        area = 36.0,
+        incline = 23.0,
+        direction = 120.0,
+        panels = 9,
+        mapId = "1"
+    )
+    private val roofSection2 = RoofSection(
+        id = null,
+        area = 23.0,
+        incline = 23.0,
+        direction = 30.0,
+        panels = 4,
+        mapId = "2"
+    )
+
+    val solarArray = SolarArray(
+        id = null,
+        name = "test2",
+        panelType = SolarPanelType.ECONOMY,
+        roofSections = listOf(roofSection1, roofSection2),
+        coordinates = Coordinates(latitude = 59.909563, longitude = 10.445503),
+        powerConsumption = 300.0
+    )
+}
+
+object TestSolarArrayDomain2 {
+    private val roofSection1 = RoofSection(
+        id = null,
+        area = 10.0,
+        incline = 13.0,
+        direction = 122.0,
+        panels = 3,
+        mapId = "1"
+    )
+
+    val solarArray = SolarArray(
+        id = null,
+        name = "test3",
+        panelType = SolarPanelType.PREMIUM,
+        roofSections = listOf(roofSection1),
+        coordinates = Coordinates(latitude = 59.902563, longitude = 10.345503),
+        powerConsumption = 1245.0
     )
 }

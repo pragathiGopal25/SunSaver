@@ -5,10 +5,19 @@ import no.uio.ifi.in2000.team54.database.SolarArrayWithRoofSections
 import no.uio.ifi.in2000.team54.database.SunSaverDao
 import javax.inject.Inject
 
+interface ISunSaverDatasource { // define interface (also used for testing)
+    suspend fun insertSolarArrayWithRoofSections(
+        solarArrayWithRoofSections: SolarArrayWithRoofSections
+    ): Long
+    fun getAllSolarArrays(): Flow<List<SolarArrayWithRoofSections>>
+    suspend fun delete(solarArrayWithRoofSections: SolarArrayWithRoofSections)
+    suspend fun update(solarArrayWithRoofSections: SolarArrayWithRoofSections)
+}
+
 class SunSaverDatasource @Inject constructor(
     private val sunSaverDao: SunSaverDao
-){
-    suspend fun insertSolarArrayWithRoofSections(solarArrayWithRoofSections: SolarArrayWithRoofSections): Long {
+): ISunSaverDatasource {
+    override suspend fun insertSolarArrayWithRoofSections(solarArrayWithRoofSections: SolarArrayWithRoofSections): Long {
         val id: Long = sunSaverDao.insertSolarArray(solarArrayWithRoofSections.solarArray)
 
         // add foreign key from solar array
@@ -19,18 +28,18 @@ class SunSaverDatasource @Inject constructor(
         return id
     }
 
-    fun getAllSolarArrays(): Flow<List<SolarArrayWithRoofSections>> {
+    override fun getAllSolarArrays(): Flow<List<SolarArrayWithRoofSections>> {
         return sunSaverDao.getAllSolarArrays()
     }
 
-    suspend fun delete(solarArrayWithRoofSections: SolarArrayWithRoofSections) {
+    override suspend fun delete(solarArrayWithRoofSections: SolarArrayWithRoofSections) {
         sunSaverDao.delete(solarArrayWithRoofSections.solarArray)
     }
 
     // we have two edge cases: added and deleted solar arrays
     // the problem is that update does nothing if it doesn't find a matching key
     // therefore we have to handle this manually in this method
-    suspend fun update(solarArrayWithRoofSections: SolarArrayWithRoofSections) {
+    override suspend fun update(solarArrayWithRoofSections: SolarArrayWithRoofSections) {
 
         // updating the solar array first
         sunSaverDao.updateSolarArray(solarArrayWithRoofSections.solarArray)
