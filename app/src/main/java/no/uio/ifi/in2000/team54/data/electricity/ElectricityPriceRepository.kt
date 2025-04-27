@@ -17,7 +17,6 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
     ): List<Double> {
         val avgPrice = getPriceDataInterval(days, area).average()
         val dailyPowerConsumption = powerConsumption/30.0
-        println("Price area: $area ")
         return listOf(
             (dailyPowerConsumption - dailySolarPowerGeneration) * days * avgPrice,
             avgPrice * days * dailyPowerConsumption
@@ -111,7 +110,6 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
     //Dette er en rough estimat fordi de sonene har ganske kompliserte grenser
     fun getPriceArea(solarArray: SolarArray):String {
         val coords = solarArray.coordinates
-        println("coords: longitude: ${coords.longitude} latitude: ${coords.latitude}")
         return when{
             coords.latitude > 64.5 -> "NO4"
             coords.latitude < 59.45 && coords.longitude < 10.5 -> "NO2"
