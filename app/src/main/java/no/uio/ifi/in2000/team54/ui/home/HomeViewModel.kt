@@ -32,7 +32,8 @@ data class WeatherData(
     var temp: Map<String, Double> = emptyMap<String, Double>(),
     var cloud: Map<String, Double> = emptyMap<String, Double>(),
     var snow: Map<String, Double> = emptyMap<String, Double>(),
-    var irradiance: Map<String, Double> = emptyMap<String, Double>()
+    var irradiance: Map<String, Double> = emptyMap<String, Double>(),
+    var sunhours: Map<String, Double> = emptyMap<String, Double>()
 )
 
 
@@ -93,16 +94,19 @@ class HomeViewModel : ViewModel() {
                 val asyncCloud = async { _repository.getData(coordinates, Elements.CLOUD) }
                 val asyncSnow = async { _repository.getData(coordinates, Elements.SNOW) }
                 val asyncIrradiance = async { _repository.getData(coordinates,Elements.IRRIDANCE) }
+                val asyncSunhours =  async { _repository.getData(coordinates,Elements.SUNHOURS) }
 
                 val tempData = asyncTemp.await()
                 val cloudData = asyncCloud.await()
                 val snowData = asyncSnow.await()
                 val irradianceData = asyncIrradiance.await()
+                val sunhoursData = asyncSunhours.await()
 
                 weatherData.temp = tempData
                 weatherData.cloud = cloudData
                 weatherData.snow = snowData
                 weatherData.irradiance = irradianceData
+                weatherData.sunhours = sunhoursData
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -134,6 +138,7 @@ class HomeViewModel : ViewModel() {
                         monthlyCloud = weatherData.cloud,
                         monthlySnow = weatherData.snow,
                         monthlyRadiance = weatherData.irradiance,
+                        monthlySunhours = weatherData.sunhours,
                         solarArray = solarArray
                     )
                     solarArrayLoadedData[solarArray] = electricityProduction
