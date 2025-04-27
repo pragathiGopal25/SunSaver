@@ -13,6 +13,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import no.uio.ifi.in2000.team54.ui.theme.Red
 
 @Composable
 fun SaveDialog(
+    viewModel: ManageSolarArrayViewModel,
     open: Boolean,
     onClose: () -> Unit,
     onSave: (name: String, power: String) -> Unit,
@@ -40,11 +42,12 @@ fun SaveDialog(
     if (!open) {
         return
     }
-
+    val solarEntity = viewModel.currentSolarArray.collectAsState()
     var validate by remember { mutableStateOf(false) }
-    var name by remember { mutableStateOf("") }
-    var power by remember { mutableStateOf("1574.5") }
 
+    // shows the saved name and power values. If they dont exist, shows the default values.
+    var name by remember { mutableStateOf(solarEntity.value?.name ?: "")}
+    var power by remember { mutableStateOf(solarEntity.value?.powerConsumption?.toString() ?: "1574.5") }
     val isValid = !validate || (name.isNotEmpty() && power.isNotEmpty())
 
     Dialog({

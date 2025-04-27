@@ -24,6 +24,10 @@ class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
     private val _sharedRepository = RepositoryProvider.sharedRepository
 
+    // allows us to access the value of the current solar array object, and keep the viewmodel updated on any changes
+    private val _currentSolarArray = MutableStateFlow<SolarArray?>(null)
+    val currentSolarArray: StateFlow<SolarArray?> = _currentSolarArray.asStateFlow()
+
     private val _mapAddress = MutableStateFlow(
         AddressState(null)
     )
@@ -74,40 +78,47 @@ class ManageSolarArrayViewModel : ViewModel() {
             address = address
         )
     }
-
     fun setSearchAddress(query: String) {
         _mapSearchAddress.value = _mapSearchAddress.value.copy(
             query = query
         )
     }
+    // used in SearchField method, and it allows the ui to remember the map address when navigating between screens
+    fun setCurrentSolarArray(solarArray: SolarArray?) {
+        _currentSolarArray.value = solarArray
+        // Update the search address when selecting a solar array to edit
+        _mapSearchAddress.value = SearchAddressState(solarArray?.address?.toFormatted() ?: "")
+        _mapAddress.value = _mapAddress.value.copy(
+            address = solarArray?.address
+        )
 
+    }
     fun addSolarArray(newSolarArray: SolarArray) {
         _sharedRepository.addSolarArray(newSolarArray)
     }
-
     fun queryAddressAtPos(pos: Pos) {
         viewModelScope.launch {
             val address = repository.getNearestAddressToPos(pos) ?: return@launch
-
             setSearchAddress(address.toFormatted())
             setMapAddress(address)
         }
+    }
+    // To Update the roof sections and other values when user edits
+    fun updateSolarArray(newSolarArray: SolarArray){
+        _sharedRepository.updateSolarArray(newSolarArray)
     }
 }
 
 data class AddressState(
     val address: Address?
 )
-
 data class MapRoofSectionsState(
     val roofSections: List<MapRoofSection>,
     val isError: Boolean
 )
-
 data class SearchAddressState(
     val query: String
 )
-
 data class AddressSuggestionsState(
     val suggestions: List<Address>,
 )

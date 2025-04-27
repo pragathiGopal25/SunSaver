@@ -20,6 +20,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,7 +66,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
             .background(Background)
     ) {
         HomeScreenTopBar()
-        SolarArrayList(homeViewModel)
+        SolarArrayList(homeViewModel, navController)
         SwitchContent(homeViewModel)
         WeatherCard(navController)
     }
@@ -125,7 +127,7 @@ fun HomeScreenTopBar() {
 }
 
 @Composable
-fun SolarArrayList(homeViewModel: HomeViewModel) {
+fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
     val solarArrays = homeViewModel.solarArrays.collectAsState()
 
     Box(
@@ -138,7 +140,7 @@ fun SolarArrayList(homeViewModel: HomeViewModel) {
                 NoSolarArrayCard()
             } else {
                 solarArrays.value.forEach {
-                    SolarArrayCard(it)
+                    SolarArrayCard(it, navController)
                 }
             }
         }
@@ -146,23 +148,43 @@ fun SolarArrayList(homeViewModel: HomeViewModel) {
 }
 
 @Composable
-fun SolarArrayCard(solarArray: SolarArray) {
+fun SolarArrayCard(
+    solarArray: SolarArray,
+    navController: NavController
+) {
     Column(
         modifier = Modifier
             .width(200.dp)
-            .height(220.dp)
+            .height(250.dp)
             .padding(15.dp)
             .clip(RoundedCornerShape(20.dp))
             .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
             .background(LightOrange),
     ) {
+        IconButton(
+            onClick = {
+                navController.navigate("editsolararrays/${solarArray.name}")
+            },
+            modifier = Modifier
+                .background(LightOrange)
+                .padding(top = 6.dp ,end = 4.dp)
+                .size(30.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .align(Alignment.End)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.circle),
+                contentDescription = "Redigere Anlegg",
+                tint = Color.Unspecified // if you don't want to tint it
+            )
+        }
         Image(
             painter = painterResource(R.drawable.house),
             contentDescription = "Hus med solcelleplaneter",
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .padding(15.dp)
+                .padding(end = 15.dp, start = 15.dp, bottom = 10.dp, top =  8.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(Lighter)
                 .padding(15.dp)
@@ -176,7 +198,7 @@ fun SolarArrayCard(solarArray: SolarArray) {
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 15.dp)
+                .padding(bottom = 6.dp)
         )
     }
 }
