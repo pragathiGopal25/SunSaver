@@ -167,9 +167,17 @@ class HomeViewModel : ViewModel() {
                 }
 
                 if (!priceMap.containsKey(days)) {
+                    val coords = solarArray.coordinates
+                    val area = when{
+                        coords.longitude > 64.5 -> "NO4"
+                        coords.longitude < 59.45 && coords.latitude < 10.5 -> "NO2"
+                        coords.longitude in 59.3 .. 61.3 && coords.latitude < 8.2 -> "NO5"
+                        coords.longitude in 61.3..64.5 && coords.latitude < 8.2 -> "NO3"
+                        else -> "NO1"
+                    }
                     priceMap[days] = priceData.getPriceData(
                         days,
-                        "NO1",
+                        area,
                         solarArrayLoadedData[solarArray]!![priceData.getMonth()]!!
                     )
                     realPriceMap[days] = priceMap[days]!![1]
