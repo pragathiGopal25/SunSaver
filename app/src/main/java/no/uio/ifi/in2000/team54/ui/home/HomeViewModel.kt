@@ -251,10 +251,10 @@ class HomeViewModel : ViewModel() {
                     )
                 }
                 if (!electricityPriceMap.containsKey(solarArray)) {
-                    timeScopeToDays.forEach { (scope, count) ->
+                    timeScopeToDays.forEach { (scope, days) ->
                         val priceDataTuple = electricityPriceRepository.getPriceData(
-                            count,
-                            "NO1",
+                            days,
+                            electricityPriceRepository.getPriceArea(solarArray),
                             electricityProductionMap[solarArray]!![electricityPriceRepository.getMonth()],
                             solarArray.powerConsumption
                         )
@@ -320,16 +320,5 @@ class HomeViewModel : ViewModel() {
                 }
             }
         }
-    }
-}
-
-fun getPriceArea(solarArray: SolarArray):String {
-    val coords = solarArray.coordinates
-    return when{
-        coords.longitude > 64.5 -> "NO4"
-        coords.longitude < 59.45 && coords.latitude < 10.5 -> "NO2"
-        coords.longitude in 59.3 .. 61.3 && coords.latitude < 8.2 -> "NO5"
-        coords.longitude in 61.3..64.5 && coords.latitude < 8.2 -> "NO3"
-        else -> "NO1"
     }
 }

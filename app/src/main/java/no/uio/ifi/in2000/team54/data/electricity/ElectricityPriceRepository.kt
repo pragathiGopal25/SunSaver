@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team54.data.electricity
 
 import android.annotation.SuppressLint
+import no.uio.ifi.in2000.team54.domain.SolarArray
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -16,6 +17,7 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
     ): List<Double> {
         val avgPrice = getPriceDataInterval(days, area).average()
         val dailyPowerConsumption = powerConsumption/30.0
+        println("Price area: $area ")
         return listOf(
             (dailyPowerConsumption - dailySolarPowerGeneration) * days * avgPrice,
             avgPrice * days * dailyPowerConsumption
@@ -103,5 +105,19 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
 
         val newDate = "$year/$month-$day"
         return newDate
+    }
+
+    //Definerer de 5 sonene for strømpriser (strøm har forskjellig pris forskjellige deler av landet)
+    //Dette er en rough estimat fordi de sonene har ganske kompliserte grenser
+    fun getPriceArea(solarArray: SolarArray):String {
+        val coords = solarArray.coordinates
+        println("coords: longitude: ${coords.longitude} latitude: ${coords.latitude}")
+        return when{
+            coords.latitude > 64.5 -> "NO4"
+            coords.latitude < 59.45 && coords.longitude < 10.5 -> "NO2"
+            coords.latitude in 59.3 .. 61.8 && coords.longitude < 8.2 -> "NO5"
+            coords.latitude in 61.9..64.5 && coords.longitude < 8.6 -> "NO3"
+            else -> "NO1"
+        }
     }
 }
