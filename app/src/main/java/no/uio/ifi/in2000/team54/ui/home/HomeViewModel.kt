@@ -19,6 +19,7 @@ import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.util.calculateMonthlyElectricityProduction
+import kotlin.math.round
 
 data class HomeUiState(
     val solarArrays: StateFlow<List<SolarArray>>,
@@ -36,7 +37,7 @@ data class LoadingState(
 data class PriceData(
     val realPrice: Double,
     val solarPrice: Double,
-    val saved: Double = Math.round(realPrice * 10.0 - solarPrice * 10.0) / 10.0
+    val saved: Double = round(realPrice * 10.0 - solarPrice * 10.0) / 10.0
 )
 
 data class WeatherData(
@@ -257,8 +258,8 @@ class HomeViewModel : ViewModel() {
                             electricityProductionMap[solarArray]!![electricityPriceRepository.getMonth()]
                         )
                         val priceData = PriceData(
-                            realPrice = Math.round(priceDataTuple[1] * 10.0) / 10.0,
-                            solarPrice = Math.round(priceDataTuple[0] * 10.0) / 10.0,
+                            realPrice = round(priceDataTuple[1] * 10.0) / 10.0,
+                            solarPrice = round(priceDataTuple[0] * 10.0) / 10.0,
                         )
                         electricityPriceMap.computeIfAbsent(
                             solarArray,
@@ -313,7 +314,7 @@ class HomeViewModel : ViewModel() {
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Feilet på å endre tidsintervall"
+                        loadingMessage = "Kunne ikke endre tidsintervall."
                     )
                 }
             }
