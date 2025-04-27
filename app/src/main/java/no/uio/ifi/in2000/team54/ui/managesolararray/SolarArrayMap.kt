@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,7 +26,6 @@ import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
 import com.mapbox.maps.extension.compose.style.MapStyle
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
-import no.uio.ifi.in2000.team54.data.building.BuildingRepository
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Pos
@@ -58,7 +56,6 @@ fun SolarArrayMap(
             val targetRoofSection = mapRoofSectionsState.roofSections.find {
                 it.geometry.contains(point)
             }
-
             // if there aren't any roof sections at this position, we wan't to try to find a new address
             if (targetRoofSection == null) {
                 viewModel.queryAddressAtPos(Pos.fromPoint(point))
@@ -78,7 +75,6 @@ fun SolarArrayMap(
                     )
                 }
             }
-
             false
         }
     ) {

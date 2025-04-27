@@ -55,7 +55,7 @@ fun MainScreen() {
             composable("settings") { SettingsScreen() }
 
             composable(
-                "EditSolarPanels/{arrayName}",
+                "editsolararrays/{arrayName}",
                 arguments = listOf(navArgument("arrayName") { type = NavType.StringType })
             ) { backStackEntry ->
                 val arrayName = backStackEntry.arguments?.getString("arrayName") ?: ""

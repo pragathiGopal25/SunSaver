@@ -163,7 +163,7 @@ fun SolarArrayCard(
     ) {
         IconButton(
             onClick = {
-                navController.navigate("EditSolarPanels/${solarArray.name}")
+                navController.navigate("editsolararrays/${solarArray.name}")
             },
             modifier = Modifier
                 .background(LightOrange)

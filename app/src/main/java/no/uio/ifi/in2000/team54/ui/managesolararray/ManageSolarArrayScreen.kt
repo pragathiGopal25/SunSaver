@@ -92,11 +92,8 @@ fun ManageSolarArrayScreen(
 ) {
     val roofSections = remember { mutableStateListOf<RoofSection>() }
     val uiState by homeviewmodel.solarArrays.collectAsState()
-
     val solarEntity = uiState.find { it.name == updateArray }
     val updateRoofSections = remember { mutableStateListOf(*solarEntity?.roofSections?.toTypedArray() ?: arrayOf()) }
-
-
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             center(osloCenter)
@@ -109,12 +106,10 @@ fun ManageSolarArrayScreen(
             .fillMaxSize()
     ) {
         if (updateArray != "") {
-
             // sends the already existing roof sections of the solarentity
             SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, updateRoofSections)
         } else {
             SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, roofSections)
-
         }
         BackButton(viewModel, navController)
         Box(
@@ -126,11 +121,9 @@ fun ManageSolarArrayScreen(
                 // makes it easier later to update mapaddress , and keep track of its name and other values.
                 viewModel.setCurrentSolarArray(solarEntity)
                 ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, updateRoofSections, solarEntity)
-
             } else {
                 ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections)
             }
-
         }
     }
 }
@@ -185,7 +178,6 @@ private fun ArraySettingsMenu(
             decayAnimationSpec = decayAnimation,
         )
     }
-
     Column {
         DraggableBox(
             screenSizeDp = screenSizeDp,
@@ -247,7 +239,6 @@ private fun ArraySettingsContent(
     val solarPanelType = rememberSaveable {
         mutableStateOf(solarEntity?.panelType ?: SolarPanelType.PREMIUM)
     }
-
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -334,32 +325,21 @@ private fun ArraySettingsMainSection(
         }
     }
     SaveDialog( viewModel, openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
-        if (solarEntity == null) {viewModel.addSolarArray(
-            SolarArray(
-                id = null,
-                name,
-                solarPanelType,
-                roofSections,
-                addressState.address!!.pos.toCoordinates(),
-                power.toDouble(),
-                addressState.address
-            ))
+        val solarObj = SolarArray(
+            id = null,
+            name,
+            solarPanelType,
+            roofSections,
+            addressState.address!!.pos.toCoordinates(),
+            power.toDouble(),
+            addressState.address
+        )
+        if (solarEntity == null) {
+            viewModel.addSolarArray(solarObj)
         } else {
             // if solarentity exists then you just want to update the values not create and save a whole new one
-            viewModel.updateSolarArray(
-                SolarArray(
-                    id = null,
-                    name,
-                    solarPanelType,
-                    roofSections,
-                    addressState.address!!.pos.toCoordinates(),
-                    power.toDouble(),
-                    addressState.address
-                )
-            )
-
+            viewModel.updateSolarArray(solarObj)
         }
-
         viewModel.setSearchAddress("")
         navController.navigate("home")
     })

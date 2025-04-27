@@ -66,12 +66,9 @@ fun SearchField(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
-
     val addressState = viewModel.mapSearchAddress.collectAsState()
     val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsState()
     var showSuggestions by remember { mutableStateOf(false) }
-
-
     // Use the address from the selected solar array or the search address
     val searchAddress = remember { mutableStateOf(addressState.value.query) }
 
@@ -89,15 +86,12 @@ fun SearchField(
             searchAddress.value = ""
         }
     }
-
     val selectSuggestion: (Address) -> Unit = remember {
         { suggestion ->
             viewModel.setSearchAddress(suggestion.toFormatted())
             viewModel.setMapAddress(suggestion)
-
             scope.launch {
                 draggableState.animateTo(ArraySettingsMenuAnchors.Bottom)
-
                 mapViewportState.easeTo(
                     CameraOptions.Builder()
                         .center(suggestion.pos.toPoint())
@@ -107,7 +101,6 @@ fun SearchField(
             }
         }
     }
-
     Column {
         SearchTextField(
             address = searchAddress.value,

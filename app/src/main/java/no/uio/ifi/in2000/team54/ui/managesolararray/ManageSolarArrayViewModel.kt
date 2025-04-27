@@ -28,8 +28,6 @@ class ManageSolarArrayViewModel : ViewModel() {
     private val _currentSolarArray = MutableStateFlow<SolarArray?>(null)
     val currentSolarArray: StateFlow<SolarArray?> = _currentSolarArray.asStateFlow()
 
-
-
     private val _mapAddress = MutableStateFlow(
         AddressState(null)
     )
@@ -80,13 +78,11 @@ class ManageSolarArrayViewModel : ViewModel() {
             address = address
         )
     }
-
     fun setSearchAddress(query: String) {
         _mapSearchAddress.value = _mapSearchAddress.value.copy(
             query = query
         )
     }
-
     // used in SearchField method, and it allows the ui to remember the map address when navigating between screens
     fun setCurrentSolarArray(solarArray: SolarArray?) {
         _currentSolarArray.value = solarArray
@@ -97,20 +93,16 @@ class ManageSolarArrayViewModel : ViewModel() {
         )
 
     }
-
     fun addSolarArray(newSolarArray: SolarArray) {
         _sharedRepository.addSolarArray(newSolarArray)
     }
-
     fun queryAddressAtPos(pos: Pos) {
         viewModelScope.launch {
             val address = repository.getNearestAddressToPos(pos) ?: return@launch
-
             setSearchAddress(address.toFormatted())
             setMapAddress(address)
         }
     }
-
     // To Update the roof sections and other values when user edits
     fun updateSolarArray(newSolarArray: SolarArray){
         _sharedRepository.updateSolarArray(newSolarArray)
@@ -120,16 +112,13 @@ class ManageSolarArrayViewModel : ViewModel() {
 data class AddressState(
     val address: Address?
 )
-
 data class MapRoofSectionsState(
     val roofSections: List<MapRoofSection>,
     val isError: Boolean
 )
-
 data class SearchAddressState(
     val query: String
 )
-
 data class AddressSuggestionsState(
     val suggestions: List<Address>,
 )
