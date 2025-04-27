@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,6 +58,8 @@ import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
 import no.uio.ifi.in2000.team54.ui.theme.Lighter
+import no.uio.ifi.in2000.team54.ui.theme.Red
+import no.uio.ifi.in2000.team54.ui.theme.SoftRed
 import no.uio.ifi.in2000.team54.ui.theme.WeatherBlue
 import no.uio.ifi.in2000.team54.ui.theme.WeatherBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
@@ -246,6 +249,51 @@ fun NoSolarArrayCard() {
 }
 
 @Composable
+fun NetworkSnackBar() {
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .border(3.dp, Red, RoundedCornerShape(20.dp))
+                .clip(RoundedCornerShape(20.dp))
+                .background(SoftRed)
+                .padding(16.dp)
+        ) {
+
+            Text(
+                text = "Manglende internettilgang ",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = Red
+            )
+
+            Spacer(Modifier.height(5.dp))
+
+            Image(
+                painter = painterResource(R.drawable.no_internet_red),
+                contentDescription = "Manglende internetttilgang",
+                modifier = Modifier
+                    .size(45.dp)
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNetwork() {
+
+    NetworkSnackBar()
+}
+
+@Composable
 fun SwitchContent(homeViewModel: HomeViewModel) {
     var isFlipped by remember { mutableStateOf(false) }
 
@@ -309,13 +357,6 @@ private fun PreviousCard( flipped: Boolean,  onClick: () -> Unit, modifier: Modi
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun PreviewSwitchContent() {
-
-    val hvm = HomeViewModel()
-   SwitchContent(hvm)
-}
 
 
 @Composable
