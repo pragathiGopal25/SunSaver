@@ -5,7 +5,7 @@ enum class SolarPanelType(
     val watt: Int,
     val price: Double,
     val installationPrice: Double,
-    val length: Double,
+    val length: Double, // values found on the internet for similar wattage panels
     val width: Double
 ) {
 

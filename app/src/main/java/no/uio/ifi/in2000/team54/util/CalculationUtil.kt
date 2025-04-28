@@ -25,16 +25,19 @@ fun calculateMonthlyElectricityProduction(
 ): Map<String, Double> {
     val monthlyIrradiance = calculateAdjustedSolarIrradiance(monthlyCloud, monthlySnow, monthlyRadiance)
     val roofSections: List<RoofSection> = solarArray.roofSections
+    val panelArea = solarArray.panelType.length.times(solarArray.panelType.width)
 
-    // factors to consider: paneltype (watt), area, incline, direction, temperature // todo: use watts somewhere
+    // factors to consider: paneltype (watt), area, incline, direction, temperature
     return monthlyIrradiance.mapValues { (month, irradiance) ->
         val sunHours = monthlySunhours[month] ?: 0.0
         val temperature = monthlyTemperatures[month] ?: DEFAULT_PANEL_TEMPERATURE_CELSIUS
         val efficiency = calculatePanelEfficiency(temperature, solarArray)
 
+
+        // substitute roofSection.area with panelArea.time(roofsection.panel)
         // need to calculate per roofSection and sum up
         roofSections.sumOf { roofSection ->
-            irradiance * sunHours * efficiency * roofSection.area * calculateDirectionImpact(
+            irradiance * sunHours * efficiency * (panelArea.times(roofSection.panels)) * calculateDirectionImpact(
                 roofSection.direction
             ) * calculateAngleImpact(roofSection.incline)
         } / 1000.0 // Convert to kWh
@@ -43,11 +46,8 @@ fun calculateMonthlyElectricityProduction(
 
 //Calculate the efficiency of the solar panel based on temperature in celsius
 //If the temperature is more than default (25 deg) the efficiency decreases
-
-// Efficiency: https://www.photonicuniverse.com/en/resources/articles/full/7.html
-// efficieny = (panel power (kW) / panel length * panel width) *  100
 private fun calculatePanelEfficiency(temperature: Double, solarArray: SolarArray): Double {
-
+    // Efficiency: https://www.photonicuniverse.com/en/resources/articles/full/7.html
     var efficiency = ((solarArray.panelType.watt)/((solarArray.panelType.length).times(solarArray.panelType.width)))
     if (temperature > DEFAULT_PANEL_TEMPERATURE_CELSIUS) {
         val temperatureDifference = temperature - DEFAULT_PANEL_TEMPERATURE_CELSIUS
@@ -86,16 +86,19 @@ private fun calculateSnowLossFactor(snowCoverage: Double): Double {
 
 //Calculates the impact the cloud cover has on solar panel efficiency
 private fun calculateCloudLossFactor(cloudCover: Double): Double {
+    // changing this based on: https://www.sunsave.energy/solar-panels-advice/how-solar-works/winter
+    // "Light cloud cover typically reduces solar panel output by 24%"
+    // "Under heavy cloud cover, your system will produce 67% less electricity, on average."
     return when (cloudCover.toInt()) {
         0 -> 1.00
-        1 -> 0.97
-        2 -> 0.93
-        3 -> 0.88
-        4 -> 0.82
-        5 -> 0.75
-        6 -> 0.68
-        7 -> 0.60
-        8 -> 0.50
+        1 -> 0.86
+        2 -> 0.76 // light cloud - 24% of the actual output
+        3 -> 0.65
+        4 -> 0.55
+        5 -> 0.45
+        6 -> 0.40
+        7 -> 0.35
+        8 -> 0.33 // heavy cloud, - 67% of the actual output
         else -> 0.75 // Fallback for unknown
     }
 }
@@ -118,6 +121,6 @@ private fun calculateAngleImpact(inclineAngle: Double): Double {
 // todo: also can be adjusted
 //Calculates the impact the direction of the panel has on solar panel efficiency
 private fun calculateDirectionImpact(azimuth: Double): Double {
-    val directionOffset = abs(180 - azimuth)
+    val directionOffset = abs(180 - azimuth) // 180 degrees for perfect south, which is optimal for sunshine in the northern hemisphere
     return maxOf(0.5, 1 - (directionOffset * DIRECTION_EFFICIENCY_DECREASE_PER_DEGREE))
 }
