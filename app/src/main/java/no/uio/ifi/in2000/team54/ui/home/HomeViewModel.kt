@@ -41,10 +41,11 @@ data class PriceData(
 )
 
 data class WeatherData(
-    var temp: Map<String, Double> = emptyMap(),
-    var cloud: Map<String, Double> = emptyMap(),
-    var snow: Map<String, Double> = emptyMap(),
-    var irradiance: Map<String, Double> = emptyMap()
+    var temp: Map<String, Double> = emptyMap<String, Double>(),
+    var cloud: Map<String, Double> = emptyMap<String, Double>(),
+    var snow: Map<String, Double> = emptyMap<String, Double>(),
+    var irradiance: Map<String, Double> = emptyMap<String, Double>(),
+    var sunhours: Map<String, Double> = emptyMap<String, Double>()
 )
 
 enum class TimeScope {
@@ -130,17 +131,20 @@ class HomeViewModel : ViewModel() {
                 val asyncTemp = async { _repository.getData(coordinates, Elements.TEMP) }
                 val asyncCloud = async { _repository.getData(coordinates, Elements.CLOUD) }
                 val asyncSnow = async { _repository.getData(coordinates, Elements.SNOW) }
-                val asyncIrradiance = async { _repository.getData(coordinates, Elements.IRRIDANCE) }
+                val asyncIrradiance = async { _repository.getData(coordinates,Elements.IRRIDANCE) }
+                val asyncSunhours =  async { _repository.getData(coordinates,Elements.SUNHOURS) }
 
                 val tempData = asyncTemp.await()
                 val cloudData = asyncCloud.await()
                 val snowData = asyncSnow.await()
                 val irradianceData = asyncIrradiance.await()
+                val sunhoursData = asyncSunhours.await()
 
                 weatherData.temp = tempData
                 weatherData.cloud = cloudData
                 weatherData.snow = snowData
                 weatherData.irradiance = irradianceData
+                weatherData.sunhours = sunhoursData
 
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
@@ -182,6 +186,7 @@ class HomeViewModel : ViewModel() {
             }
 
             try {
+
                 if (!electricityProductionMap.containsKey(solarArray)) {
                     val electricityProduction: Map<String, Double> =
                         calculateMonthlyElectricityProduction(
@@ -189,6 +194,7 @@ class HomeViewModel : ViewModel() {
                             monthlyCloud = weatherData.cloud,
                             monthlySnow = weatherData.snow,
                             monthlyRadiance = weatherData.irradiance,
+                            monthlySunhours = weatherData.sunhours,
                             solarArray = solarArray
                         )
                     electricityProductionMap[solarArray] = electricityProduction.values.toList()
