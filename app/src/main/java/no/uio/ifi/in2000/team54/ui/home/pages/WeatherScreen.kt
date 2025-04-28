@@ -29,13 +29,13 @@ fun WeatherScreen() {
     ) {
 
         Text(
-            text = " Væroversikt",
+            text = " Værforhold",
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
         Text(
-            text = " & Temperatur",
+            text = " & Skydekke",
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White
