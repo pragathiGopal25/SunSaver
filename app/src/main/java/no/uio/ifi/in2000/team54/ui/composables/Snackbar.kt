@@ -15,13 +15,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.ui.theme.Red
+import no.uio.ifi.in2000.team54.ui.theme.SoftRed
 
 @Composable
 fun Snackbar(snackbarState: SnackbarHostState) {
+
     SnackbarHost(hostState = snackbarState) {
         val message = snackbarState.currentSnackbarData?.visuals?.message
 
@@ -33,14 +37,15 @@ fun Snackbar(snackbarState: SnackbarHostState) {
                 modifier = Modifier
                     .padding(4.dp)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(15))
-                    .background(Red)
-                    .border(1.dp, Red, RoundedCornerShape(15))
+                    .clip(RoundedCornerShape(20))
+                    .background(SoftRed)
+                    .border(3.dp, Red, RoundedCornerShape(20))
                     .padding(vertical = 10.dp)
                     .align(Alignment.TopCenter),
                 text = message ?: "", // need to do this or it breaks the fade-out animation
-                color = Color.Black,
+                color = Red,
                 fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,
             )
         }

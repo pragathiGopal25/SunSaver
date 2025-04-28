@@ -9,14 +9,8 @@ import androidx.core.content.getSystemService
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import no.uio.ifi.in2000.team54.ui.home.ConnectivityObserver
 
-class InternetConnectivityObserver (
-
-    private val context: Context,
-
-
-): ConnectivityObserver {
+class NetworkObserver ( private val context: Context, ): ConnectivityObserver {
 
     private val connectivityManager = context.getSystemService<ConnectivityManager>()!!
 
@@ -58,4 +52,10 @@ class InternetConnectivityObserver (
                 connectivityManager.unregisterNetworkCallback(callback)
             }
         }
+
+    fun isNetworkAvailable(): Boolean {
+        val activeNetwork = connectivityManager.activeNetwork
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
+        return networkCapabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+    }
 }

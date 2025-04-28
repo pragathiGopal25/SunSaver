@@ -7,8 +7,10 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
@@ -52,7 +54,10 @@ enum class TimeScope {
     DAY, MONTH, YEAR
 }
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(
+    private val networkObserver: NetworkObserver
+
+) : ViewModel() {
     private val _repository = FrostRepository()
     private val _sharedRepository = RepositoryProvider.sharedRepository
 
@@ -60,6 +65,7 @@ class HomeViewModel : ViewModel() {
 
     private val _graphLoadingState = MutableStateFlow(LoadingState())
     val graphLoadingState = _graphLoadingState.asStateFlow()
+
     private val _priceLoadingState = MutableStateFlow(LoadingState())
     val priceLoadingState = _priceLoadingState.asStateFlow()
 
@@ -89,7 +95,15 @@ class HomeViewModel : ViewModel() {
     private val timeScopeToDays =
         mapOf(TimeScope.DAY to 1, TimeScope.MONTH to 30, TimeScope.YEAR to 365)
 
+    private val _isOnline = MutableStateFlow(true)
+    val isOnline = _isOnline.asStateFlow()
+
+
     init {
+        _isOnline.value = networkObserver.isNetworkAvailable()
+
+        observeNetwork()
+
         viewModelScope.launch {
             solarArrays.filter { it.isNotEmpty() }
                 .distinctUntilChanged()
@@ -110,6 +124,16 @@ class HomeViewModel : ViewModel() {
                         selectSolarArray(firstSolarArray)
                     }
                 }
+        }
+    }
+
+    private fun observeNetwork() {
+
+        viewModelScope.launch {
+
+            networkObserver.isConnected.collectLatest { connected ->
+                _isOnline.value = connected
+            }
         }
     }
 

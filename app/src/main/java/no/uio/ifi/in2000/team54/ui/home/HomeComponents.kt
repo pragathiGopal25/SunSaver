@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,8 +29,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.SolarArray
+import no.uio.ifi.in2000.team54.ui.composables.Snackbar
 import no.uio.ifi.in2000.team54.ui.theme.Background
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.GreyText
@@ -68,6 +73,10 @@ import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
+
+    val snackbarState =  SnackbarHostState()
+    val isOnline by homeViewModel.isOnline.collectAsState(initial = true)
+
     Column(
         Modifier
             .fillMaxSize()
@@ -77,6 +86,14 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
         SolarArrayList(homeViewModel, navController)
         SwitchContent(homeViewModel)
         WeatherCard(navController)
+
+        Snackbar(snackbarState)
+
+        LaunchedEffect(isOnline) {
+            if (!isOnline) {
+                snackbarState.showSnackbar("Manglende internettilgang")
+            }
+        }
     }
 }
 
@@ -261,51 +278,6 @@ fun NoSolarArrayCard() {
 }
 
 @Composable
-fun NetworkSnackBar() {
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .border(3.dp, Red, RoundedCornerShape(20.dp))
-                .clip(RoundedCornerShape(20.dp))
-                .background(SoftRed)
-                .padding(16.dp)
-        ) {
-
-            Text(
-                text = "Manglende internettilgang ",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = Red
-            )
-
-            Spacer(Modifier.height(5.dp))
-
-            Image(
-                painter = painterResource(R.drawable.no_internet_red),
-                contentDescription = "Manglende internetttilgang",
-                modifier = Modifier
-                    .size(45.dp)
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewNetwork() {
-
-    NetworkSnackBar()
-}
-
-@Composable
 fun SwitchContent(homeViewModel: HomeViewModel) {
     var isFlipped by remember { mutableStateOf(false) }
 
@@ -366,15 +338,6 @@ private fun PreviousCard(flipped: Boolean, onClick: () -> Unit, modifier: Modifi
         )
 
     // Skal kun vises når det er mulig for bruker å navigere seg tilbake
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewSwitchContent() {
-
-    val hvm = HomeViewModel()
-   SwitchContent(hvm)
 }
 
 
