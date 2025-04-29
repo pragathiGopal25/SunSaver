@@ -47,6 +47,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("com.airbnb.android:lottie:6.3.0")
+    implementation(libs.lottie.compose)
+
 
     implementation(libs.androidx.navigation.compose)
 

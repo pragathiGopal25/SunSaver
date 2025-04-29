@@ -48,7 +48,7 @@ fun MyLottie() {
 }
 
 @Composable
-fun splaschscreen () {
+fun SunSplashScreen() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "splash") {
         composable("splash") {
