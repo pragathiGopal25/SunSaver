@@ -56,7 +56,6 @@ fun SolarArrayMap(
             val targetRoofSection = mapRoofSectionsState.roofSections.find {
                 it.geometry.contains(point)
             }
-
             // if there aren't any roof sections at this position, we wan't to try to find a new address
             if (targetRoofSection == null) {
                 viewModel.queryAddressAtPos(Pos.fromPoint(point))
@@ -76,7 +75,6 @@ fun SolarArrayMap(
                     )
                 }
             }
-
             false
         }
     ) {

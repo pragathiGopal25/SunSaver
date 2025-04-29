@@ -41,6 +41,17 @@ class SharedRepository @Inject constructor(
     override suspend fun updateSolarArray(solarArray: SolarArray) {
         datasource.update(toEntity(solarArray))
     }
+
+    fun updateSolarArray(newSolarArray: SolarArray) {
+        val updatedList = _solarArrays.value.map { solarObj ->
+            if (solarObj.name == newSolarArray.name) {
+                newSolarArray
+            } else {
+                solarObj
+            }
+        }
+        _solarArrays.value = updatedList
+    }
 }
 
 object RepositoryProvider {
