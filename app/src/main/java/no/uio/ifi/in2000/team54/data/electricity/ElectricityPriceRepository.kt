@@ -5,20 +5,27 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasource) {
-    // https://forbrukerguiden.no/normalt-stromforbruk/
-    private fun estimatedAvgKwh(): Double = 44.43 //Avg kWh for 120kvm enebolig per dag
-
 
     //Get the average electricity price with and without solar panel
     // The avg is in NOK per kWh
-    suspend fun getPriceData(days: Int, area: String, solarProduction: Double): List<Double> {
+    suspend fun getPriceData(
+        days: Int,
+        area: String,
+        dailySolarPowerGeneration: Double,
+        powerConsumption: Double
+    ): List<Double> {
         val avgPrice = getPriceDataInterval(days, area).average()
-        return listOf((estimatedAvgKwh() - solarProduction) * days * avgPrice, avgPrice * days * estimatedAvgKwh())
+        val dailyPowerConsumption = powerConsumption/30.0
+        return listOf(
+            (dailyPowerConsumption - dailySolarPowerGeneration) * days * avgPrice,
+            avgPrice * days * dailyPowerConsumption
+        )
     }
 
     //Get which month the calculations base themselves on
+    //Decrement in order to get the most accurate month (e.g. for edge case 1st of the month)
     @SuppressLint("SimpleDateFormat")
-    fun getMonth(): String {
+    fun getMonth(): Int {
         val pattern = "yyyy/MM-dd"
         val simpleDateFormat = SimpleDateFormat(pattern)
         val currentDate = simpleDateFormat.format(Date())
@@ -29,7 +36,21 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
 
         val info = currentDate.split("-", "/")
         val month = info[1]
-        return month
+        val monthToIndex = mapOf(
+            "01" to 0,
+            "02" to 1,
+            "03" to 2,
+            "04" to 3,
+            "05" to 4,
+            "06" to 5,
+            "07" to 6,
+            "08" to 7,
+            "09" to 8,
+            "10" to 9,
+            "11" to 10,
+            "12" to 11,
+        )
+        return monthToIndex[month]!!
     }
 
 

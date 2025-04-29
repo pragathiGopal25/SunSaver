@@ -36,6 +36,7 @@ fun calculateMonthlyElectricityProduction(
     monthlySnow: Map<String, Double>,
     monthlyRadiance: Map<String, Double>,
     monthlyTemperatures: Map<String, Double>,
+    monthlySunhours: Map<String, Double>,
     solarArray: SolarArray
 ): Map<String, Double> {
     val monthlyIrradiance = calculateAdjustedSolarIrradiance(monthlyCloud, monthlySnow, monthlyRadiance)

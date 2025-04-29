@@ -42,7 +42,8 @@ class FrostDatasource {
         Elements.TEMP to "mean(air_temperature%20P1M)",
         Elements.CLOUD to "mean(cloud_area_fraction%20P1D)",
         Elements.SNOW to "mean(snow_coverage_type%20P1M)",
-        Elements.IRRIDANCE to "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)"
+        Elements.IRRIDANCE to "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)",
+        Elements.SUNHOURS to "sum(duration_of_sunshine%20P1M)"
     )
 
     private var sensorMap: MutableMap<Elements, MutableList<String>> = mutableMapOf()
