@@ -45,10 +45,10 @@ fun MyLottie() {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.artboard_))
     val progress by animateLottieCompositionAsState(composition, iterations = LottieConstants.IterateForever)
     LottieAnimation(composition, { progress })
-
 }
+
 @Composable
-fun Navigation () {
+fun splaschscreen () {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "splash") {
         composable("splash") {
@@ -58,5 +58,5 @@ fun Navigation () {
             MainScreen()
         }
     }
-}                                                     gi
+}
 
