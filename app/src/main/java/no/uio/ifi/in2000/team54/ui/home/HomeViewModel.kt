@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.ui.home
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
@@ -104,9 +105,7 @@ class HomeViewModel : ViewModel() {
                         }
 
                         getWeatherData(firstSolarArray.coordinates)
-
                         useWeatherData(firstSolarArray)
-
                         selectSolarArray(firstSolarArray)
                     }
                 }
@@ -182,6 +181,11 @@ class HomeViewModel : ViewModel() {
                         loadingMessage = "Ingen solanlegg er opprettet"
                     )
                 }
+                _homeUiState.update { currentState ->
+                    currentState.copy(
+                        electricityProductionData = emptyMap() // CLEAR the graph data here
+                    )
+                }
                 return@launch
             }
 
@@ -200,12 +204,15 @@ class HomeViewModel : ViewModel() {
                     electricityProductionMap[solarArray] = electricityProduction.values.toList()
                 }
 
+
                 _homeUiState.update { currentState ->
                     currentState.copy(
                         //Hvorfor trenger vi at dette er en map med "strømproduksjon som key?
                         electricityProductionData = mapOf("Strømproduksjon" to electricityProductionMap[solarArray]!!),
                     )
                 }
+
+
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
@@ -236,6 +243,26 @@ class HomeViewModel : ViewModel() {
                 _homeUiState.update { currentState ->
                     currentState.copy(
                         selectedSolarArray = solarArray,
+                    )
+                }
+            } catch (ex: Exception) {
+                _homeUiState.update { currentState ->
+                    currentState.copy(
+                        loadingState = "Klarte ikke å velge solcelleanlegg"
+                    )
+                }
+            }
+        }
+    }
+
+    fun removeSolarArray(solarArray: SolarArray) {
+        viewModelScope.launch {
+            _sharedRepository.removeSolarArray(solarArray)
+            try {
+                useWeatherData(null)
+                _homeUiState.update { currentState ->
+                    currentState.copy(
+                        selectedSolarArray = null,
                     )
                 }
             } catch (ex: Exception) {

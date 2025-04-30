@@ -15,6 +15,7 @@ class SharedRepository {
         // todo: check if exists, update then (probably need to add an id then)
     }
 
+    //TODO: update to ID
     fun updateSolarArray(newSolarArray: SolarArray) {
         val updatedList = _solarArrays.value.map { solarObj ->
             if (solarObj.name == newSolarArray.name) {
@@ -24,6 +25,11 @@ class SharedRepository {
             }
         }
         _solarArrays.value = updatedList
+    }
+
+    //TODO: update to ID
+    fun removeSolarArray(solarArray: SolarArray) {
+        _solarArrays.value = _solarArrays.value.filter { it.name != solarArray.name }
     }
 }
 
