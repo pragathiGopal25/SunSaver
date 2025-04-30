@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -53,9 +54,11 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -68,6 +71,7 @@ import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.rememberMapState
 import kotlinx.coroutines.launch
+import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
@@ -289,7 +293,7 @@ private fun ArraySettingsMainSection(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        DragHandle()
+        DragHandle(draggableState)
         SearchField(mapState, mapViewportState, draggableState, viewModel, solarEntity)
         Spacer(modifier = Modifier.size(10.dp))
         Column(
@@ -345,16 +349,35 @@ private fun ArraySettingsMainSection(
     })
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun DragHandle() {
-    Box(
+private fun DragHandle(draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>) {
+    val direction = if (draggableState.currentValue == ArraySettingsMenuAnchors.Top) 1 else -1
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy((-5).dp),
         modifier = Modifier
-            .padding(bottom = 8.dp)
-            .width(85.dp)
-            .height(7.dp)
-            .clip(shape = RoundedCornerShape(100.dp))
-            .background(BrightYellow)
-    )
+            .padding(top = 5.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .width(35.dp)
+                .height(7.dp)
+                .rotate(20f * direction)
+                .clip(shape = RoundedCornerShape(100.dp))
+                .background(BrightYellow)
+        )
+        Box(
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .width(35.dp)
+                .height(7.dp)
+                .rotate(20f * direction * -1)
+                .clip(shape = RoundedCornerShape(100.dp))
+                .background(BrightYellow)
+        )
+    }
 }
 
 @Composable
