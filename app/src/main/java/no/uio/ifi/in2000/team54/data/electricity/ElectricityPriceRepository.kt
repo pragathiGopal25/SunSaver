@@ -13,13 +13,13 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
         days: Int,
         area: String,
         dailySolarPowerGeneration: Double,
-        powerConsumption: Double
+        monthlyPowerConsumption: Double
     ): List<Double> {
-        val avgPrice = getPriceDataInterval(days, area).average()
-        val dailyPowerConsumption = powerConsumption/30.0
+        val avgDailyElectricityPrice = getPriceDataInterval(days, area).average()
+        val dailyPowerConsumption = monthlyPowerConsumption/30.0
         return listOf(
-            (dailyPowerConsumption - dailySolarPowerGeneration) * days * avgPrice,
-            avgPrice * days * dailyPowerConsumption
+            (dailyPowerConsumption - dailySolarPowerGeneration) * days * avgDailyElectricityPrice,
+            avgDailyElectricityPrice * days * dailyPowerConsumption
         )
     }
 

@@ -1,5 +1,7 @@
 package no.uio.ifi.in2000.team54.ui.home
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
@@ -34,18 +36,26 @@ data class LoadingState(
     val loadingMessage: String = "Ingen solanlegg er opprettet",
 )
 
+data class ExpandedSizeState(
+    val height: Dp = 340.dp
+)
+
+//FORCE NOK til å være midtstilt under beløp UI
 data class PriceData(
     val realPrice: Double,
-    val solarPrice: Double,
-    val saved: Double = round(realPrice * 10.0 - solarPrice * 10.0) / 10.0
+    val solarPrice: Double, //hvordan løse når denne er < 0
+    //option 1: cappe på 0,
+    //option 2: forklare bruker tydeligere hvordan negativ verdi funker
+    //option 3: gi bruker mulighet til å velge om de skal selge overskudd eller ikke
+    val saved: Double = round(realPrice * 100.0 - solarPrice * 100.0) / 100.0
 )
 
 data class WeatherData(
-    var temp: Map<String, Double> = emptyMap<String, Double>(),
-    var cloud: Map<String, Double> = emptyMap<String, Double>(),
-    var snow: Map<String, Double> = emptyMap<String, Double>(),
-    var irradiance: Map<String, Double> = emptyMap<String, Double>(),
-    var sunhours: Map<String, Double> = emptyMap<String, Double>()
+    var temp: Map<String, Double> = emptyMap(),
+    var cloud: Map<String, Double> = emptyMap(),
+    var snow: Map<String, Double> = emptyMap(),
+    var irradiance: Map<String, Double> = emptyMap(),
+    var sunhours: Map<String, Double> = emptyMap()
 )
 
 enum class TimeScope {
@@ -62,6 +72,16 @@ class HomeViewModel : ViewModel() {
     val graphLoadingState = _graphLoadingState.asStateFlow()
     private val _priceLoadingState = MutableStateFlow(LoadingState())
     val priceLoadingState = _priceLoadingState.asStateFlow()
+    private val _expandedSizeState = MutableStateFlow(ExpandedSizeState())
+    val expandedSizeState = _expandedSizeState.asStateFlow()
+
+    fun updateExpand(size: Dp) {
+        _expandedSizeState.update { currentState ->
+            currentState.copy(
+                height = size
+            )
+        }
+    }
 
     val solarArrays: StateFlow<List<SolarArray>> =
         _sharedRepository.solarArrays // save to SolarArraysUiState?
@@ -131,8 +151,8 @@ class HomeViewModel : ViewModel() {
                 val asyncTemp = async { _repository.getData(coordinates, Elements.TEMP) }
                 val asyncCloud = async { _repository.getData(coordinates, Elements.CLOUD) }
                 val asyncSnow = async { _repository.getData(coordinates, Elements.SNOW) }
-                val asyncIrradiance = async { _repository.getData(coordinates,Elements.IRRIDANCE) }
-                val asyncSunhours =  async { _repository.getData(coordinates,Elements.SUNHOURS) }
+                val asyncIrradiance = async { _repository.getData(coordinates, Elements.IRRIDANCE) }
+                val asyncSunhours = async { _repository.getData(coordinates, Elements.SUNHOURS) }
 
                 val tempData = asyncTemp.await()
                 val cloudData = asyncCloud.await()
@@ -258,15 +278,18 @@ class HomeViewModel : ViewModel() {
                 }
                 if (!electricityPriceMap.containsKey(solarArray)) {
                     timeScopeToDays.forEach { (scope, days) ->
+                        val powerUsage =
+                            if (scope == TimeScope.YEAR) electricityProductionMap[solarArray]!!.average()
+                            else electricityProductionMap[solarArray]!![electricityPriceRepository.getMonth()]
                         val priceDataTuple = electricityPriceRepository.getPriceData(
                             days,
                             electricityPriceRepository.getPriceArea(solarArray),
-                            electricityProductionMap[solarArray]!![electricityPriceRepository.getMonth()],
+                            powerUsage,
                             solarArray.powerConsumption
                         )
                         val priceData = PriceData(
-                            realPrice = round(priceDataTuple[1] * 10.0) / 10.0,
-                            solarPrice = round(priceDataTuple[0] * 10.0) / 10.0,
+                            realPrice = round(priceDataTuple[1] * 100.0) / 100.0,
+                            solarPrice = round(priceDataTuple[0] * 100.0) / 100.0,
                         )
                         electricityPriceMap.computeIfAbsent(
                             solarArray,
