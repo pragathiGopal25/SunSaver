@@ -87,10 +87,10 @@ class ManageSolarArrayViewModel : ViewModel() {
     fun setCurrentSolarArray(solarArray: SolarArray?) {
         _currentSolarArray.value = solarArray
         // Update the search address when selecting a solar array to edit
-        _mapSearchAddress.value = SearchAddressState(solarArray?.address?.toFormatted() ?: "")
-        _mapAddress.value = _mapAddress.value.copy(
+        _mapSearchAddress.value = SearchAddressState(solarArray?.address ?: "")
+        /*_mapAddress.value = _mapAddress.value.copy(
             address = solarArray?.address
-        )
+        )*/
 
     }
     fun addSolarArray(newSolarArray: SolarArray) {
