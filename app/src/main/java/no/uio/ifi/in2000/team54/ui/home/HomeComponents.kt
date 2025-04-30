@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,6 +20,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -181,22 +184,46 @@ fun SolarArrayCard(
             ),
     ) {
         Column {
-            IconButton(
-                onClick = {
-                    navController.navigate("editsolararrays/${solarArray.name}")
-                },
+            Row(
                 modifier = Modifier
-                    .background(LightOrange)
-                    .padding(top = 6.dp, end = 4.dp)
-                    .size(30.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .align(Alignment.End)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.circle),
-                    contentDescription = "Redigere Anlegg",
-                    tint = Color.Unspecified // if you don't want to tint it
-                )
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                IconButton(
+                    onClick = {
+                        //TOdo: add deleting option
+                    },
+                    modifier = Modifier
+                        .background(LightOrange)
+                        .padding(top = 6.dp, end = 20.dp)
+                        .size(35.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.delete),
+                        modifier = Modifier
+                            .padding(top = 2.dp, end = 7.dp, start = 2.dp),
+                        contentDescription = "Slett Anlegg",
+                        tint = Color.Unspecified// if you don't want to tint it
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        navController.navigate("editsolararrays/${solarArray.name}")
+                    },
+                    modifier = Modifier
+                        .background(LightOrange)
+                        .padding(top = 6.dp, end = 5.dp)
+                        .size(28.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.circle),
+                        contentDescription = "Redigere Anlegg",
+                        tint = Color.Unspecified // if you don't want to tint it
+                    )
+                }
             }
             Image(
                 painter = painterResource(R.drawable.house),
