@@ -9,8 +9,8 @@ enum class SolarPanelType(
     val width: Double
 ) {
 
-    PREMIUM(
-        "Premium",
+    ECONOMY(
+        "Economy",
         405,
         6000.0,
         3000.0,
@@ -25,8 +25,8 @@ enum class SolarPanelType(
         length =1.74,
         width =  1.09
     ),
-    ECONOMY(
-        "Economy",
+    PREMIUM(
+        "Premium",
         455,
         7500.0,
         3250.0,
