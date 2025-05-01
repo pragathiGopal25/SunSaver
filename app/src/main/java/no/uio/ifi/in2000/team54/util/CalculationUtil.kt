@@ -9,7 +9,7 @@ import kotlin.math.abs
 private const val MINIMUM_OPTIMAL_INCLINE_ANGLE = 15.0 //Degrees
 private const val MAXIMUM_OPTIMAL_INCLINE_ANGLE = 45.0 //Degrees
 private const val INCLINE_ANGLE_EFFICIENCY_DECREASE_PER_DEGREE = 0.05
-private const val DIRECTION_EFFICIENCY_DECREASE_PER_DEGREE = 0.005
+private const val DIRECTION_EFFICIENCY_DECREASE_PER_DEGREE = 0.002
 private const val DEFAULT_PANEL_TEMPERATURE_CELSIUS = 25.0
 private const val TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS = 0.5 // Percentage loss per degree Celsius
 
@@ -104,7 +104,6 @@ private fun calculateCloudLossFactor(cloudCover: Double): Double {
 }
 
 // https://www.otovo.no/blog/solcellepanel-solceller/solceller-norge-virkningsgrad/#sollys-og-innfallsvinkelhelling-av-solceller
-// todo: can be adjusted
 //Calculates the impact the angle of the panel has on solar panel efficiency
 private fun calculateAngleImpact(inclineAngle: Double): Double {
     if (inclineAngle in MINIMUM_OPTIMAL_INCLINE_ANGLE..MAXIMUM_OPTIMAL_INCLINE_ANGLE) {
@@ -118,7 +117,10 @@ private fun calculateAngleImpact(inclineAngle: Double): Double {
     return maxOf(0.5, 1 - (angleOffset * INCLINE_ANGLE_EFFICIENCY_DECREASE_PER_DEGREE))
 }
 
-// todo: also can be adjusted
+//https://blog.projects4roofing.co.uk/does-roof-orientation-affect-my-solar-panels-efficiency
+// efficiency loss if north facing roof = 40%
+// optimal direction = 180, so efficiency is 100%.
+// efficiency loss per degree = 0.4/180 = 0.002
 //Calculates the impact the direction of the panel has on solar panel efficiency
 private fun calculateDirectionImpact(azimuth: Double): Double {
     val directionOffset = abs(180 - azimuth) // 180 degrees for perfect south, which is optimal for sunshine in the northern hemisphere
