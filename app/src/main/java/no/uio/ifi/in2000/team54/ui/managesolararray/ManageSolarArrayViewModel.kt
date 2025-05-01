@@ -24,7 +24,7 @@ import no.uio.ifi.in2000.team54.model.building.Pos
 
 class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
-    private val _sharedRepository = RepositoryProvider.sharedRepository
+    private val _sharedRepository = RepositoryProvider.sunSaverRepository
 
     // allows us to access the value of the current solar array object, and keep the viewmodel updated on any changes
     private val _currentSolarArray = MutableStateFlow<SolarArray?>(null)

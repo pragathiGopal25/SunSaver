@@ -51,7 +51,7 @@ enum class TimeScope {
 
 class HomeViewModel : ViewModel() {
     private val _repository = FrostRepository()
-    private val _sunSaverRepository = RepositoryProvider.sharedRepository
+    private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
 
     private val weatherData = WeatherData()
 

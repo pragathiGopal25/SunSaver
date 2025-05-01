@@ -5,7 +5,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import no.uio.ifi.in2000.team54.data.shared.ISunSaverRepository
-import no.uio.ifi.in2000.team54.data.shared.SharedRepository
+import no.uio.ifi.in2000.team54.data.shared.SunSaverRepository
 import javax.inject.Singleton
 
 @Module
@@ -15,6 +15,6 @@ abstract class SunSaverRepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSunSaverDatasource(
-        sunSaverRepository: SharedRepository
+        sunSaverRepository: SunSaverRepository
     ): ISunSaverRepository
 }

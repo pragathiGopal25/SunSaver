@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import no.uio.ifi.in2000.team54.data.shared.ISunSaverDatasource
-import no.uio.ifi.in2000.team54.data.shared.SharedRepository
+import no.uio.ifi.in2000.team54.data.shared.SunSaverRepository
 import no.uio.ifi.in2000.team54.database.SolarArrayWithRoofSections
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
@@ -16,12 +16,12 @@ import org.junit.Test
 // here we have to focus on mapping
 class SunSaverRepositoryTest {
     private lateinit var fakeDatasource: FakeSunSaverDatasource
-    private lateinit var sunSaverRepository: SharedRepository
+    private lateinit var sunSaverRepository: SunSaverRepository
 
     @Before
     fun setUp() {
         fakeDatasource = FakeSunSaverDatasource()
-        sunSaverRepository = SharedRepository(fakeDatasource)
+        sunSaverRepository = SunSaverRepository(fakeDatasource)
     }
 
     @Test // test mapping during insertion
