@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team54.ui.managesolararray
 
 import android.app.Application
 import android.content.Context
+import android.util.Log.i
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,7 +38,7 @@ class ManageSolarArrayViewModel(
     val currentSolarArray: StateFlow<SolarArray?> = _currentSolarArray.asStateFlow()
 
     private val _mapAddress = MutableStateFlow(
-        AddressState(null)
+        AddressState(null, null)
     )
     private val _mapSearchAddress = MutableStateFlow(
         SearchAddressState("")
@@ -71,33 +72,47 @@ class ManageSolarArrayViewModel(
         .filter { state -> state.address != null }
         .mapLatest { state ->
             try {
-                // we know the address isn't null here because we filter out all null addresses above
-                MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
+                if (!_isOnline.value) {
+                    MapRoofSectionsState(emptyList(), true, "Ingen internettforbindelse.")
+
+                }else {// we know the address isn't null here because we filter out all null addresses above
+                    MapRoofSectionsState(repository.getRoofSections(state.address!!), false, null)
+                }
 
             } catch (e: Exception) {
                 // if it fails to get the roof information, don't display any in the map
-                MapRoofSectionsState(emptyList(), true)
+                MapRoofSectionsState(emptyList(), true, "Noe gikk galt under datainnhentingen.")
             }
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = MapRoofSectionsState(emptyList(), false)
+            initialValue = MapRoofSectionsState(emptyList(), false, null)
         )
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
     val mapSearchAddressSuggestions = _mapSearchAddress
         .debounce(250)
         .mapLatest { state ->
-            val result = repository.getAddressSuggestions(state.query)
-            val suggestions = result.getOrNull() ?: emptyList()
 
-            AddressSuggestionsState(suggestions)
+            try {
+                if (!_isOnline.value) {
+                    AddressSuggestionsState(emptyList(), "Ingen internettforbindelse.")
+
+                } else {
+                    val result = repository.getAddressSuggestions(state.query)
+                    val suggestions = result.getOrNull() ?: emptyList()
+                    AddressSuggestionsState(suggestions, null)
+                }
+
+            }catch(e: Exception) {
+                AddressSuggestionsState(emptyList(), "Noe gikk galt med innhenting av data")
+            }
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = AddressSuggestionsState(emptyList())
+            initialValue = AddressSuggestionsState(emptyList(),null)
         )
 
     fun setMapAddress(address: Address) {
@@ -125,9 +140,26 @@ class ManageSolarArrayViewModel(
     }
     fun queryAddressAtPos(pos: Pos) {
         viewModelScope.launch {
-            val address = repository.getNearestAddressToPos(pos) ?: return@launch
-            setSearchAddress(address.toFormatted())
-            setMapAddress(address)
+
+            if (!_isOnline.value) {
+
+                _mapAddress.value = AddressState(null, "Ingen internettforbindelse.")
+                return@launch
+            }
+            try {
+
+                val address = repository.getNearestAddressToPos(pos) ?:  run {
+                    _mapAddress.value = AddressState(null, "Fant ingen adresse for posisjonen.")
+                    return@launch
+                }
+
+                setSearchAddress(address.toFormatted())
+                setMapAddress(address)
+
+            } catch (e: Exception) {
+
+                _mapAddress.value = AddressState(null, "Noe gikk galt med innhenting av data")
+            }
         }
     }
     // To Update the roof sections and other values when user edits
@@ -137,15 +169,19 @@ class ManageSolarArrayViewModel(
 }
 
 data class AddressState(
-    val address: Address?
+    val address: Address?,
+    val errorMessage: String?
 )
 data class MapRoofSectionsState(
     val roofSections: List<MapRoofSection>,
-    val isError: Boolean
+    val isError: Boolean,
+    val errorMessage: String?
 )
 data class SearchAddressState(
     val query: String
 )
 data class AddressSuggestionsState(
     val suggestions: List<Address>,
+    val errorMessage: String?
+
 )

@@ -96,13 +96,22 @@ fun ManageSolarArrayScreen(
     val solarEntity = uiState.find { it.name == updateArray }
     val updateRoofSections = remember { mutableStateListOf(*solarEntity?.roofSections?.toTypedArray() ?: arrayOf()) }
 
-    val isOnline by viewModel.isOnline.collectAsState(initial = true)
-    LaunchedEffect(isOnline) {
-        if (!isOnline) {
-            snackbarState.showSnackbar("Manglende internettilgang")
+    val addressState by viewModel.mapAddress.collectAsState()
+    val roofSectionsState by viewModel.mapRoofSections.collectAsState()
+    val addressSuggestionsState by viewModel.mapSearchAddressSuggestions.collectAsState()
+
+
+    LaunchedEffect(addressState.errorMessage, roofSectionsState.errorMessage, addressSuggestionsState.errorMessage) {
+        addressState.errorMessage?.let {
+            snackbarState.showSnackbar(it)
+        }
+        roofSectionsState.errorMessage?.let {
+            snackbarState.showSnackbar(it)
+        }
+        addressSuggestionsState.errorMessage?.let {
+            snackbarState.showSnackbar(it)
         }
     }
-
     
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
