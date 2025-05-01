@@ -79,7 +79,7 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
                 content = { GraphContainer(viewModel = homeViewModel) }
             )
             HomeCard(
-                name = "Sparing", modifier = Modifier.height(expandedSizeState.value.height),
+                name = "Sparing", modifier = Modifier,
                 content = { PriceContainer(viewModel = homeViewModel) }
             )
             println("TEST: height: ${expandedSizeState.value.height}")

@@ -54,9 +54,10 @@ fun PriceContainer(viewModel: HomeViewModel) {
     val loadingState by viewModel.priceLoadingState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
     if (loadingState.loadingMessage != "") {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxSize().height(302.dp), contentAlignment = Alignment.Center) {
             Text(loadingState.loadingMessage)
         }
+        return
     }
     Box(
         modifier = Modifier.fillMaxWidth(),
@@ -96,31 +97,37 @@ fun PriceContainer(viewModel: HomeViewModel) {
                     .clickable(onClick = {
                         expanded = !expanded
                     })
-                    .shadow(elevation = 1.dp, shape = RoundedCornerShape(10.dp))
+                    .shadow(elevation = 1.dp, shape = RoundedCornerShape(20.dp))
                     .background(Beige)
+                    .padding(2.dp)
             ) {
-                Text(
-                    text = "Hva betyr dette? Trykk her for mer informasjon",
-                    fontWeight = FontWeight.Light
-                )
-                Spacer(Modifier.height(3.dp))
-                if (expanded) {
-                    if (uiState.priceData.solarPrice < 0) {
-                        viewModel.updateExpand(530.dp)
+                Column {
+
+                    if (!expanded) {
                         Text(
-                            "Du har produsert et overskudd med strøm, og kan derfor selge tilbake til markedet." +
-                                    " Derfor er utgiftene med solcellepanel representert som et negativt tall. Det negative tallet representerer hvor mye du kan selge som overskudd." +
-                                    " Ellers representerer boksen til venstre strømprisen uten solcellepanel, mens spareboksen i midten er differansen mellom de to andre."
-                        )
-                    } else {
-                        viewModel.updateExpand(480.dp)
-                        Text(
-                            "Du vil spare ${uiState.priceData.saved} NOK ${timePerspective[uiState.timeScope]}," +
-                                    " fordi strømmen i utgangspunktet koster ${uiState.priceData.realPrice} NOK uten solcelleanlegget ditt, " +
-                                    " mens du vil betale ${uiState.priceData.solarPrice} NOK."
+                            text = "Hva betyr dette? Trykk her for mer informasjon",
+                            fontWeight = FontWeight.Light
                         )
                     }
-                } else viewModel.updateExpand(340.dp)
+                    Spacer(Modifier.height(3.dp))
+                    if (expanded) {
+                        if (uiState.priceData.solarPrice < 0) {
+                            viewModel.updateExpand(520.dp)
+                            Text(
+                                "Du har produsert et overskudd med strøm, og kan derfor selge tilbake til markedet." +
+                                        " Derfor er utgiftene med solcellepanel representert som et negativt tall. Det negative tallet representerer hvor mye du kan selge som overskudd." +
+                                        " Ellers representerer boksen til venstre strømprisen uten solcellepanel, mens spareboksen i midten er differansen mellom de to andre."
+                            )
+                        } else {
+                            viewModel.updateExpand(450.dp)
+                            Text(
+                                "Du vil spare ${uiState.priceData.saved} NOK ${timePerspective[uiState.timeScope]}," +
+                                        " fordi strømmen i utgangspunktet koster ${uiState.priceData.realPrice} NOK uten solcelleanlegget ditt, " +
+                                        " mens du vil betale ${uiState.priceData.solarPrice} NOK."
+                            )
+                        }
+                    } else viewModel.updateExpand(340.dp)
+                }
             }
         }
     }

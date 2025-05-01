@@ -31,10 +31,6 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
         val simpleDateFormat = SimpleDateFormat(pattern)
         val currentDate = simpleDateFormat.format(Date())
 
-        for (i in 0..14) {
-            decrementDate(currentDate)
-        }
-
         val info = currentDate.split("-", "/")
         val month = info[1]
         val monthToIndex = mapOf(
