@@ -76,6 +76,9 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
             HomeCard("Strømproduksjon") {
                 GraphContainer(viewModel = homeViewModel)
             }
+            HomeCard("Opptjening") {
+                TimeUntilRecouped(viewModel = homeViewModel)
+            }
         }
     }
 }

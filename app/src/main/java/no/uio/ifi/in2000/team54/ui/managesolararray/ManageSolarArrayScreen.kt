@@ -124,9 +124,9 @@ fun ManageSolarArrayScreen(
                 // updates the viewmodel to focus on the current solar entity.
                 // makes it easier later to update mapaddress , and keep track of its name and other values.
                 viewModel.setCurrentSolarArray(solarEntity)
-                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, updateRoofSections, solarEntity)
+                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, updateRoofSections, solarEntity, homeviewmodel)
             } else {
-                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections)
+                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections, homeviewmodel = homeviewmodel)
             }
         }
     }
@@ -162,6 +162,7 @@ private fun ArraySettingsMenu(
     navController: NavController,
     roofSections: SnapshotStateList<RoofSection>,
     solarEntity: SolarArray? = null,
+    homeviewmodel: HomeViewModel
     ) {
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
@@ -196,6 +197,7 @@ private fun ArraySettingsMenu(
                 navController,
                 roofSections,
                 solarEntity,
+                homeviewmodel
             )
         }
     }
@@ -238,6 +240,7 @@ private fun ArraySettingsContent(
     navController: NavController,
     roofSections: SnapshotStateList<RoofSection>,
     solarEntity: SolarArray? = null,
+    homeviewmodel: HomeViewModel
 ) {
     // solar panel type changes and the changes is saved across screens
     val solarPanelType = rememberSaveable {
@@ -264,6 +267,7 @@ private fun ArraySettingsContent(
                 solarPanelType.value = selectedType
             },
             solarEntity,
+            homeviewmodel
         )
     }
 }
@@ -281,6 +285,7 @@ private fun ArraySettingsMainSection(
     roofSections: SnapshotStateList<RoofSection>,
     onSelectPanelType: (SolarPanelType) -> Unit,
     solarEntity: SolarArray? = null,
+    homeviewmodel: HomeViewModel
 ) {
     val addressState by viewModel.mapAddress.collectAsState()
     var editingRoofSection by remember { mutableStateOf<Int?>(null) }
@@ -308,7 +313,7 @@ private fun ArraySettingsMainSection(
             RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
             ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
             SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
-            PriceSummaryCard(solarPanelType, roofSections)
+            PriceSummaryCard(solarPanelType, roofSections, homeviewmodel)
             SaveButton {
                 if (addressState.address == null) {
                     scope.launch {

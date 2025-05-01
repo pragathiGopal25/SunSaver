@@ -27,7 +27,9 @@ data class HomeUiState(
     val priceData: PriceData,
     val electricityProductionData: Map<String, List<Double>> = emptyMap(),
     val timeScope: TimeScope = TimeScope.DAY,
-    val loadingState: String = ""
+    val loadingState: String = "",
+    val timeUntilRecoup: Double = 0.0,
+    val totalPrice: Double = 0.0
 )
 
 data class LoadingState(
@@ -131,8 +133,8 @@ class HomeViewModel : ViewModel() {
                 val asyncTemp = async { _repository.getData(coordinates, Elements.TEMP) }
                 val asyncCloud = async { _repository.getData(coordinates, Elements.CLOUD) }
                 val asyncSnow = async { _repository.getData(coordinates, Elements.SNOW) }
-                val asyncIrradiance = async { _repository.getData(coordinates,Elements.IRRIDANCE) }
-                val asyncSunhours =  async { _repository.getData(coordinates,Elements.SUNHOURS) }
+                val asyncIrradiance = async { _repository.getData(coordinates, Elements.IRRIDANCE) }
+                val asyncSunhours = async { _repository.getData(coordinates, Elements.SUNHOURS) }
 
                 val tempData = asyncTemp.await()
                 val cloudData = asyncCloud.await()
@@ -325,6 +327,22 @@ class HomeViewModel : ViewModel() {
                     )
                 }
             }
+        }
+    }
+
+    fun getTotalPrice(totalPrice: Double) {
+        _homeUiState.update { currentState ->
+            currentState.copy(
+                totalPrice = totalPrice
+            )
+        }
+    }
+
+    fun calculateRecoup(totalPrice: Double) {
+        _homeUiState.update { currentState ->
+            currentState.copy(
+                timeUntilRecoup = totalPrice / electricityPriceMap[currentState.selectedSolarArray]!![TimeScope.YEAR]!!.saved
+            )
         }
     }
 }
