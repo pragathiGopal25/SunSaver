@@ -16,6 +16,7 @@ data class SolarArrayEntity(
     val latitude: Double, // repository will have to handle this mapping
     val longitude: Double,
     val powerConsumption: Double,
+    val address: String
 )
 
 @Entity(tableName = "RoofSections",

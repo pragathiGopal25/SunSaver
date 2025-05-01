@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -95,6 +96,7 @@ class ManageSolarArrayViewModel : ViewModel() {
         _mapSearchAddress.value = SearchAddressState(solarArray.address ?: "")
 
     }
+
     fun addSolarArray(newSolarArray: SolarArray) {
         viewModelScope.launch {
             _sharedRepository.addSolarArray(newSolarArray)
@@ -109,7 +111,18 @@ class ManageSolarArrayViewModel : ViewModel() {
     }
     // To Update the roof sections and other values when user edits
     fun updateSolarArray(newSolarArray: SolarArray){
-        _sharedRepository.updateSolarArray(newSolarArray)
+        viewModelScope.launch {
+            _sharedRepository.updateSolarArray(newSolarArray)
+        }
+    }
+
+    fun getSolarArray(name: String){
+        viewModelScope.launch {
+            _currentSolarArray.value = _sharedRepository.getAllSolarArrays()
+                .filter { it.isNotEmpty() }
+                .first()
+                .find { it.name == name }
+        }
     }
 }
 

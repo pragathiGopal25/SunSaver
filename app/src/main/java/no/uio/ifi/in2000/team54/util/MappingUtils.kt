@@ -20,6 +20,7 @@ fun toDomain(entity: SolarArrayWithRoofSections): SolarArray {
             longitude = solarArray.longitude
         ),
         powerConsumption = solarArray.powerConsumption,
+        address = solarArray.address,
         roofSections = entity.roofSections.map {
             RoofSection(
                 id = it.roofSectionId,
@@ -42,7 +43,8 @@ fun toEntity(solarArray: SolarArray): SolarArrayWithRoofSections {
             panelType = solarArray.panelType.displayName,
             latitude = solarArray.coordinates.latitude,
             longitude = solarArray.coordinates.longitude,
-            powerConsumption = solarArray.powerConsumption
+            powerConsumption = solarArray.powerConsumption,
+            address = solarArray.address
         ),
         roofSections = solarArray.roofSections.map {
             RoofSectionEntity(

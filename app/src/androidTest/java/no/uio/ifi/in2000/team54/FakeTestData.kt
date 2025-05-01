@@ -15,7 +15,8 @@ object TestSolarArray1 { // immutable test data
         panelType = "Premium",
         latitude = 59.899563, // should be transformed by repository
         longitude = 10.485503,
-        powerConsumption = 1200.0
+        powerConsumption = 1200.0,
+        address = "Shire 245"
     )
 
     private val roofSection1 = RoofSectionEntity(
@@ -50,7 +51,8 @@ object TestSolarArray2 {
         panelType = "Economy",
         latitude = 59.805636,
         longitude = 10.806756,
-        powerConsumption = 1200.0
+        powerConsumption = 1200.0,
+        address = "Ole Johan Dahls hus 2"
     )
 
     private val roofSection1 = RoofSectionEntity(
@@ -103,7 +105,8 @@ object TestSolarArrayDomain1 {
         panelType = SolarPanelType.ECONOMY,
         roofSections = listOf(roofSection1, roofSection2),
         coordinates = Coordinates(latitude = 59.909563, longitude = 10.445503),
-        powerConsumption = 300.0
+        powerConsumption = 300.0,
+        address = "Sinsenkrysset 5"
     )
 }
 
@@ -123,6 +126,7 @@ object TestSolarArrayDomain2 {
         panelType = SolarPanelType.PREMIUM,
         roofSections = listOf(roofSection1),
         coordinates = Coordinates(latitude = 59.902563, longitude = 10.345503),
-        powerConsumption = 1245.0
+        powerConsumption = 1245.0,
+        address = "Gondor 46"
     )
 }

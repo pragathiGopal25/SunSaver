@@ -42,7 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.SolarArray
@@ -54,7 +53,6 @@ import no.uio.ifi.in2000.team54.ui.theme.Lighter
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
-import kotlin.math.exp
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
@@ -142,7 +140,7 @@ fun HomeScreenTopBar() {
 
 @Composable
 fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
-    val solarArrays = homeViewModel.solarArrays.collectAsState()
+    val homeUiState = homeViewModel.homeUiState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -150,10 +148,10 @@ fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
             .horizontalScroll(rememberScrollState())
     ) {
         Row {
-            if (solarArrays.value.isEmpty()) {
+            if (homeUiState.value.solarArrays.isEmpty()) {
                 NoSolarArrayCard()
             } else {
-                solarArrays.value.forEach {
+                homeUiState.value.solarArrays.forEach {
                     SolarArrayCard(it, homeViewModel, navController)
                 }
             }

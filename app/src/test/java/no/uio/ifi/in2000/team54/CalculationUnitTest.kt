@@ -31,7 +31,8 @@ class HomeViewModelUnitTest {
             panelType = SolarPanelType.PREMIUM,
             roofSections = testList,
             coordinates = coordinates,
-            powerConsumption = 10.0
+            powerConsumption = 10.0,
+            address = "Test Address 333"
         )
 
         val monthlyCloud: Map<String, Double> = mapOf(
@@ -111,7 +112,8 @@ class HomeViewModelUnitTest {
             monthlySnow = monthlySnow,
             monthlyRadiance = monthlyRadiance,
             monthlyTemperatures = monthlyTemps,
-            solarArray = testArray
+            solarArray = testArray,
+            monthlySunhours = emptyMap() // todo: fix
         )
 
         // assert

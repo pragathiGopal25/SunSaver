@@ -58,7 +58,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -71,11 +70,9 @@ import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.rememberMapState
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
-import no.uio.ifi.in2000.team54.ui.home.HomeViewModel
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
@@ -91,13 +88,16 @@ fun ManageSolarArrayScreen(
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     snackbarState: SnackbarHostState,
-    homeviewmodel: HomeViewModel,
     updateArray: String? = "",
 ) {
     val roofSections = remember { mutableStateListOf<RoofSection>() }
-    val uiState by homeviewmodel.solarArrays.collectAsState()
-    val solarEntity = uiState.find { it.name == updateArray }
-    val updateRoofSections = remember { mutableStateListOf(*solarEntity?.roofSections?.toTypedArray() ?: arrayOf()) }
+    if (!updateArray.isNullOrEmpty()) { // if we want to update the solar array
+        viewModel.getSolarArray(updateArray)
+    }
+    val solarEntity = viewModel.currentSolarArray.collectAsState().value
+    val updateRoofSections = remember {
+        mutableStateListOf(*solarEntity?.roofSections?.toTypedArray() ?: arrayOf())
+    }
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             center(osloCenter)
@@ -123,7 +123,6 @@ fun ManageSolarArrayScreen(
             if (updateArray != "") {
                 // updates the viewmodel to focus on the current solar entity.
                 // makes it easier later to update mapaddress , and keep track of its name and other values.
-                viewModel.setCurrentSolarArray(solarEntity)
                 ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, updateRoofSections, solarEntity)
             } else {
                 ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections)
@@ -342,7 +341,7 @@ private fun ArraySettingsMainSection(
             viewModel.addSolarArray(solarObj)
         } else {
             // if solarentity exists then you just want to update the values not create and save a whole new one
-            viewModel.updateSolarArray(solarObj)
+            viewModel.updateSolarArray(solarObj.copy(id = solarEntity.id))
         }
         viewModel.setSearchAddress("")
         navController.navigate("home")

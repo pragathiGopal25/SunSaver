@@ -24,8 +24,9 @@ object SunSaverDatabaseModule {
         return Room.databaseBuilder(
             context,
             SunSaverDatabase::class.java,
-            "SunSaverDatabase"
-        ).build()
+            "SunSaverDatabase")
+            .fallbackToDestructiveMigration(true). // todo: delete before submitting
+            build()
     }
 
     @Provides

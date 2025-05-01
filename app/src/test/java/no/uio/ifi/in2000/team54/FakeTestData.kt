@@ -32,7 +32,8 @@ object FakeSolarArrayDomain {
         panelType = SolarPanelType.PERFORMANCE,
         roofSections = listOf(roofSection1, roofSection2),
         coordinates = Coordinates(latitude = 59.899563, longitude = 10.485503),
-        powerConsumption = 1200.0
+        powerConsumption = 1200.0,
+        address = "Shire 34"
     )
 }
 
@@ -64,6 +65,7 @@ object FakeSolarArrayEntity {
         latitude = 59.899563,
         longitude = 10.485503,
         powerConsumption = 0.0,
+        address = "Shire 34"
     )
 
     val solarArrayWithRoofSections = SolarArrayWithRoofSections(
