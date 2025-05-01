@@ -336,7 +336,7 @@ private fun ArraySettingsMainSection(
             roofSections,
             addressState.address!!.pos.toCoordinates(),
             power.toDouble(),
-            addressState.address
+            addressState.address!!.toFormatted()
         )
         if (solarEntity == null) {
             viewModel.addSolarArray(solarObj)

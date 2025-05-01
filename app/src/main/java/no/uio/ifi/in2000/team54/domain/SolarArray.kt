@@ -10,5 +10,5 @@ data class SolarArray(
     val roofSections: List<RoofSection>,
     val coordinates: Coordinates,
     val powerConsumption: Double,// kWh per month
-    val address: Address?
+    val address: String
 )
