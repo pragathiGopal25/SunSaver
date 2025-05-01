@@ -71,7 +71,7 @@ class HomeViewModel(
 
     val solarArrays: StateFlow<List<SolarArray>> =
         _sharedRepository.solarArrays // save to SolarArraysUiState?
-
+    
 
     private val _homeUiState = MutableStateFlow(
         HomeUiState(

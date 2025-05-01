@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapLatest
@@ -19,8 +20,12 @@ import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
+import no.uio.ifi.in2000.team54.ui.home.NetworkObserver
 
-class ManageSolarArrayViewModel : ViewModel() {
+class ManageSolarArrayViewModel(
+    private val networkObserver: NetworkObserver
+
+) : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
     private val _sharedRepository = RepositoryProvider.sharedRepository
 
@@ -38,6 +43,26 @@ class ManageSolarArrayViewModel : ViewModel() {
     val mapAddress: StateFlow<AddressState> = _mapAddress.asStateFlow()
     val mapSearchAddress: StateFlow<SearchAddressState> = _mapSearchAddress.asStateFlow()
 
+    private val _isOnline = MutableStateFlow(true)
+    val isOnline = _isOnline.asStateFlow()
+
+    init {
+
+        _isOnline.value = networkObserver.isNetworkAvailable()
+
+        observeNetwork()
+    }
+
+    fun observeNetwork()  {
+
+        viewModelScope.launch {
+
+            networkObserver.isConnected.collectLatest { connected ->
+                _isOnline.value = connected
+            }
+        }
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val mapRoofSections = _mapAddress
         .filter { state -> state.address != null }
@@ -45,6 +70,7 @@ class ManageSolarArrayViewModel : ViewModel() {
             try {
                 // we know the address isn't null here because we filter out all null addresses above
                 MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
+
             } catch (e: Exception) {
                 // if it fails to get the roof information, don't display any in the map
                 MapRoofSectionsState(emptyList(), true)
@@ -62,6 +88,7 @@ class ManageSolarArrayViewModel : ViewModel() {
         .mapLatest { state ->
             val suggestions = try {
                 repository.getAddressSuggestions(state.query)
+
             } catch (e: Exception) {
                 emptyList() // could not find any addresses for the users input
             }

@@ -41,6 +41,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -94,6 +95,15 @@ fun ManageSolarArrayScreen(
     val uiState by homeviewmodel.solarArrays.collectAsState()
     val solarEntity = uiState.find { it.name == updateArray }
     val updateRoofSections = remember { mutableStateListOf(*solarEntity?.roofSections?.toTypedArray() ?: arrayOf()) }
+
+    val isOnline by viewModel.isOnline.collectAsState(initial = true)
+    LaunchedEffect(isOnline) {
+        if (!isOnline) {
+            snackbarState.showSnackbar("Manglende internettilgang")
+        }
+    }
+
+    
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             center(osloCenter)

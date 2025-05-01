@@ -35,7 +35,7 @@ fun MainScreen() {
 
     val navController = rememberNavController()
 
-    val manageSolarArrayViewModel = remember { ManageSolarArrayViewModel() }
+    val manageSolarArrayViewModel = remember { ManageSolarArrayViewModel(networkObserver) }
     val homeViewModel = remember { HomeViewModel( networkObserver) }
 
     val snackbarState = remember { SnackbarHostState() }

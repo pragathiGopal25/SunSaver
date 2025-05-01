@@ -1,32 +1,44 @@
 package no.uio.ifi.in2000.team54.data.building
 
+import android.content.Context
+import androidx.compose.material3.SnackbarHostState
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
 
-class BuildingRepository {
-    private val dataSource = BuildingDataSource()
+class BuildingRepository(private val context: Context) {
 
-    suspend fun getAddressSuggestions(address: String): List<Address> {
+    private val dataSource = BuildingDataSource(context)
+
+    suspend fun getAddressSuggestions(address: String): Result<List<Address>> {
         return dataSource.getAddressSuggestions(address)
     }
 
     suspend fun getNearestAddressToPos(pos: Pos): Address? {
-        val addresses = dataSource.getAddressFromPos(pos)
-        if (addresses.isEmpty()) {
+        val result = dataSource.getAddressFromPos(pos)
+        if (result.isFailure) {
             return null
         }
 
-        return addresses.minBy { it.distanceFromPoint }
+        val address = result.getOrNull().orEmpty()
+        return address.minByOrNull { it.distanceFromPoint }
     }
 
     suspend fun getBuildingIds(address: Address): List<String> {
-        val cadastreId = dataSource.getCadastreId(address) ?: return emptyList()
-        return dataSource.getBuildingIds(cadastreId).filter { !it.contains("-") }
+
+        val result = dataSource.getCadastreId(address)
+        val cadastreId = result.getOrNull() ?: return emptyList()
+
+        val buildingResult = dataSource.getBuildingIds(cadastreId)
+
+        return buildingResult.getOrNull().orEmpty().filter { !it.contains("-") }!!
+
     }
 
     suspend fun getRoofSections(address: Address): List<MapRoofSection> {
+
         val buildingIds = getBuildingIds(address)
+
         if (buildingIds.isEmpty()) {
             return emptyList()
         }
