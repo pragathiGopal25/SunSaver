@@ -66,7 +66,7 @@ private fun calculateAdjustedSolarIrradiance(
 
     return monthlyRadiance.mapValues { (month, radiance) ->
         var adjustedIrradiance = radiance
-        val snowFactor = monthlySnow[month]?.let { calculateSnowLossFactor(it) } ?: 1.0
+        val snowFactor = monthlySnow[month]?.let { calculateSnowLossFactor(it, month)} ?: 1.0
         val cloudFactor = monthlyCloud[month]?.let { calculateCloudLossFactor(it) } ?: 1.0
         adjustedIrradiance *= snowFactor * cloudFactor
         adjustedIrradiance
@@ -74,12 +74,15 @@ private fun calculateAdjustedSolarIrradiance(
 }
 
 //Calculates the impact the snow has on solar panel efficiency
-private fun calculateSnowLossFactor(snowCoverage: Double): Double {
+//https://www.sciencedirect.com/science/article/abs/pii/S1364032118308268
+// 25 % less efficiency of solar panels in winter months
+private fun calculateSnowLossFactor(snowCoverage: Double, month: String): Double {
+    val isWinter = month in listOf("11", "12", "01", "02") // winter months, efficiency is lower
     return when (snowCoverage) {
-        1.0 -> 0.98
-        2.0 -> 0.96
-        3.0 -> 0.93
-        4.0 -> 0.90
+         1.0 -> if (isWinter) 0.92 else 0.98
+         2.0 -> if (isWinter) 0.90 else 0.96
+         3.0 -> if (isWinter) 0.80 else 0.93
+         4.0 -> if (isWinter) 0.75 else 0.90
         else -> 1.0
     }
 }
