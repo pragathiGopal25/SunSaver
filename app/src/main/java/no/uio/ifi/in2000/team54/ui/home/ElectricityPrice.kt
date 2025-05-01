@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,7 +55,11 @@ fun PriceContainer(viewModel: HomeViewModel) {
     val loadingState by viewModel.priceLoadingState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
     if (loadingState.loadingMessage != "") {
-        Box(modifier = Modifier.fillMaxSize().height(302.dp), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(302.dp), contentAlignment = Alignment.Center
+        ) {
             Text(loadingState.loadingMessage)
         }
         return
@@ -99,10 +104,10 @@ fun PriceContainer(viewModel: HomeViewModel) {
                     })
                     .shadow(elevation = 1.dp, shape = RoundedCornerShape(20.dp))
                     .background(Beige)
-                    .padding(2.dp)
+                    .padding(2.dp),
+                contentAlignment = Alignment.CenterStart
             ) {
-                Column {
-
+                Column(horizontalAlignment = AbsoluteAlignment.Left, modifier = Modifier.padding(2.dp)) {
                     if (!expanded) {
                         Text(
                             text = "Hva betyr dette? Trykk her for mer informasjon",
@@ -112,21 +117,25 @@ fun PriceContainer(viewModel: HomeViewModel) {
                     Spacer(Modifier.height(3.dp))
                     if (expanded) {
                         if (uiState.priceData.solarPrice < 0) {
-                            viewModel.updateExpand(520.dp)
                             Text(
-                                "Du har produsert et overskudd med strøm, og kan derfor selge tilbake til markedet." +
-                                        " Derfor er utgiftene med solcellepanel representert som et negativt tall. Det negative tallet representerer hvor mye du kan selge som overskudd." +
-                                        " Ellers representerer boksen til venstre strømprisen uten solcellepanel, mens spareboksen i midten er differansen mellom de to andre."
+                                """
+                                    >Du har produsert et overskudd med strøm, og kan derfor selge tilbake til markedet. Overskuddet du kan selge er markert i den høyre boksen med et negativt tall.
+                                    >- Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
+                                    >- Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
+                                    >- Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
+                                    """.trimMargin(">")
                             )
                         } else {
-                            viewModel.updateExpand(450.dp)
                             Text(
-                                "Du vil spare ${uiState.priceData.saved} NOK ${timePerspective[uiState.timeScope]}," +
-                                        " fordi strømmen i utgangspunktet koster ${uiState.priceData.realPrice} NOK uten solcelleanlegget ditt, " +
-                                        " mens du vil betale ${uiState.priceData.solarPrice} NOK."
+                                """
+                                     >Du vil spare ${uiState.priceData.saved} NOK ${timePerspective[uiState.timeScope]}, fordi strømmen i utgangspunktet koster ${uiState.priceData.realPrice} NOK uten solcelleanlegget ditt, mens du vil betale ${uiState.priceData.solarPrice} NOK.
+                                    >- Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
+                                    >- Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
+                                    >- Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
+                                    """.trimMargin(">")
                             )
                         }
-                    } else viewModel.updateExpand(340.dp)
+                    }
                 }
             }
         }

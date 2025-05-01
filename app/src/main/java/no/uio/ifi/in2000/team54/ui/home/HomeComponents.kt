@@ -59,7 +59,6 @@ import kotlin.math.exp
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
     val scroll = rememberScrollState()
-    val expandedSizeState = homeViewModel.expandedSizeState.collectAsState()
 
     Column(
         Modifier
@@ -82,7 +81,6 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
                 name = "Sparing", modifier = Modifier,
                 content = { PriceContainer(viewModel = homeViewModel) }
             )
-            println("TEST: height: ${expandedSizeState.value.height}")
         }
     }
 }

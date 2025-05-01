@@ -36,17 +36,9 @@ data class LoadingState(
     val loadingMessage: String = "Ingen solanlegg er opprettet",
 )
 
-data class ExpandedSizeState(
-    val height: Dp = 340.dp
-)
-
-//FORCE NOK til å være midtstilt under beløp UI
 data class PriceData(
     val realPrice: Double,
-    val solarPrice: Double, //hvordan løse når denne er < 0
-    //option 1: cappe på 0,
-    //option 2: forklare bruker tydeligere hvordan negativ verdi funker
-    //option 3: gi bruker mulighet til å velge om de skal selge overskudd eller ikke
+    val solarPrice: Double,
     val saved: Double = round(realPrice * 100.0 - solarPrice * 100.0) / 100.0
 )
 
@@ -72,16 +64,6 @@ class HomeViewModel : ViewModel() {
     val graphLoadingState = _graphLoadingState.asStateFlow()
     private val _priceLoadingState = MutableStateFlow(LoadingState())
     val priceLoadingState = _priceLoadingState.asStateFlow()
-    private val _expandedSizeState = MutableStateFlow(ExpandedSizeState())
-    val expandedSizeState = _expandedSizeState.asStateFlow()
-
-    fun updateExpand(size: Dp) {
-        _expandedSizeState.update { currentState ->
-            currentState.copy(
-                height = size
-            )
-        }
-    }
 
     val solarArrays: StateFlow<List<SolarArray>> =
         _sharedRepository.solarArrays // save to SolarArraysUiState?
