@@ -313,7 +313,7 @@ private fun ArraySettingsMainSection(
             RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
             ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
             SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
-            PriceSummaryCard(solarPanelType, roofSections, homeviewmodel)
+            PriceSummaryCard(solarPanelType, roofSections, homeviewmodel) //Inni denne ligger totalkosten
             SaveButton {
                 if (addressState.address == null) {
                     scope.launch {
@@ -334,7 +334,7 @@ private fun ArraySettingsMainSection(
         }
     }
     SaveDialog( viewModel, openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
-        val solarObj = SolarArray(
+        val solarObj = SolarArray( //Dette er solararrayet som er koblet til kostnaden
             id = null,
             name,
             solarPanelType,

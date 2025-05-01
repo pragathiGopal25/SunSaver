@@ -3,8 +3,11 @@ package no.uio.ifi.in2000.team54.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,7 +15,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import java.util.Locale
 
 @Composable
 fun TimeUntilRecouped(viewModel: HomeViewModel) {
@@ -26,7 +33,6 @@ fun TimeUntilRecouped(viewModel: HomeViewModel) {
         return
     }
 
-    viewModel.calculateRecoup(uiState.totalPrice)
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
@@ -38,7 +44,30 @@ fun TimeUntilRecouped(viewModel: HomeViewModel) {
             verticalArrangement = Arrangement.Center
         ) {
             Text("Tid til du har tjent inn din investering i solcellepaneler:")
-            Text("${uiState.timeUntilRecoup} ÅR")
+            Spacer(Modifier.height(10.dp))
+            RecoupText(uiState.timeUntilRecoup)
         }
+    }
+}
+@Composable
+private fun RecoupText(time: Double) {
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Text(
+//            text = "%,d".format(time, Locale.GERMANY).replace(",", " "),
+            text = time.toString(),
+            color = Color.Black,
+            fontSize = 34.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = "År",
+            color = Color.Black,
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
