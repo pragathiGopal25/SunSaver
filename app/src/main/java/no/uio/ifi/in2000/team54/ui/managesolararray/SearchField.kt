@@ -78,7 +78,7 @@ fun SearchField(
             viewModel.setCurrentSolarArray(solarEntity) // Load the solar array to edit
             mapViewportState.easeTo(
                 CameraOptions.Builder()
-                    .center(solarEntity.address?.pos?.toPoint())
+                    .center(solarEntity.coordinates.toPoint())
                     .zoom(19.0)
                     .build()
             )

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +46,9 @@ class ManageSolarArrayViewModel : ViewModel() {
             try {
                 // we know the address isn't null here because we filter out all null addresses above
                 MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
+
             } catch (e: Exception) {
+                delay(1000) // delayed so that the Building API gets time to respond
                 // if it fails to get the roof information, don't display any in the map
                 MapRoofSectionsState(emptyList(), true)
             }
@@ -87,10 +90,9 @@ class ManageSolarArrayViewModel : ViewModel() {
     fun setCurrentSolarArray(solarArray: SolarArray?) {
         _currentSolarArray.value = solarArray
         // Update the search address when selecting a solar array to edit
-        _mapSearchAddress.value = SearchAddressState(solarArray?.address?.toFormatted() ?: "")
-        _mapAddress.value = _mapAddress.value.copy(
-            address = solarArray?.address
-        )
+        val pos: Pos = Pos.fromPoint(solarArray?.coordinates!!.toPoint())
+        queryAddressAtPos(pos)
+        _mapSearchAddress.value = SearchAddressState(solarArray.address ?: "")
 
     }
     fun addSolarArray(newSolarArray: SolarArray) {

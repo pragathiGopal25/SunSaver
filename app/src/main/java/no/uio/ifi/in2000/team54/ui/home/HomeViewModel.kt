@@ -1,5 +1,7 @@
 package no.uio.ifi.in2000.team54.ui.home
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
@@ -37,15 +39,15 @@ data class LoadingState(
 data class PriceData(
     val realPrice: Double,
     val solarPrice: Double,
-    val saved: Double = round(realPrice * 10.0 - solarPrice * 10.0) / 10.0
+    val saved: Double = round(realPrice * 100.0 - solarPrice * 100.0) / 100.0
 )
 
 data class WeatherData(
-    var temp: Map<String, Double> = emptyMap<String, Double>(),
-    var cloud: Map<String, Double> = emptyMap<String, Double>(),
-    var snow: Map<String, Double> = emptyMap<String, Double>(),
-    var irradiance: Map<String, Double> = emptyMap<String, Double>(),
-    var sunhours: Map<String, Double> = emptyMap<String, Double>()
+    var temp: Map<String, Double> = emptyMap(),
+    var cloud: Map<String, Double> = emptyMap(),
+    var snow: Map<String, Double> = emptyMap(),
+    var irradiance: Map<String, Double> = emptyMap(),
+    var sunhours: Map<String, Double> = emptyMap()
 )
 
 enum class TimeScope {
@@ -131,8 +133,8 @@ class HomeViewModel : ViewModel() {
                 val asyncTemp = async { _repository.getData(coordinates, Elements.TEMP) }
                 val asyncCloud = async { _repository.getData(coordinates, Elements.CLOUD) }
                 val asyncSnow = async { _repository.getData(coordinates, Elements.SNOW) }
-                val asyncIrradiance = async { _repository.getData(coordinates,Elements.IRRIDANCE) }
-                val asyncSunhours =  async { _repository.getData(coordinates,Elements.SUNHOURS) }
+                val asyncIrradiance = async { _repository.getData(coordinates, Elements.IRRIDANCE) }
+                val asyncSunhours = async { _repository.getData(coordinates, Elements.SUNHOURS) }
 
                 val tempData = asyncTemp.await()
                 val cloudData = asyncCloud.await()
@@ -258,15 +260,18 @@ class HomeViewModel : ViewModel() {
                 }
                 if (!electricityPriceMap.containsKey(solarArray)) {
                     timeScopeToDays.forEach { (scope, days) ->
+                        val powerUsage =
+                            if (scope == TimeScope.YEAR) electricityProductionMap[solarArray]!!.average()
+                            else electricityProductionMap[solarArray]!![electricityPriceRepository.getMonth()]
                         val priceDataTuple = electricityPriceRepository.getPriceData(
                             days,
                             electricityPriceRepository.getPriceArea(solarArray),
-                            electricityProductionMap[solarArray]!![electricityPriceRepository.getMonth()],
+                            powerUsage,
                             solarArray.powerConsumption
                         )
                         val priceData = PriceData(
-                            realPrice = round(priceDataTuple[1] * 10.0) / 10.0,
-                            solarPrice = round(priceDataTuple[0] * 10.0) / 10.0,
+                            realPrice = round(priceDataTuple[1] * 100.0) / 100.0,
+                            solarPrice = round(priceDataTuple[0] * 100.0) / 100.0,
                         )
                         electricityPriceMap.computeIfAbsent(
                             solarArray,

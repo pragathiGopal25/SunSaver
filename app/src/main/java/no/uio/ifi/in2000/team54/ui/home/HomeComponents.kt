@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,9 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -31,9 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,35 +40,48 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.ui.theme.Background
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
 import no.uio.ifi.in2000.team54.ui.theme.Lighter
-import no.uio.ifi.in2000.team54.ui.theme.WeatherBlue
-import no.uio.ifi.in2000.team54.ui.theme.WeatherBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
+import kotlin.math.exp
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
+    val scroll = rememberScrollState()
+
     Column(
         Modifier
             .fillMaxSize()
             .background(Background)
     ) {
         HomeScreenTopBar()
-        SolarArrayList(homeViewModel, navController)
-        SwitchContent(homeViewModel)
-        WeatherCard(navController)
+        Column(
+            modifier = Modifier
+                .verticalScroll(scroll)
+        ) {
+            SolarArrayList(homeViewModel, navController)
+            SelectedSolarArrayTitle(homeViewModel)
+            //Putter strømproduksjon øverst fordi den laster inn mye raskere
+            HomeCard(
+                name = "Strømproduksjon", modifier = Modifier.height(302.dp),
+                content = { GraphContainer(viewModel = homeViewModel) }
+            )
+            HomeCard(
+                name = "Sparing", modifier = Modifier,
+                content = { PriceContainer(viewModel = homeViewModel) }
+            )
+        }
     }
 }
 
@@ -259,92 +266,43 @@ fun NoSolarArrayCard() {
 }
 
 @Composable
-fun SwitchContent(homeViewModel: HomeViewModel) {
-    var isFlipped by remember { mutableStateOf(false) }
+fun SelectedSolarArrayTitle(viewModel: HomeViewModel) {
+    val uiState by viewModel.homeUiState.collectAsState()
 
-    Box(
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .height(300.dp)
-            .width(409.dp),
-        contentAlignment = Alignment.Center
+            .fillMaxWidth()
     ) {
-        ElectricityCard(
-            flipped = isFlipped,
-            onFlipClick = { isFlipped = !isFlipped }
+        Row(
+            modifier = Modifier
+                .border(1.dp, YellowerBorder, RoundedCornerShape(100))
+                .clip(RoundedCornerShape(100))
+                .background(LightOrange)
+                .padding(horizontal = 10.dp, vertical = 5.dp)
         ) {
-            if (!isFlipped) {
-                GraphContainer(viewModel = homeViewModel)
-
-            } else {
-                PriceContainer(viewModel = homeViewModel)
-            }
+            Text(
+                text = "Valgt anlegg: ",
+            )
+            Text(
+                text = uiState.selectedSolarArray?.name ?: "Ingen",
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
 
-
 @Composable
-private fun NextCard(flipped: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-
-    if (!flipped)
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-            contentDescription = "Neste kort",
-            tint = DarkYellow,
-            modifier = modifier
-                .padding(10.dp)
-                .size(35.dp)
-                .clickable { onClick() }
-                .padding(7.dp)
-        )
-
-    // Skal kun vises før neste kort er i fokus
-
-}
-
-@Composable
-private fun PreviousCard(flipped: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-
-    if (flipped)
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Forrige kort",
-            tint = DarkYellow,
-            modifier = modifier
-                .padding(10.dp)
-                .size(35.dp)
-                .clickable { onClick() }
-                .padding(7.dp)
-        )
-
-    // Skal kun vises når det er mulig for bruker å navigere seg tilbake
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewSwitchContent() {
-
-    val hvm = HomeViewModel()
-    SwitchContent(hvm)
-}
-
-
-@Composable
-fun ElectricityCard(
-
-    flipped: Boolean,
-    onFlipClick: () -> Unit,
-    content: @Composable () -> Unit
-
+fun HomeCard(
+    name: String,
+    content: @Composable () -> Unit,
+    modifier: Modifier
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(15.dp)
             .clip(RoundedCornerShape(20.dp))
             .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
-            .height(262.dp)
             .width(395.dp),
 
         shape = RoundedCornerShape(20.dp),
@@ -356,23 +314,6 @@ fun ElectricityCard(
     ) {
 
         Box(modifier = Modifier.fillMaxSize()) {
-
-            NextCard(
-                flipped = flipped,
-                onClick = onFlipClick,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(10.dp)
-            )
-
-            PreviousCard(
-                flipped = flipped,
-                onClick = onFlipClick,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(10.dp)
-            )
-
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -380,59 +321,13 @@ fun ElectricityCard(
                     Modifier.padding(10.dp)
                 ) {
                     Text(
-                        text = "Strømutgifter ",
+                        text = name,
                         style = MaterialTheme.typography.bodyLarge,
-                        fontSize = 18.sp
-                    )
-                    Text(
-                        text = "& Sparing",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = YellowText,
                         fontSize = 18.sp
                     )
                 }
                 content()
             }
         }
-    }
-}
-
-@Composable
-fun WeatherCard(navController: NavController) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(90.dp)
-            .width(409.dp)
-            .padding(15.dp)
-            .border(1.dp, WeatherBorder, shape = RoundedCornerShape(20.dp))
-            .clip(RoundedCornerShape(20.dp))
-            .background(WeatherBlue)
-            .clickable { navController.navigate("weather") }
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(15.dp)
-        ) {
-            Text(
-                text = "Værforhold ",
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Text(
-                text = "& Skydekke",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White
-            )
-        }
-
-        Image(
-            painter = painterResource(R.drawable.weather),
-            contentDescription = null,
-            modifier = Modifier
-                .size(45.dp)
-                .offset(x = (-15).dp)
-        )
     }
 }
