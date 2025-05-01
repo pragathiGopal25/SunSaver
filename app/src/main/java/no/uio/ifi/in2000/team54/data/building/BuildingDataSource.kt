@@ -26,16 +26,18 @@ import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
 import no.uio.ifi.in2000.team54.ui.home.NetworkObserver
 
-class BuildingDataSource(private val context: Context) {
+class BuildingDataSource() {
+
+
     private val httpClient = HttpClient(CIO) {
         install(ContentNegotiation) {
             json()
         }
     }
 
-    private val networkObserver = NetworkObserver(context)
     private suspend fun isOnline(): Boolean {
-
+        val context = MyApplication.appContext
+        val networkObserver = NetworkObserver(context)
         return networkObserver.isConnected.first()
     }
 

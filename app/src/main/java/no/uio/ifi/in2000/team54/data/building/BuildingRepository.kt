@@ -6,9 +6,9 @@ import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
 
-class BuildingRepository(private val context: Context) {
+class BuildingRepository() {
 
-    private val dataSource = BuildingDataSource(context)
+    private val dataSource = BuildingDataSource()
 
     suspend fun getAddressSuggestions(address: String): Result<List<Address>> {
         return dataSource.getAddressSuggestions(address)
@@ -43,6 +43,8 @@ class BuildingRepository(private val context: Context) {
             return emptyList()
         }
 
-        return buildingIds.flatMap { dataSource.getRoofSections(it) }.toList()
+        return buildingIds.mapNotNull { id ->
+            dataSource.getRoofSections(id).getOrNull()
+        }.flatten()
     }
 }

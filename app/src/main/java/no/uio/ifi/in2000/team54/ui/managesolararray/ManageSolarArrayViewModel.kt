@@ -1,5 +1,7 @@
 package no.uio.ifi.in2000.team54.ui.managesolararray
 
+import android.app.Application
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,6 +28,7 @@ class ManageSolarArrayViewModel(
     private val networkObserver: NetworkObserver
 
 ) : ViewModel() {
+
     private val repository: BuildingRepository = BuildingRepository()
     private val _sharedRepository = RepositoryProvider.sharedRepository
 
@@ -86,12 +89,9 @@ class ManageSolarArrayViewModel(
     val mapSearchAddressSuggestions = _mapSearchAddress
         .debounce(250)
         .mapLatest { state ->
-            val suggestions = try {
-                repository.getAddressSuggestions(state.query)
+            val result = repository.getAddressSuggestions(state.query)
+            val suggestions = result.getOrNull() ?: emptyList()
 
-            } catch (e: Exception) {
-                emptyList() // could not find any addresses for the users input
-            }
             AddressSuggestionsState(suggestions)
         }
         .stateIn(
