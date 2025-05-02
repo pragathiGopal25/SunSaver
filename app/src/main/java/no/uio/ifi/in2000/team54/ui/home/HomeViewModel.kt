@@ -1,7 +1,6 @@
 package no.uio.ifi.in2000.team54.ui.home
 
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
@@ -34,6 +33,7 @@ data class HomeUiState(
 )
 
 data class LoadingState(
+    val isLoading: Boolean = false,
     val loadingMessage: String = "Ingen solanlegg er opprettet",
 )
 
@@ -124,7 +124,8 @@ class HomeViewModel : ViewModel() {
             try {
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Henter data om været ..."
+                        isLoading = true,
+                        loadingMessage = ""
                     )
                 }
                 _priceLoadingState.update { currentState ->
@@ -164,6 +165,7 @@ class HomeViewModel : ViewModel() {
             } finally {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
+                        isLoading = false,
                         loadingMessage = ""
                     )
                 }

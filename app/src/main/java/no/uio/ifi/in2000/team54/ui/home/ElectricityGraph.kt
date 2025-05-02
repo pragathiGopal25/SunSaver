@@ -3,8 +3,11 @@ package no.uio.ifi.in2000.team54.ui.home
 import android.text.Layout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mapbox.maps.extension.style.expressions.dsl.generated.mod
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
@@ -72,9 +76,17 @@ fun GraphContainer(
     val graphLoadingState by viewModel.graphLoadingState.collectAsStateWithLifecycle()
     if (graphDataUiState.electricityProductionData.isEmpty()) {
         Box(modifier.fillMaxSize(), Alignment.Center) {
-            Text(text = graphLoadingState.loadingMessage)
+            if (!graphLoadingState.isLoading) {
+                Text(text = graphLoadingState.loadingMessage)
+            } else {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .width(70.dp)
+                )
+            }
         }
-    } else {
+    }
+    else {
         ElectricityGraph(graphDataUiState = graphDataUiState)
     }
 }
