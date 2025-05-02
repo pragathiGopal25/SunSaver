@@ -277,10 +277,10 @@ private fun ArraySettingsContent(
                 // we need to clamp each roof section's amount of panels to the max amount of panels
                 // the roof section has space for, this is necessary when changing solar panel type
                 // because the different types are different sizes
-                for (roofSection in roofSections) {
+                roofSections.forEach { roofSection ->
                     val maxPanelAmount = (roofSection.area / solarPanelType.value.area()).toInt()
                     if (roofSection.panels <= maxPanelAmount) {
-                        continue
+                        return@forEach
                     }
 
                     // we need to create a new RoofSection object to trigger a re-render by the state changing
