@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -90,14 +91,22 @@ fun ManageSolarArrayScreen(
     snackbarState: SnackbarHostState,
     updateArray: String? = "",
 ) {
+    val solarEntity by viewModel.currentSolarArray.collectAsState()
     val roofSections = remember { mutableStateListOf<RoofSection>() }
-    if (!updateArray.isNullOrEmpty()) { // if we want to update the solar array
-        viewModel.getSolarArray(updateArray)
+
+    LaunchedEffect(updateArray) {
+        if (!updateArray.isNullOrEmpty()) {
+            viewModel.getSolarArray(updateArray)
+        }
     }
-    val solarEntity = viewModel.currentSolarArray.collectAsState().value
-    val updateRoofSections = remember {
-        mutableStateListOf(*solarEntity?.roofSections?.toTypedArray() ?: arrayOf())
+
+    LaunchedEffect(solarEntity) { // if we are updating
+        if (solarEntity != null) {
+            roofSections.clear()
+            roofSections.addAll(solarEntity!!.roofSections)
+        }
     }
+
     val mapViewportState = rememberMapViewportState {
         setCameraOptions {
             center(osloCenter)
@@ -109,24 +118,14 @@ fun ManageSolarArrayScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (updateArray != "") {
-            // sends the already existing roof sections of the solarentity
-            SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, updateRoofSections)
-        } else {
-            SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, roofSections)
-        }
+        SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, roofSections)
+
         BackButton(viewModel, navController)
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            if (updateArray != "") {
-                // updates the viewmodel to focus on the current solar entity.
-                // makes it easier later to update mapaddress , and keep track of its name and other values.
-                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, updateRoofSections, solarEntity)
-            } else {
-                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections)
-            }
+            ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections)
         }
     }
 }
@@ -147,6 +146,7 @@ private fun BackButton(viewModel: ManageSolarArrayViewModel, navController: NavC
             .clickable {
                 viewModel.setSearchAddress("")
                 navController.navigate("home")
+                viewModel.resetUpdSolarArray()
             }
     )
 }
@@ -160,7 +160,6 @@ private fun ArraySettingsMenu(
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     roofSections: SnapshotStateList<RoofSection>,
-    solarEntity: SolarArray? = null,
     ) {
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
@@ -194,7 +193,6 @@ private fun ArraySettingsMenu(
                 viewModel,
                 navController,
                 roofSections,
-                solarEntity,
             )
         }
     }
@@ -236,11 +234,14 @@ private fun ArraySettingsContent(
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     roofSections: SnapshotStateList<RoofSection>,
-    solarEntity: SolarArray? = null,
 ) {
-    // solar panel type changes and the changes is saved across screens
-    val solarPanelType = rememberSaveable {
-        mutableStateOf(solarEntity?.panelType ?: SolarPanelType.PREMIUM)
+    val solarPanelType = rememberSaveable { mutableStateOf(SolarPanelType.PREMIUM) }
+    val solarEntity by viewModel.currentSolarArray.collectAsState()
+
+    LaunchedEffect(solarEntity) {
+        solarEntity?.panelType?.let {
+            solarPanelType.value = it
+        }
     }
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
@@ -262,7 +263,6 @@ private fun ArraySettingsContent(
                     selectedType ->
                 solarPanelType.value = selectedType
             },
-            solarEntity,
         )
     }
 }
@@ -279,11 +279,11 @@ private fun ArraySettingsMainSection(
     solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>,
     onSelectPanelType: (SolarPanelType) -> Unit,
-    solarEntity: SolarArray? = null,
 ) {
     val addressState by viewModel.mapAddress.collectAsState()
     var editingRoofSection by remember { mutableStateOf<Int?>(null) }
     var openSaveDialog by remember { mutableStateOf(false) }
+    val solarEntity by viewModel.currentSolarArray.collectAsState()
 
     val scope = rememberCoroutineScope()
     val scroll = rememberScrollState()
@@ -293,7 +293,7 @@ private fun ArraySettingsMainSection(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DragHandle(draggableState)
-        SearchField(mapState, mapViewportState, draggableState, viewModel, solarEntity)
+        SearchField(mapState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(15.dp),
@@ -341,7 +341,7 @@ private fun ArraySettingsMainSection(
             viewModel.addSolarArray(solarObj)
         } else {
             // if solarentity exists then you just want to update the values not create and save a whole new one
-            viewModel.updateSolarArray(solarObj.copy(id = solarEntity.id))
+            viewModel.updateSolarArray(solarObj.copy(id = solarEntity!!.id))
         }
         viewModel.setSearchAddress("")
         navController.navigate("home")
