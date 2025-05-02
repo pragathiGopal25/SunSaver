@@ -42,7 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.SolarArray
@@ -54,7 +53,6 @@ import no.uio.ifi.in2000.team54.ui.theme.Lighter
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
-import kotlin.math.exp
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
@@ -72,14 +70,17 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
         ) {
             SolarArrayList(homeViewModel, navController)
             SelectedSolarArrayTitle(homeViewModel)
-            //Putter strømproduksjon øverst fordi den laster inn mye raskere
+            HomeCard(
+                name = "Sparing", modifier = Modifier,
+                content = { PriceContainer(viewModel = homeViewModel) }
+            )
             HomeCard(
                 name = "Strømproduksjon", modifier = Modifier.height(302.dp),
                 content = { GraphContainer(viewModel = homeViewModel) }
             )
             HomeCard(
-                name = "Sparing", modifier = Modifier,
-                content = { PriceContainer(viewModel = homeViewModel) }
+                name = "Inntjening", modifier = Modifier.height(242.dp),
+                content = { TimeUntilRecouped(viewModel = homeViewModel) }
             )
         }
     }

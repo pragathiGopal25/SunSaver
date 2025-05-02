@@ -58,7 +58,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -71,7 +70,6 @@ import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
 import com.mapbox.maps.extension.compose.rememberMapState
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
@@ -91,11 +89,11 @@ fun ManageSolarArrayScreen(
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     snackbarState: SnackbarHostState,
-    homeviewmodel: HomeViewModel,
+    homeViewModel: HomeViewModel,
     updateArray: String? = "",
 ) {
     val roofSections = remember { mutableStateListOf<RoofSection>() }
-    val uiState by homeviewmodel.solarArrays.collectAsState()
+    val uiState by homeViewModel.solarArrays.collectAsState()
     val solarEntity = uiState.find { it.name == updateArray }
     val updateRoofSections = remember { mutableStateListOf(*solarEntity?.roofSections?.toTypedArray() ?: arrayOf()) }
     val mapViewportState = rememberMapViewportState {
@@ -308,7 +306,7 @@ private fun ArraySettingsMainSection(
             RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
             ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
             SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
-            PriceSummaryCard(solarPanelType, roofSections)
+            PriceSummaryCard(solarPanelType, roofSections) //Inni denne ligger totalkosten
             SaveButton {
                 if (addressState.address == null) {
                     scope.launch {
