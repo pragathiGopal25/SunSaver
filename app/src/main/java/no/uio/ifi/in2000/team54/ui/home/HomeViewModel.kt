@@ -320,7 +320,7 @@ class HomeViewModel : ViewModel() {
                         timeScope = timeScope
                     )
                 }
-                seePrices(timeScope, _homeUiState.value.selectedSolarArray!!)
+                loadElectricityPrices(_homeUiState.value.selectedSolarArray!!)
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
@@ -332,8 +332,9 @@ class HomeViewModel : ViewModel() {
     }
 
 
-    fun calculateRecoup(solarArray: SolarArray) {
+    private fun calculateRecoup(solarArray: SolarArray) {
         val totalPrice = solarArray.getTotalPrice()
+        println("Recoup: totalprice er $totalPrice og forbruk pr år er ${electricityPriceMap[_homeUiState.value.selectedSolarArray]!![TimeScope.YEAR]!!.saved}")
         _homeUiState.update { currentState ->
             currentState.copy(
                 timeUntilRecoup = round((totalPrice / electricityPriceMap[currentState.selectedSolarArray]!![TimeScope.YEAR]!!.saved) * 100.0) / 100.0

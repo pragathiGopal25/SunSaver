@@ -15,7 +15,7 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
         dailySolarPowerGeneration: Double,
         powerConsumption: Double
     ): List<Double> {
-        val avgPrice = getPriceDataInterval(days, area).average()
+        val avgPrice = getPriceDataInterval(days, area).average() //Denne kan gis som parameter, så man kan hente data parallelt
         val dailyPowerConsumption = powerConsumption/30.0
         return listOf(
             (dailyPowerConsumption - dailySolarPowerGeneration) * days * avgPrice,
