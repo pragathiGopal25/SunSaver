@@ -23,7 +23,7 @@ enum class SolarPanelType(
         435,
         6750.0,
         3250.0,
-        length =1.74,
+        length = 1.74,
         width =  1.09
     ),
     PREMIUM(
@@ -43,7 +43,7 @@ enum class SolarPanelType(
         return "${this.displayName} (${this.watt}W)"
     }
 
-    companion object {
-        const val AREA = 2.5
+    fun area(): Double {
+        return this.length * this.width
     }
 }

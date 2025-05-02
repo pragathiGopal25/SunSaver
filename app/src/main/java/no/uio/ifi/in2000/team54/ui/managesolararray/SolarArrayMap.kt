@@ -39,6 +39,7 @@ fun SolarArrayMap(
     mapViewportState: MapViewportState,
     snackbarState: SnackbarHostState,
     viewModel: ManageSolarArrayViewModel,
+    solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>
 ) {
     val mapRoofSectionsState by viewModel.mapRoofSections.collectAsState()
@@ -69,7 +70,7 @@ fun SolarArrayMap(
                             area,
                             targetRoofSection.incline,
                             targetRoofSection.direction,
-                            (area / SolarPanelType.AREA).toInt(),
+                            (area / solarPanelType.area()).toInt(),
                             targetRoofSection.id
                         )
                     )

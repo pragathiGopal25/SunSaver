@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -78,6 +79,8 @@ import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
@@ -103,15 +106,20 @@ fun ManageSolarArrayScreen(
         }
     }
     val mapState = rememberMapState {}
+    // solar panel type changes and the changes is saved across screens
+    val solarPanelType = rememberSaveable {
+        mutableStateOf(solarEntity?.panelType ?: SolarPanelType.ECONOMY)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
         if (updateArray != "") {
             // sends the already existing roof sections of the solarentity
-            SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, updateRoofSections)
+            SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, solarPanelType.value, updateRoofSections)
         } else {
-            SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, roofSections)
+            SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, solarPanelType.value, roofSections)
         }
         BackButton(viewModel, navController)
         Box(
@@ -122,9 +130,18 @@ fun ManageSolarArrayScreen(
                 // updates the viewmodel to focus on the current solar entity.
                 // makes it easier later to update mapaddress , and keep track of its name and other values.
                 viewModel.setCurrentSolarArray(solarEntity)
-                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, updateRoofSections, solarEntity)
+                ArraySettingsMenu(
+                    mapState,
+                    mapViewportState,
+                    snackbarState,
+                    viewModel,
+                    navController,
+                    solarPanelType,
+                    updateRoofSections,
+                    solarEntity
+                )
             } else {
-                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, roofSections)
+                ArraySettingsMenu(mapState, mapViewportState, snackbarState, viewModel, navController, solarPanelType, roofSections)
             }
         }
     }
@@ -158,9 +175,10 @@ private fun ArraySettingsMenu(
     snackbarState: SnackbarHostState,
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
+    solarPanelType: MutableState<SolarPanelType>,
     roofSections: SnapshotStateList<RoofSection>,
     solarEntity: SolarArray? = null,
-    ) {
+) {
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
 
@@ -192,6 +210,7 @@ private fun ArraySettingsMenu(
                 draggableState,
                 viewModel,
                 navController,
+                solarPanelType,
                 roofSections,
                 solarEntity,
             )
@@ -234,13 +253,10 @@ private fun ArraySettingsContent(
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
+    solarPanelType: MutableState<SolarPanelType>,
     roofSections: SnapshotStateList<RoofSection>,
     solarEntity: SolarArray? = null,
 ) {
-    // solar panel type changes and the changes is saved across screens
-    val solarPanelType = rememberSaveable {
-        mutableStateOf(solarEntity?.panelType ?: SolarPanelType.PREMIUM)
-    }
     Column(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -257,9 +273,28 @@ private fun ArraySettingsContent(
             viewModel,
             solarPanelType.value,
             roofSections,
-            {
-                    selectedType ->
+            { selectedType ->
                 solarPanelType.value = selectedType
+
+                // we need to clamp each roof section's amount of panels to the max amount of panels
+                // the roof section has space for, this is necessary when changing solar panel type
+                // because the different types are different sizes
+                for (roofSection in roofSections) {
+                    val maxPanelAmount = (roofSection.area / solarPanelType.value.area()).toInt()
+                    if (roofSection.panels <= maxPanelAmount) {
+                        continue
+                    }
+
+                    // we need to create a new RoofSection object to trigger a re-render by the state changing
+                    roofSections[roofSections.indexOf(roofSection)] = RoofSection(
+                        roofSection.id,
+                        roofSection.area,
+                        roofSection.incline,
+                        roofSection.direction,
+                        maxPanelAmount,
+                        roofSection.mapId
+                    )
+                }
             },
             solarEntity,
         )
@@ -326,7 +361,7 @@ private fun ArraySettingsMainSection(
             }
         }
     }
-    SaveDialog( viewModel, openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
+    SaveDialog(viewModel, openSaveDialog, onClose = { openSaveDialog = false }, onSave = { name, power ->
         val solarObj = SolarArray(
             id = null,
             name,
@@ -405,7 +440,7 @@ private fun SaveButton(
 private fun SolarPanelTypeDropdown(
     solarPanelType: SolarPanelType,
     onSelect: (SolarPanelType) -> Unit,
-    ) {
+) {
     var dropdownExpanded by remember { mutableStateOf(false) }
 
     Column(
