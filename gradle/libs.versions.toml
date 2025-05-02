@@ -18,7 +18,7 @@ vico = "2.1.0"
 navigationCompose = "2.8.9"
 
 [libraries]
-
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.3.0" }
 mapbox = { module = "com.mapbox.maps:android", version.ref = "mapbox" }
 mapbox-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
 mapbox-sdk-turf = { module = "com.mapbox.mapboxsdk:mapbox-sdk-turf", version.ref = "mapboxSdkTurf" }

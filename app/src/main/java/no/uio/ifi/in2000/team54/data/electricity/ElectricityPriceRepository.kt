@@ -1,35 +1,53 @@
 package no.uio.ifi.in2000.team54.data.electricity
 
 import android.annotation.SuppressLint
+import no.uio.ifi.in2000.team54.domain.SolarArray
 import java.text.SimpleDateFormat
 import java.util.Date
 
 class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasource) {
-    // https://forbrukerguiden.no/normalt-stromforbruk/
-    private fun estimatedAvgKwh(): Double = 44.43 //Avg kWh for 120kvm enebolig per dag
-
 
     //Get the average electricity price with and without solar panel
     // The avg is in NOK per kWh
-    suspend fun getPriceData(days: Int, area: String, solarProduction: Double): List<Double> {
-        val avgPrice = getPriceDataInterval(days, area).average()
-        return listOf((estimatedAvgKwh() - solarProduction) * days * avgPrice, avgPrice * days * estimatedAvgKwh())
+    suspend fun getPriceData(
+        days: Int,
+        area: String,
+        dailySolarPowerGeneration: Double,
+        monthlyPowerConsumption: Double
+    ): List<Double> {
+        val avgDailyElectricityPrice = getPriceDataInterval(days, area).average() //Denne kan gis som parameter, så man kan hente data parallelt
+        val dailyPowerConsumption = monthlyPowerConsumption/30.0
+        return listOf(
+            (dailyPowerConsumption - dailySolarPowerGeneration) * days * avgDailyElectricityPrice,
+            avgDailyElectricityPrice * days * dailyPowerConsumption
+        )
     }
 
     //Get which month the calculations base themselves on
+    //Decrement in order to get the most accurate month (e.g. for edge case 1st of the month)
     @SuppressLint("SimpleDateFormat")
-    fun getMonth(): String {
+    fun getMonth(): Int {
         val pattern = "yyyy/MM-dd"
         val simpleDateFormat = SimpleDateFormat(pattern)
         val currentDate = simpleDateFormat.format(Date())
 
-        for (i in 0..14) {
-            decrementDate(currentDate)
-        }
-
         val info = currentDate.split("-", "/")
         val month = info[1]
-        return month
+        val monthToIndex = mapOf(
+            "01" to 0,
+            "02" to 1,
+            "03" to 2,
+            "04" to 3,
+            "05" to 4,
+            "06" to 5,
+            "07" to 6,
+            "08" to 7,
+            "09" to 8,
+            "10" to 9,
+            "11" to 10,
+            "12" to 11,
+        )
+        return monthToIndex[month]!!
     }
 
 
@@ -82,5 +100,18 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
 
         val newDate = "$year/$month-$day"
         return newDate
+    }
+
+    //Definerer de 5 sonene for strømpriser (strøm har forskjellig pris forskjellige deler av landet)
+    //Dette er en rough estimat fordi de sonene har ganske kompliserte grenser
+    fun getPriceArea(solarArray: SolarArray):String {
+        val coords = solarArray.coordinates
+        return when{
+            coords.latitude > 64.5 -> "NO4"
+            coords.latitude < 59.45 && coords.longitude < 10.5 -> "NO2"
+            coords.latitude in 59.3 .. 61.8 && coords.longitude < 8.2 -> "NO5"
+            coords.latitude in 61.9..64.5 && coords.longitude < 8.6 -> "NO3"
+            else -> "NO1"
+        }
     }
 }

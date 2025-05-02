@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.enums
 
+
 enum class SolarPanelType(
     val displayName: String,
     val watt: Int,

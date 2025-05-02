@@ -5,10 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,16 +18,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,23 +50,39 @@ import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
 import no.uio.ifi.in2000.team54.ui.theme.Lighter
-import no.uio.ifi.in2000.team54.ui.theme.WeatherBlue
-import no.uio.ifi.in2000.team54.ui.theme.WeatherBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
-
+import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
+    val scroll = rememberScrollState()
+
     Column(
         Modifier
             .fillMaxSize()
             .background(Background)
     ) {
         HomeScreenTopBar()
-        SolarArrayList(homeViewModel)
-        SwitchContent(homeViewModel)
-        WeatherCard(navController)
+        Column(
+            modifier = Modifier
+                .verticalScroll(scroll)
+        ) {
+            SolarArrayList(homeViewModel, navController)
+            SelectedSolarArrayTitle(homeViewModel)
+            HomeCard(
+                name = "Sparing", modifier = Modifier,
+                content = { PriceContainer(viewModel = homeViewModel) }
+            )
+            HomeCard(
+                name = "Strømproduksjon", modifier = Modifier.height(302.dp),
+                content = { GraphContainer(viewModel = homeViewModel) }
+            )
+            HomeCard(
+                name = "Inntjening", modifier = Modifier.height(242.dp),
+                content = { TimeUntilRecouped(viewModel = homeViewModel) }
+            )
+        }
     }
 }
 
@@ -74,7 +90,8 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
 fun GreetingMessage() {
     Text(
         text = getGreeting(),
-        style = MaterialTheme.typography.bodyMedium
+        style = MaterialTheme.typography.bodyMedium,
+        fontSize = 18.sp
     )
 }
 
@@ -112,12 +129,12 @@ fun HomeScreenTopBar() {
             }
 
             Image(
-                painter = painterResource(R.drawable.final_applogo),
+                painter = painterResource(R.drawable.mediumsizelogo),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(130.dp)
+                    .size(120.dp)
                     .align(Alignment.TopEnd)
-                    .offset(x = (-25).dp),
+                    .offset(x = (-30).dp),
                 contentScale = ContentScale.Crop
             )
         }
@@ -125,7 +142,7 @@ fun HomeScreenTopBar() {
 }
 
 @Composable
-fun SolarArrayList(homeViewModel: HomeViewModel) {
+fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
     val solarArrays = homeViewModel.solarArrays.collectAsState()
 
     Box(
@@ -138,7 +155,7 @@ fun SolarArrayList(homeViewModel: HomeViewModel) {
                 NoSolarArrayCard()
             } else {
                 solarArrays.value.forEach {
-                    SolarArrayCard(it)
+                    SolarArrayCard(it, homeViewModel, navController)
                 }
             }
         }
@@ -146,38 +163,70 @@ fun SolarArrayList(homeViewModel: HomeViewModel) {
 }
 
 @Composable
-fun SolarArrayCard(solarArray: SolarArray) {
-    Column(
+fun SolarArrayCard(
+    solarArray: SolarArray,
+    viewModel: HomeViewModel,
+    navController: NavController
+) {
+    val uiState by viewModel.homeUiState.collectAsState()
+    val baseModifier = Modifier
+        .width(200.dp)
+        .height(250.dp)
+        .padding(15.dp)
+        .clip(RoundedCornerShape(20.dp))
+        .background(LightOrange)
+        .clickable { viewModel.selectSolarArray(solarArray) }
+    Box(
         modifier = Modifier
-            .width(200.dp)
-            .height(220.dp)
-            .padding(15.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
-            .background(LightOrange),
+            .then(
+                if (solarArray == uiState.selectedSolarArray) {
+                    baseModifier.border(4.dp, YellowerBorder, shape = RoundedCornerShape(20.dp))
+                } else {
+                    baseModifier.border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
+                }
+            ),
     ) {
-        Image(
-            painter = painterResource(R.drawable.house),
-            contentDescription = "Hus med solcelleplaneter",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp)
-                .padding(15.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Lighter)
-                .padding(15.dp)
-        )
+        Column {
+            IconButton(
+                onClick = {
+                    navController.navigate("editsolararrays/${solarArray.name}")
+                },
+                modifier = Modifier
+                    .background(LightOrange)
+                    .padding(top = 6.dp, end = 4.dp)
+                    .size(30.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .align(Alignment.End)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.circle),
+                    contentDescription = "Redigere Anlegg",
+                    tint = Color.Unspecified // if you don't want to tint it
+                )
+            }
+            Image(
+                painter = painterResource(R.drawable.house),
+                contentDescription = "Hus med solcelleplaneter",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .padding(end = 15.dp, start = 15.dp, bottom = 10.dp, top = 8.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Lighter)
+                    .padding(15.dp)
+            )
 
-        Text(
-            text = solarArray.name,
-            fontSize = 20.sp,
-            color = GreyText,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 15.dp)
-        )
+            Text(
+                text = solarArray.name,
+                fontSize = 20.sp,
+                color = GreyText,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 6.dp)
+            )
+        }
     }
 }
 
@@ -198,7 +247,7 @@ fun NoSolarArrayCard() {
                     )
                 )
             }
-            .padding(15.dp)
+            .padding(18.dp)
     ) {
         Text(
             "Ingen anlegg",
@@ -206,6 +255,9 @@ fun NoSolarArrayCard() {
             fontWeight = FontWeight.Bold,
             color = Color.Gray,
         )
+
+        Spacer(Modifier.padding(13.dp))
+
         Text(
             "Legg til et nytt anlegg ved å trykke på + symbolet på bunnen av skjermen.",
             fontSize = 12.sp,
@@ -215,35 +267,43 @@ fun NoSolarArrayCard() {
 }
 
 @Composable
-fun SwitchContent(homeViewModel: HomeViewModel) {
-    var isFlipped by remember { mutableStateOf(false) }
+fun SelectedSolarArrayTitle(viewModel: HomeViewModel) {
+    val uiState by viewModel.homeUiState.collectAsState()
 
-    Box(
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .height(300.dp)
-            .width(409.dp)
-            .clickable { isFlipped = !isFlipped },
-        contentAlignment = Alignment.Center
+            .fillMaxWidth()
     ) {
-        ElectricityCard {
-            if (!isFlipped) {
-                EletricityGraphContainer(viewModel = homeViewModel)
-            } else {
-                ElectricityPriceContainer(viewModel = homeViewModel)
-            }
+        Row(
+            modifier = Modifier
+                .border(1.dp, YellowerBorder, RoundedCornerShape(100))
+                .clip(RoundedCornerShape(100))
+                .background(LightOrange)
+                .padding(horizontal = 10.dp, vertical = 5.dp)
+        ) {
+            Text(
+                text = "Valgt anlegg: ",
+            )
+            Text(
+                text = uiState.selectedSolarArray?.name ?: "Ingen",
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
 
 @Composable
-fun ElectricityCard(content: @Composable () -> Unit) {
+fun HomeCard(
+    name: String,
+    content: @Composable () -> Unit,
+    modifier: Modifier
+) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(15.dp)
             .clip(RoundedCornerShape(20.dp))
             .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
-            .height(250.dp)
             .width(395.dp),
 
         shape = RoundedCornerShape(20.dp),
@@ -253,63 +313,22 @@ fun ElectricityCard(content: @Composable () -> Unit) {
             containerColor = Light,
         )
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Row(
-                Modifier.padding(10.dp)
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Strømutgifter ",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = "& Sparing",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = YellowText
-                )
+                Row(
+                    Modifier.padding(10.dp)
+                ) {
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontSize = 18.sp
+                    )
+                }
+                content()
             }
-            content()
         }
-    }
-}
-
-@Composable
-fun WeatherCard(navController: NavController) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(90.dp)
-            .width(409.dp)
-            .padding(15.dp)
-            .border(1.dp, WeatherBorder, shape = RoundedCornerShape(20.dp))
-            .clip(RoundedCornerShape(20.dp))
-            .background(WeatherBlue)
-            .clickable { navController.navigate("weather") }
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(15.dp)
-        ) {
-            Text(
-                text = "Værforhold ",
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Text(
-                text = "& Skydekke",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White
-            )
-        }
-
-        Image(
-            painter = painterResource(R.drawable.weather),
-            contentDescription = null,
-            modifier = Modifier
-                .size(45.dp)
-                .offset(x = (-15).dp)
-        )
     }
 }

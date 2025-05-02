@@ -21,7 +21,7 @@ fun NumberInputField(
         modifier = Modifier.fillMaxWidth(),
         containerModifier = modifier,
         value = value,
-        onValueChange = { if (it.isNumber()) onValueChange(it) },
+        onValueChange = { if (it.isNumber() || it.isEmpty()) onValueChange(it) },
         label = label,
         placeholder = placeholder,
         validate = validate,

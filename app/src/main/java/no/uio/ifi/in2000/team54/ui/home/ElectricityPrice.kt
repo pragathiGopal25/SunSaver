@@ -3,11 +3,13 @@ package no.uio.ifi.in2000.team54.ui.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,8 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonColors
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -26,8 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,16 +38,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import no.uio.ifi.in2000.team54.R
+import no.uio.ifi.in2000.team54.ui.theme.Beige
+import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
+import kotlin.math.round
 
 
 @Composable
-fun ElectricityPriceContainer(viewModel: HomeViewModel) {
-    val uiState by viewModel.priceUiState.collectAsState()
+fun PriceContainer(viewModel: HomeViewModel) {
+    val uiState by viewModel.homeUiState.collectAsState()
+    val loadingState by viewModel.priceLoadingState.collectAsState()
+    var expanded by remember { mutableStateOf(false) }
+    if (loadingState.loadingMessage != "") {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(302.dp), contentAlignment = Alignment.Center
+        ) {
+            Text(loadingState.loadingMessage)
+        }
+        return
+    }
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
@@ -62,67 +80,98 @@ fun ElectricityPriceContainer(viewModel: HomeViewModel) {
             ) {
                 TimeScopeSegmentedButton(viewModel, uiState)
             }
-            Spacer(Modifier.padding(10.dp))
+            Spacer(Modifier.padding(8.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                ExpensesStatBox(false, "${uiState.realPrice}", R.drawable.withoutsolar, uiState)
-                Spacer(Modifier.padding(8.dp))
-                ExpensesStatBox(true, "${uiState.saved}", R.drawable.coin, uiState)
-                Spacer(Modifier.padding(8.dp))
-                ExpensesStatBox(false, "${uiState.solarPrice}", R.drawable.solar, uiState)
+                ExpensesStatBox(false, "${uiState.priceData.realPrice}", R.drawable.withoutsolar)
+                Spacer(Modifier.padding(7.dp))
+                ExpensesStatBox(true, "${uiState.priceData.saved}", R.drawable.coin)
+                Spacer(Modifier.padding(7.dp))
+                ExpensesStatBox(false, "${uiState.priceData.solarPrice}", R.drawable.solar)
             }
-            Spacer(Modifier.padding(10.dp))
+            Spacer(Modifier.padding(8.dp))
+            val timePerspective = mapOf(
+                TimeScope.DAY to "denne dagen",
+                TimeScope.MONTH to "denne måneden",
+                TimeScope.YEAR to "dette året"
+            )
+            Box(
+                Modifier
+                    .clickable(onClick = {
+                        expanded = !expanded
+                    })
+                    .shadow(elevation = 1.dp, shape = RoundedCornerShape(20.dp))
+                    .background(Beige)
+                    .padding(2.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Column(horizontalAlignment = AbsoluteAlignment.Left, modifier = Modifier.padding(2.dp)) {
+                    if (!expanded) {
+                        Text(
+                            text = "Hva betyr dette? Trykk her for mer informasjon",
+                            fontWeight = FontWeight.Light
+                        )
+                    }
+                    Spacer(Modifier.height(3.dp))
+                    if (expanded) {
+                        if (uiState.priceData.solarPrice < 0) {
+                            Text(
+                                """
+                                    >Du har produsert et overskudd med strøm, og kan derfor selge tilbake til markedet. Overskuddet du kan selge er markert i den høyre boksen med et negativt tall.
+                                    >- Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
+                                    >- Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
+                                    >- Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
+                                    """.trimMargin(">")
+                            )
+                        } else {
+                            Text(
+                                """
+                                     >Du vil spare ${uiState.priceData.saved} NOK ${timePerspective[uiState.timeScope]}, fordi strømmen i utgangspunktet koster ${uiState.priceData.realPrice} NOK uten solcelleanlegget ditt, mens du vil betale ${uiState.priceData.solarPrice} NOK.
+                                    >- Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
+                                    >- Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
+                                    >- Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
+                                    """.trimMargin(">")
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun IndeterminateCircularIndicator(uiState: HomeViewModel.PriceUiState) {
-    if (!uiState.loading) return
-    CircularProgressIndicator(
-        modifier = Modifier.width(23.dp),
-        color = MaterialTheme.colorScheme.secondary,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-    )
-}
-
-@Composable
 fun ExpensesStatBox(
-    main: Boolean,
-    text: String,
+    mainBox: Boolean,
+    priceAmount: String,
     image: Int,
-    uiState: HomeViewModel.PriceUiState
 ) {
-    if (uiState.error) {
-        Text("Det oppstod en feil i beregningen av strømkostnader")
-        return
-    }
     Box(
         modifier = Modifier
             .shadow(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(20.dp)
             )
-            .height(if (main) 134.dp else 95.dp)
-            .width(if (main) 121.dp else 85.dp)
-            .background(if (main) RandomBeige else LightestYellow)
+            .height(if (mainBox) 155.dp else 110.dp)
+            .width(if (mainBox) 126.dp else 99.dp)
+            .background(if (mainBox) RandomBeige else LightestYellow)
             .border(
                 color = DarkBeige,
                 width = 1.dp,
                 shape = RoundedCornerShape(20.dp)
             ),
-        contentAlignment = if (main) Alignment.TopCenter else Alignment.Center
+        contentAlignment = if (mainBox) Alignment.TopCenter else Alignment.Center
     ) {
         Column(
             Modifier.padding(8.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (main) Text("SPART", fontWeight = FontWeight.Bold)
+            if (mainBox) Text("Spart", fontWeight = FontWeight.Bold)
             val img = painterResource(image)
-            val size = if (main) 60.dp else 50.dp
+            val size = if (mainBox) 60.dp else 50.dp
             Image(
                 modifier = Modifier
                     .shadow(
@@ -135,8 +184,8 @@ fun ExpensesStatBox(
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds
             )
-            IndeterminateCircularIndicator(uiState)
-            Text("$text,-")
+            Text(priceAmount)
+            Text("NOK")
         }
     }
 }
@@ -144,18 +193,18 @@ fun ExpensesStatBox(
 @Composable
 fun TimeScopeSegmentedButton(
     viewModel: HomeViewModel,
-    uiState: HomeViewModel.PriceUiState
+    uiState: HomeUiState
 ) {
     var selectedIndex by remember { mutableIntStateOf(0) }
     val options = listOf("Dag", "Måned", "År")
 
     val map = mapOf(
-        HomeViewModel.Scope.DAY to 0,
-        HomeViewModel.Scope.MONTH to 1,
-        HomeViewModel.Scope.YEAR to 2
+        TimeScope.DAY to 0,
+        TimeScope.MONTH to 1,
+        TimeScope.YEAR to 2
     )
 
-    if (map[uiState.scope] != selectedIndex) selectedIndex = map[uiState.scope]!!
+    if (map[uiState.timeScope] != selectedIndex) selectedIndex = map[uiState.timeScope]!!
 
     SingleChoiceSegmentedButtonRow {
         options.forEachIndexed { index, label ->
@@ -166,7 +215,7 @@ fun TimeScopeSegmentedButton(
                 ),
                 onClick = {
                     selectedIndex = index
-                    viewModel.changeTimeScope(HomeViewModel.Scope.entries[selectedIndex])
+                    viewModel.changeTimeScope(TimeScope.entries[selectedIndex])
                 },
                 selected = index == selectedIndex,
                 icon = {},
