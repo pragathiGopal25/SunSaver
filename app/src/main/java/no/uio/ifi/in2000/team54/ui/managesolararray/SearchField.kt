@@ -86,7 +86,6 @@ fun SearchField(
     }
     val selectSuggestion: (Address) -> Unit = remember {
         { suggestion ->
-            println("set search address to ${suggestion.toFormatted()}")
             viewModel.setSearchAddress(suggestion.toFormatted())
             viewModel.setMapAddress(suggestion)
             scope.launch {
