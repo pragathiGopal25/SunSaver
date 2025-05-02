@@ -334,7 +334,6 @@ class HomeViewModel : ViewModel() {
 
     private fun calculateRecoup(solarArray: SolarArray) {
         val totalPrice = solarArray.getTotalPrice()
-        println("Recoup: totalprice er $totalPrice og forbruk pr år er ${electricityPriceMap[_homeUiState.value.selectedSolarArray]!![TimeScope.YEAR]!!.saved}")
         _homeUiState.update { currentState ->
             currentState.copy(
                 timeUntilRecoup = round((totalPrice / electricityPriceMap[currentState.selectedSolarArray]!![TimeScope.YEAR]!!.saved) * 100.0) / 100.0

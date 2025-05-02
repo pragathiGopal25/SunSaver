@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
-import no.uio.ifi.in2000.team54.ui.home.HomeViewModel
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.util.calculateSubsidy
@@ -37,8 +36,7 @@ import java.util.Locale
 fun PriceSummaryCard(
     solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>,
-    homeViewModel: HomeViewModel
-    ) {
+) {
     val totalPanels = roofSections.sumOf { it.panels }
     val grossPrice = solarPanelType.totalPrice(totalPanels)
     val subsidy = calculateSubsidy(solarPanelType, totalPanels)

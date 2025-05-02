@@ -56,7 +56,6 @@ private fun RecoupText(time: Double) {
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Text(
-//            text = "%,d".format(time, Locale.GERMANY).replace(",", " "),
             text = time.toString(),
             color = Color.Black,
             fontSize = 34.sp,
