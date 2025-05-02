@@ -70,14 +70,17 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
         ) {
             SolarArrayList(homeViewModel, navController)
             SelectedSolarArrayTitle(homeViewModel)
-            //Putter strømproduksjon øverst fordi den laster inn mye raskere
+            HomeCard(
+                name = "Sparing", modifier = Modifier,
+                content = { PriceContainer(viewModel = homeViewModel) }
+            )
             HomeCard(
                 name = "Strømproduksjon", modifier = Modifier.height(302.dp),
                 content = { GraphContainer(viewModel = homeViewModel) }
             )
             HomeCard(
-                name = "Sparing", modifier = Modifier,
-                content = { PriceContainer(viewModel = homeViewModel) }
+                name = "Inntjening", modifier = Modifier.height(242.dp),
+                content = { TimeUntilRecouped(viewModel = homeViewModel) }
             )
         }
     }

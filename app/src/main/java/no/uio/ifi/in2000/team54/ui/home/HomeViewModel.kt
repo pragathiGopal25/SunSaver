@@ -24,7 +24,8 @@ data class HomeUiState(
     val priceData: PriceData = PriceData(0.0, 0.0),
     val electricityProductionData: Map<String, List<Double>> = emptyMap(),
     val timeScope: TimeScope = TimeScope.DAY,
-    val loadingState: String = ""
+    val loadingState: String = "",
+    val timeUntilRecoup: Double = 0.0
 )
 
 data class LoadingState(
@@ -72,6 +73,7 @@ class HomeViewModel : ViewModel() {
     private val electricityProductionMap: MutableMap<SolarArray, List<Double>> = mutableMapOf()
     private val electricityPriceMap: MutableMap<SolarArray, MutableMap<TimeScope, PriceData>> =
         mutableMapOf()
+    private val totalPriceMap: MutableMap<SolarArray, Double> = mutableMapOf()
 
     private val timeScopeToDays =
         mapOf(TimeScope.DAY to 1, TimeScope.MONTH to 30, TimeScope.YEAR to 365)
@@ -265,6 +267,7 @@ class HomeViewModel : ViewModel() {
                     }
                 }
                 seePrices(_homeUiState.value.timeScope, solarArray)
+                calculateRecoup(solarArray)
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
@@ -308,7 +311,7 @@ class HomeViewModel : ViewModel() {
                         timeScope = timeScope
                     )
                 }
-                seePrices(timeScope, _homeUiState.value.selectedSolarArray!!)
+                loadElectricityPrices(_homeUiState.value.selectedSolarArray!!)
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
@@ -316,6 +319,16 @@ class HomeViewModel : ViewModel() {
                     )
                 }
             }
+        }
+    }
+
+
+    private fun calculateRecoup(solarArray: SolarArray) {
+        val totalPrice = solarArray.getTotalPrice()
+        _homeUiState.update { currentState ->
+            currentState.copy(
+                timeUntilRecoup = round((totalPrice / electricityPriceMap[currentState.selectedSolarArray]!![TimeScope.YEAR]!!.saved) * 100.0) / 100.0
+            )
         }
     }
 }
