@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,6 +55,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -88,11 +90,11 @@ fun ManageSolarArrayScreen(
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     snackbarState: SnackbarHostState,
-    homeviewmodel: HomeViewModel,
+    homeViewModel: HomeViewModel,
     updateArray: String? = "",
 ) {
     val roofSections = remember { mutableStateListOf<RoofSection>() }
-    val uiState by homeviewmodel.solarArrays.collectAsState()
+    val uiState by homeViewModel.solarArrays.collectAsState()
     val solarEntity = uiState.find { it.name == updateArray }
     val updateRoofSections = remember { mutableStateListOf(*solarEntity?.roofSections?.toTypedArray() ?: arrayOf()) }
 
@@ -291,7 +293,7 @@ private fun ArraySettingsMainSection(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        DragHandle()
+        DragHandle(draggableState)
         SearchField(mapState, mapViewportState, draggableState, viewModel, solarEntity)
         Spacer(modifier = Modifier.size(10.dp))
         Column(
@@ -306,7 +308,7 @@ private fun ArraySettingsMainSection(
             RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
             ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
             SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
-            PriceSummaryCard(solarPanelType, roofSections)
+            PriceSummaryCard(solarPanelType, roofSections) //Inni denne ligger totalkosten
             SaveButton {
                 if (addressState.address == null) {
                     scope.launch {
@@ -334,7 +336,7 @@ private fun ArraySettingsMainSection(
             roofSections,
             addressState.address!!.pos.toCoordinates(),
             power.toDouble(),
-            addressState.address
+            addressState.address!!.toFormatted()
         )
         if (solarEntity == null) {
             viewModel.addSolarArray(solarObj)
@@ -347,16 +349,35 @@ private fun ArraySettingsMainSection(
     })
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun DragHandle() {
-    Box(
+private fun DragHandle(draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>) {
+    val direction = if (draggableState.currentValue == ArraySettingsMenuAnchors.Top) 1 else -1
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy((-5).dp),
         modifier = Modifier
-            .padding(bottom = 8.dp)
-            .width(85.dp)
-            .height(7.dp)
-            .clip(shape = RoundedCornerShape(100.dp))
-            .background(BrightYellow)
-    )
+            .padding(top = 5.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .width(35.dp)
+                .height(7.dp)
+                .rotate(20f * direction)
+                .clip(shape = RoundedCornerShape(100.dp))
+                .background(BrightYellow)
+        )
+        Box(
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .width(35.dp)
+                .height(7.dp)
+                .rotate(20f * direction * -1)
+                .clip(shape = RoundedCornerShape(100.dp))
+                .background(BrightYellow)
+        )
+    }
 }
 
 @Composable

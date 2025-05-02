@@ -18,13 +18,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -64,17 +64,12 @@ import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
 import no.uio.ifi.in2000.team54.ui.theme.Lighter
-import no.uio.ifi.in2000.team54.ui.theme.Red
-import no.uio.ifi.in2000.team54.ui.theme.SoftRed
-import no.uio.ifi.in2000.team54.ui.theme.WeatherBlue
-import no.uio.ifi.in2000.team54.ui.theme.WeatherBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
 
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
-
     val scroll = rememberScrollState()
 
     Column(
@@ -99,9 +94,27 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
                 content = { PriceContainer(viewModel = homeViewModel) }
             )
         }
+        Column(
+            modifier = Modifier
+                .verticalScroll(scroll)
+        ) {
+            SolarArrayList(homeViewModel, navController)
+            SelectedSolarArrayTitle(homeViewModel)
+            HomeCard(
+                name = "Sparing", modifier = Modifier,
+                content = { PriceContainer(viewModel = homeViewModel) }
+            )
+            HomeCard(
+                name = "Strømproduksjon", modifier = Modifier.height(302.dp),
+                content = { GraphContainer(viewModel = homeViewModel) }
+            )
+            HomeCard(
+                name = "Inntjening", modifier = Modifier.height(242.dp),
+                content = { TimeUntilRecouped(viewModel = homeViewModel) }
+            )
+        }
     }
 }
-
 
 @Composable
 fun GreetingMessage() {
@@ -350,4 +363,5 @@ fun HomeCard(
         }
     }
 }
+
 
