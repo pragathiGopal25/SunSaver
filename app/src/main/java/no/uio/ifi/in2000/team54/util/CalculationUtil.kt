@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.util
 
+import android.util.Log
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import kotlin.math.abs
@@ -23,6 +24,8 @@ fun calculateMonthlyElectricityProduction(
     monthlySunhours: Map<String, Double>,
     solarArray: SolarArray
 ): Map<String, Double> {
+
+    Log.i("testing sunhours", monthlySunhours.toString())
     val monthlyIrradiance = calculateAdjustedSolarIrradiance(monthlyCloud, monthlySnow, monthlyRadiance)
     val roofSections: List<RoofSection> = solarArray.roofSections
     val panelArea = solarArray.panelType.length.times(solarArray.panelType.width)
@@ -48,7 +51,7 @@ fun calculateMonthlyElectricityProduction(
 //If the temperature is more than default (25 deg) the efficiency decreases
 private fun calculatePanelEfficiency(temperature: Double, solarArray: SolarArray): Double {
     // Efficiency: https://www.photonicuniverse.com/en/resources/articles/full/7.html
-    var efficiency = ((solarArray.panelType.watt)/((solarArray.panelType.length).times(solarArray.panelType.width)))
+    var efficiency = ((solarArray.panelType.watt)/((solarArray.panelType.length).times(solarArray.panelType.width)))/1000 // divide by thousand to get kW
     if (temperature > DEFAULT_PANEL_TEMPERATURE_CELSIUS) {
         val temperatureDifference = temperature - DEFAULT_PANEL_TEMPERATURE_CELSIUS
         val efficiencyLossPercentage = temperatureDifference * TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS
@@ -94,14 +97,14 @@ private fun calculateCloudLossFactor(cloudCover: Double): Double {
     // "Under heavy cloud cover, your system will produce 67% less electricity, on average."
     return when (cloudCover.toInt()) {
         0 -> 1.00
-        1 -> 0.86
-        2 -> 0.76 // light cloud - 24% of the actual output
-        3 -> 0.65
-        4 -> 0.55
-        5 -> 0.45
-        6 -> 0.40
-        7 -> 0.35
-        8 -> 0.33 // heavy cloud, - 67% of the actual output
+        1 -> 0.97
+        2 -> 0.93
+        3 -> 0.88
+        4 -> 0.82
+        5 -> 0.75
+        6 -> 0.68
+        7 -> 0.65
+        8 -> 0.60
         else -> 0.75 // Fallback for unknown
     }
 }

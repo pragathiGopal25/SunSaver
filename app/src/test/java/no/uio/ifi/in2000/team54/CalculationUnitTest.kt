@@ -12,7 +12,7 @@ class HomeViewModelUnitTest {
 
     @Test
     fun testCalculationShouldReturnTrue() {
-        //TODO arrange
+        // arrange
 
         val testRoofSection = RoofSection(
             area = 10.0,
@@ -90,30 +90,50 @@ class HomeViewModelUnitTest {
             "12" to 1.0
         )
 
-        //TODO act
-        val expectedResult = mapOf(
-            "01" to 0.0703444,
-            "02" to 0.085554,
-            "03" to 0.14259,
-            "04" to 0.19012,
-            "05" to 0.19962600000000003,
-            "06" to 0.218638,
-            "07" to 0.19962600000000003,
-            "08" to 0.171108,
-            "09" to 0.14259,
-            "10" to 0.085554,
-            "11" to 0.05703600000000001,
-            "12" to 0.05228300000000001
+         val monthlySunhours = mapOf( // todo: Get from datasource!!
+            "01" to 74.0,
+            "02" to 90.0,
+            "03" to 150.0,
+            "04" to 200.0,
+            "05" to 210.0,
+            "06" to 230.0,
+            "07" to 210.0,
+            "08" to 180.0,
+            "09" to 150.0,
+            "10" to 90.0,
+            "11" to 60.0,
+            "12" to 55.0
         )
+
+
+        // act
+        val expectedResult = mapOf(
+            "01" to 0.23759735999999995,
+            "02" to 0.23759735999999995,
+            "03" to 0.25309284,
+            "04" to 0.25309284,
+            "05" to 0.25309284,
+            "06" to 0.25309284,
+            "07" to 0.25309284,
+            "08" to 0.25309284,
+            "09" to 0.25309284,
+            "10" to 0.25309284,
+            "11" to 0.23759735999999995,
+            "12" to 0.23759735999999995
+        )
+
         val result = calculateMonthlyElectricityProduction(
             monthlyCloud = monthlyCloud,
             monthlySnow = monthlySnow,
             monthlyRadiance = monthlyRadiance,
             monthlyTemperatures = monthlyTemps,
+            monthlySunhours = monthlySunhours,
             solarArray = testArray
         )
 
-        //TODO assert
+        println(result.toString())
+
+        // assert
         expectedResult.forEach {
             assertEquals(it.value, result[it.key]!!, 0.001)
         }
