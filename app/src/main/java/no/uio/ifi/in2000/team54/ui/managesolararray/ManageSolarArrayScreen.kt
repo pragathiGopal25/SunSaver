@@ -79,8 +79,6 @@ import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.roundToInt
 
 private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
