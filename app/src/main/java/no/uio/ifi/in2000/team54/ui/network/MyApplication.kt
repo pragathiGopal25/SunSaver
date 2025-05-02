@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team54.data.building
+package no.uio.ifi.in2000.team54.ui.network
 
 import android.app.Application
 import android.content.Context

@@ -1,8 +1,7 @@
-package no.uio.ifi.in2000.team54.ui.home
+package no.uio.ifi.in2000.team54.ui.network
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import androidx.core.content.getSystemService
@@ -10,13 +9,13 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-class NetworkObserver ( private val context: Context, ): ConnectivityObserver {
+class NetworkObserver (private val context: Context, ): ConnectivityObserver {
 
     private val connectivityManager = context.getSystemService<ConnectivityManager>()!!
 
     override val isConnected: Flow<Boolean>
         get() = callbackFlow {
-            val callback = object : NetworkCallback() {
+            val callback = object : ConnectivityManager.NetworkCallback() {
 
                 override fun onCapabilitiesChanged(
                     network: Network,

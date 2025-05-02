@@ -76,14 +76,7 @@ import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
 fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
 
     val scroll = rememberScrollState()
-    val snackbarState =  SnackbarHostState()
-    val isOnline by homeViewModel.isOnline.collectAsState(initial = true)
 
-    LaunchedEffect(isOnline) {
-        if (!isOnline) {
-            snackbarState.showSnackbar("Ingen internettforbindelse.")
-        }
-    }
     Column(
         Modifier
             .fillMaxSize()

@@ -1,4 +1,4 @@
-package no.uio.ifi.in2000.team54.ui.home
+package no.uio.ifi.in2000.team54.ui.network
 
 import kotlinx.coroutines.flow.Flow
 

@@ -24,7 +24,8 @@ import kotlinx.serialization.json.long
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
-import no.uio.ifi.in2000.team54.ui.home.NetworkObserver
+import no.uio.ifi.in2000.team54.ui.network.MyApplication
+import no.uio.ifi.in2000.team54.ui.network.NetworkObserver
 
 class BuildingDataSource() {
 
