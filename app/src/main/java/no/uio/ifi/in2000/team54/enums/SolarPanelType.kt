@@ -46,9 +46,4 @@ enum class SolarPanelType(
     fun area(): Double {
         return this.length * this.width
     }
-    fun fromDisplayName(name: String): SolarPanelType {
-        val displayNameMap = entries.associateBy { it.displayName }
-        return displayNameMap[name]!!
-    }
-
 }

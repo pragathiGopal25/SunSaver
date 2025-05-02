@@ -94,6 +94,9 @@ fun ManageSolarArrayScreen(
 ) {
     val solarEntity by viewModel.currentSolarArray.collectAsState()
     val roofSections = remember { mutableStateListOf<RoofSection>() }
+    val solarPanelType = rememberSaveable {
+        mutableStateOf(solarEntity?.panelType ?: SolarPanelType.ECONOMY)
+    }
 
     LaunchedEffect(updateArray) {
         if (!updateArray.isNullOrEmpty()) {
@@ -105,6 +108,9 @@ fun ManageSolarArrayScreen(
         if (solarEntity != null) {
             roofSections.clear()
             roofSections.addAll(solarEntity!!.roofSections)
+            solarEntity!!.panelType.let {
+                solarPanelType.value = it
+            }
         }
     }
 
@@ -119,7 +125,7 @@ fun ManageSolarArrayScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, roofSections)
+        SolarArrayMap(mapState, mapViewportState, snackbarState, viewModel, solarPanelType.value, roofSections)
 
         BackButton(viewModel, navController)
         Box(

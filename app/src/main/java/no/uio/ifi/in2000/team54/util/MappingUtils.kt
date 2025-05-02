@@ -11,10 +11,15 @@ import no.uio.ifi.in2000.team54.enums.SolarPanelType
 fun toDomain(entity: SolarArrayWithRoofSections): SolarArray {
     val solarArray = entity.solarArray
 
+    fun fromDisplayName(name: String): SolarPanelType {
+        val displayNameMap = SolarPanelType.entries.associateBy { it.displayName }
+        return displayNameMap[name]!!
+    }
+
     return SolarArray(
         id = solarArray.id,
         name = solarArray.name,
-        panelType = SolarPanelType.fromDisplayName(solarArray.panelType),
+        panelType = fromDisplayName(solarArray.panelType),
         coordinates = Coordinates(
             latitude = solarArray.latitude,
             longitude = solarArray.longitude
