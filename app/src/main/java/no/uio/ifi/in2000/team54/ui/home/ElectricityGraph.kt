@@ -56,6 +56,7 @@ import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 
 val monthFormatter =
     CartesianValueFormatter { _, value, _ -> // overriding "format" method in CastertianValueFormatter
@@ -80,6 +81,7 @@ fun GraphContainer(
                 Text(text = graphLoadingState.loadingMessage)
             } else {
                 CircularProgressIndicator(
+                    color = DarkYellow,
                     modifier = Modifier
                         .width(70.dp)
                 )
