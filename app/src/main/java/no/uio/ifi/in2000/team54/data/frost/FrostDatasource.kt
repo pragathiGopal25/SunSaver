@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team54.data.frost
 
 import android.util.Base64
 import android.util.Log
+import com.mapbox.maps.extension.style.precipitations.generated.snow
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -55,23 +56,29 @@ class FrostDatasource {
         coordinates: Coordinates,
         element: Elements,
     ): MutableMap<Elements, MutableList<String>> {
+        sensorMap.clear()
 
         try {
             val response: HttpResponse =
-                client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))&elements=$element&nearestmaxcount=5") {
+                client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))&elements=${nameMap[element]}&nearestmaxcount=5") {
                     header(HttpHeaders.Authorization, authHeader)
                     header(HttpHeaders.Accept, "application/json")
                 }
 
             if (response.status.value != 200) { // Cannot find nearest sensor for ALL urls, try individual URLS now
+                Log.i("testingTERR", "DID not get response")
+
                 return mutableMapOf()
 
             } else {
+                Log.i("testingT", "Successfully got response $coordinates")
+
                 val body: List<SensorSystem> = response.body<SourceResponse>().data
 
                 // maps the element name to a list of strings (sensorids)
                 body.forEach{value ->
                     sensorMap.getOrPut(element) { mutableListOf() }.add(value.id)
+                    Log.i("testingT", value.id)
                 }
                 return sensorMap
             }
@@ -88,6 +95,7 @@ class FrostDatasource {
         coordinates: Coordinates,
         elementName: Elements,
     ): List<ObservationData> {
+
         sensorMap = fetchNearestSource(coordinates, elementName)
 
 
@@ -101,7 +109,7 @@ class FrostDatasource {
             // updates the sensorUrl variable with the sensor ids in the sensorIds element
             // between every element, but the last, a %2C is added.
             sensorIds.forEach { value ->
-                sensorUrl += if (value == nameMap.values.last()) {
+                sensorUrl += if (value == nameMap[elementName]) {
                     value
                 } else {
                     "$value%2C"
@@ -113,7 +121,7 @@ class FrostDatasource {
 
         // find out which of the sensors are available for the time series.
         val getAvailableSensors = "https://frost.met.no/observations/availableTimeSeries/v0.jsonld?sources=$sensorUrl&referencetime=2022-12-31%2F2024-12-31&elements=${nameMap[elementName]}"
-
+        Log.i("testingTSensors",getAvailableSensors )
         response = client.get(getAvailableSensors) {
             header(HttpHeaders.Authorization, authHeader)
             header(HttpHeaders.Accept, "application/json")
@@ -130,12 +138,14 @@ class FrostDatasource {
         // use the new sensorId, which is also the closest with available data for the reference time to retrieve observation data.
         var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=${nameMap[elementName]}"
 
+
         if (nameMap[elementName] == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
             url = "$url&qualities=0" // no data of other qualities
         }
 
         url = "$url&fields=sourceId%2CelementId%2Cvalue%2Cunit%2CqualityCode%2CreferenceTime" // restric amount of data retrieved
 
+        Log.i("testingTobsurl" , url)
         try {
             response = client.get(url) {
                 header(HttpHeaders.Authorization, authHeader)

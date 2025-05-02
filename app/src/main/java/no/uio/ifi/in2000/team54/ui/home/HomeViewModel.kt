@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.ui.home
 
+import android.util.Log
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -98,7 +99,7 @@ class HomeViewModel : ViewModel() {
             solarArrays.filter { it.isNotEmpty() }
                 .distinctUntilChanged()
                 .collect { solarArrays ->
-                    val firstSolarArray = solarArrays.firstOrNull()
+                    val firstSolarArray = solarArrays.lastOrNull()
 
                     if (firstSolarArray != null) {
                         _homeUiState.update { currentState ->
