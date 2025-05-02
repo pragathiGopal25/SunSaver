@@ -69,8 +69,6 @@ fun SearchField(
     val addressState = viewModel.mapSearchAddress.collectAsState()
     val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsState()
     var showSuggestions by remember { mutableStateOf(false) }
-    // Use the address from the selected solar array or the search address
-    val searchAddress = remember { mutableStateOf(addressState.value.query) }
 
     // recomposes everytime there is a change in the solar entity
     LaunchedEffect(solarEntity) {
@@ -83,11 +81,12 @@ fun SearchField(
                     .build()
             )
         } else {
-            searchAddress.value = ""
+            viewModel.setSearchAddress("")
         }
     }
     val selectSuggestion: (Address) -> Unit = remember {
         { suggestion ->
+            println("set search address to ${suggestion.toFormatted()}")
             viewModel.setSearchAddress(suggestion.toFormatted())
             viewModel.setMapAddress(suggestion)
             scope.launch {
@@ -103,9 +102,8 @@ fun SearchField(
     }
     Column {
         SearchTextField(
-            address = searchAddress.value,
+            address = addressState.value.query,
             onAddressChange = { address ->
-                searchAddress.value = address
                 viewModel.setSearchAddress(address)
             },
             onDone = {
