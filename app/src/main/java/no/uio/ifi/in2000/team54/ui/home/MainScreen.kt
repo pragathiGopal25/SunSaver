@@ -50,7 +50,7 @@ fun MainScreen() {
         ) {
             composable("home") { HomeScreen(homeViewModel = homeViewModel, navController = navController) }
             composable("stats") { StatScreen() }
-            composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, homeViewModel) }
+            composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState) }
             composable("weather") { WeatherScreen() }
             composable("settings") { SettingsScreen() }
 
@@ -59,7 +59,7 @@ fun MainScreen() {
                 arguments = listOf(navArgument("arrayName") { type = NavType.StringType })
             ) { backStackEntry ->
                 val arrayName = backStackEntry.arguments?.getString("arrayName") ?: ""
-                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, homeViewModel, arrayName)
+                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, arrayName)
             }
         }
     }

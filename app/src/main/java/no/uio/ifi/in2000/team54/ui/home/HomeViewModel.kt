@@ -1,16 +1,11 @@
 package no.uio.ifi.in2000.team54.ui.home
 
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
@@ -24,9 +19,9 @@ import no.uio.ifi.in2000.team54.util.calculateMonthlyElectricityProduction
 import kotlin.math.round
 
 data class HomeUiState(
-    val solarArrays: StateFlow<List<SolarArray>>,
-    val selectedSolarArray: SolarArray?,
-    val priceData: PriceData,
+    val solarArrays: List<SolarArray> = emptyList(),
+    val selectedSolarArray: SolarArray? = null,
+    val priceData: PriceData = PriceData(0.0, 0.0),
     val electricityProductionData: Map<String, List<Double>> = emptyMap(),
     val timeScope: TimeScope = TimeScope.DAY,
     val loadingState: String = "",
@@ -57,7 +52,7 @@ enum class TimeScope {
 
 class HomeViewModel : ViewModel() {
     private val _repository = FrostRepository()
-    private val _sharedRepository = RepositoryProvider.sharedRepository
+    private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
 
     private val weatherData = WeatherData()
 
@@ -66,17 +61,7 @@ class HomeViewModel : ViewModel() {
     private val _priceLoadingState = MutableStateFlow(LoadingState())
     val priceLoadingState = _priceLoadingState.asStateFlow()
 
-    val solarArrays: StateFlow<List<SolarArray>> =
-        _sharedRepository.solarArrays // save to SolarArraysUiState?
-
-
-    private val _homeUiState = MutableStateFlow(
-        HomeUiState(
-            solarArrays = solarArrays,
-            selectedSolarArray = null,
-            priceData = PriceData(0.0, 0.0)
-        )
-    )
+    private val _homeUiState = MutableStateFlow(HomeUiState())
 
     val homeUiState = _homeUiState.asStateFlow()
 
@@ -95,17 +80,18 @@ class HomeViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            solarArrays.filter { it.isNotEmpty() }
-                .distinctUntilChanged()
-                .collect { solarArrays ->
-                    val firstSolarArray = solarArrays.firstOrNull()
+            _sunSaverRepository.getAllSolarArrays()
+                .collect { solarArraysList  ->
+                    val firstSolarArray = solarArraysList.firstOrNull()
+
+                    _homeUiState.update { currentState ->
+                        currentState.copy(
+                            solarArrays = solarArraysList,
+                            selectedSolarArray = firstSolarArray
+                        )
+                    }
 
                     if (firstSolarArray != null) {
-                        _homeUiState.update { currentState ->
-                            currentState.copy(
-                                selectedSolarArray = firstSolarArray
-                            )
-                        }
 
                         getWeatherData(firstSolarArray.coordinates)
 
@@ -233,7 +219,7 @@ class HomeViewModel : ViewModel() {
 
     fun selectSolarArray(solarArray: SolarArray) {
         viewModelScope.launch {
-            if (homeUiState.value.solarArrays.value.isEmpty()) return@launch
+            if (homeUiState.value.solarArrays.isEmpty()) return@launch
             try {
                 useWeatherData(solarArray)
                 loadElectricityPrices(solarArray)
