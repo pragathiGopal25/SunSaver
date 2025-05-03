@@ -82,7 +82,7 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             _sunSaverRepository.getAllSolarArrays()
                 .collect { solarArraysList  ->
-                    val firstSolarArray = solarArraysList.firstOrNull()
+                    val firstSolarArray = solarArraysList.lastOrNull()
 
                     _homeUiState.update { currentState ->
                         currentState.copy(
