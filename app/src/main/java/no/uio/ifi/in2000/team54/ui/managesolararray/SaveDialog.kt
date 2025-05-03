@@ -102,6 +102,7 @@ fun SaveDialog(
 
                     onClose()
                     onSave(name, power)
+                    viewModel.resetUpdSolarArray()
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Light
