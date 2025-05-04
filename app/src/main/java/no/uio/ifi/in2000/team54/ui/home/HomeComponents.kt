@@ -76,12 +76,18 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
         ) {
             SolarArrayList(homeViewModel, navController)
             SelectedSolarArrayTitle(homeViewModel)
-            HomeCard("Sparing") {
-                PriceContainer(viewModel = homeViewModel)
-            }
-            HomeCard("Strømproduksjon") {
-                GraphContainer(viewModel = homeViewModel)
-            }
+            HomeCard(
+                name = "Sparing", modifier = Modifier,
+                content = { PriceContainer(viewModel = homeViewModel) }
+            )
+            HomeCard(
+                name = "Strømproduksjon", modifier = Modifier.height(302.dp),
+                content = { GraphContainer(viewModel = homeViewModel) }
+            )
+            HomeCard(
+                name = "Inntjening", modifier = Modifier.height(242.dp),
+                content = { TimeUntilRecouped(viewModel = homeViewModel) }
+            )
         }
     }
 }
@@ -143,7 +149,7 @@ fun HomeScreenTopBar() {
 
 @Composable
 fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
-    val solarArrays = homeViewModel.solarArrays.collectAsState()
+    val homeUiState = homeViewModel.homeUiState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -151,10 +157,10 @@ fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
             .horizontalScroll(rememberScrollState())
     ) {
         Row {
-            if (solarArrays.value.isEmpty()) {
+            if (homeUiState.value.solarArrays.isEmpty()) {
                 NoSolarArrayCard()
             } else {
-                solarArrays.value.forEach {
+                homeUiState.value.solarArrays.forEach {
                     SolarArrayCard(it, homeViewModel, navController)
                 }
             }
@@ -323,13 +329,13 @@ fun SelectedSolarArrayTitle(viewModel: HomeViewModel) {
 fun HomeCard(
     name: String,
     content: @Composable () -> Unit,
+    modifier: Modifier
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(15.dp)
             .clip(RoundedCornerShape(20.dp))
             .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
-            .height(262.dp)
             .width(395.dp),
 
         shape = RoundedCornerShape(20.dp),

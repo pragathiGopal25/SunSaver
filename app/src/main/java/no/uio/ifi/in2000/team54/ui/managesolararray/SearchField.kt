@@ -48,7 +48,6 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
@@ -61,7 +60,6 @@ fun SearchField(
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
     viewModel: ManageSolarArrayViewModel,
-    solarEntity: SolarArray? = null,
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -71,14 +69,15 @@ fun SearchField(
     var showSuggestions by remember { mutableStateOf(false) }
     // Use the address from the selected solar array or the search address
     val searchAddress = remember { mutableStateOf(addressState.value.query) }
+    val solarEntity by viewModel.currentSolarArray.collectAsState()
 
     // recomposes everytime there is a change in the solar entity
     LaunchedEffect(solarEntity) {
         if (solarEntity != null) {
-            viewModel.setCurrentSolarArray(solarEntity) // Load the solar array to edit
+            viewModel.updateSolarArrayAddress(solarEntity) // Load the solar array to edit
             mapViewportState.easeTo(
                 CameraOptions.Builder()
-                    .center(solarEntity.address?.pos?.toPoint())
+                    .center(solarEntity!!.coordinates.toPoint())
                     .zoom(19.0)
                     .build()
             )

@@ -19,7 +19,6 @@ import no.uio.ifi.in2000.team54.model.frost.ObservationData
 import no.uio.ifi.in2000.team54.model.frost.ObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.SensorSystem
 import no.uio.ifi.in2000.team54.model.frost.SourceResponse
-import kotlin.to
 
 class FrostDatasource {
     private val client = HttpClient(CIO) {
@@ -55,10 +54,11 @@ class FrostDatasource {
         coordinates: Coordinates,
         element: Elements,
     ): MutableMap<Elements, MutableList<String>> {
+        sensorMap.clear()
 
         try {
             val response: HttpResponse =
-                client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))&elements=$element&nearestmaxcount=5") {
+                client.get("https://frost.met.no/sources/v0.jsonld?geometry=nearest(POINT(${coordinates.longitude}%20${coordinates.latitude}))&elements=${nameMap[element]}&nearestmaxcount=5") {
                     header(HttpHeaders.Authorization, authHeader)
                     header(HttpHeaders.Accept, "application/json")
                 }
@@ -88,12 +88,12 @@ class FrostDatasource {
         coordinates: Coordinates,
         elementName: Elements,
     ): List<ObservationData> {
+
         sensorMap = fetchNearestSource(coordinates, elementName)
 
 
         // stores the list of sensorIds in this variable
         var sensorIds = sensorMap[elementName]
-        Log.i("TestingAllSensors", sensorIds.toString())
         var sensorUrl = ""
 
 
@@ -101,7 +101,7 @@ class FrostDatasource {
             // updates the sensorUrl variable with the sensor ids in the sensorIds element
             // between every element, but the last, a %2C is added.
             sensorIds.forEach { value ->
-                sensorUrl += if (value == nameMap.values.last()) {
+                sensorUrl += if (value == nameMap[elementName]) {
                     value
                 } else {
                     "$value%2C"
@@ -130,7 +130,8 @@ class FrostDatasource {
         // use the new sensorId, which is also the closest with available data for the reference time to retrieve observation data.
         var url = "https://frost.met.no/observations/v0.jsonld?sources=$sensorId&referencetime=$referenceTime&elements=${nameMap[elementName]}"
 
-        if (nameMap[elementName] == "mean(surface_downwelling_shortwave_flux_in_air%20PT1H)") {
+
+        if (elementName == Elements.IRRIDANCE) {
             url = "$url&qualities=0" // no data of other qualities
         }
 
