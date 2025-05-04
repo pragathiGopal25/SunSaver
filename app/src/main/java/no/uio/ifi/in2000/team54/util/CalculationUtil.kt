@@ -3,6 +3,7 @@ package no.uio.ifi.in2000.team54.util
 import android.util.Log
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
+import java.time.YearMonth
 import kotlin.math.abs
 
 //Constants used in calculations
@@ -13,7 +14,6 @@ private const val INCLINE_ANGLE_EFFICIENCY_DECREASE_PER_DEGREE = 0.05
 private const val DIRECTION_EFFICIENCY_DECREASE_PER_DEGREE = 0.002
 private const val DEFAULT_PANEL_TEMPERATURE_CELSIUS = 25.0
 private const val TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS = 0.5 // Percentage loss per degree Celsius
-
 
 //Calculates the monthly electricity production for a solar array based on set factors
 fun calculateMonthlyElectricityProduction(
@@ -34,6 +34,7 @@ fun calculateMonthlyElectricityProduction(
 
 
     val monthlyIrradiance = calculateAdjustedSolarIrradiance(monthlyCloud, monthlySnow, monthlyRadiance)
+    Log.i("SolarArrayMONTHLY", monthlyIrradiance.toString())
     val roofSections: List<RoofSection> = solarArray.roofSections
     val panelArea = solarArray.panelType.length.times(solarArray.panelType.width)
 
@@ -43,9 +44,9 @@ fun calculateMonthlyElectricityProduction(
         val temperature = monthlyTemperatures[month] ?: DEFAULT_PANEL_TEMPERATURE_CELSIUS
         val efficiency = calculatePanelEfficiency(temperature, solarArray)
 
-
         // substitute roofSection.area with panelArea.time(roofsection.panel)
         // need to calculate per roofSection and sum up
+
         roofSections.sumOf { roofSection ->
             irradiance * sunHours * efficiency * panelArea * roofSection.panels * calculateDirectionImpact(
                 roofSection.direction
@@ -58,7 +59,7 @@ fun calculateMonthlyElectricityProduction(
 //If the temperature is more than default (25 deg) the efficiency decreases
 private fun calculatePanelEfficiency(temperature: Double, solarArray: SolarArray): Double {
     // Efficiency: https://www.photonicuniverse.com/en/resources/articles/full/7.html
-    var efficiency = ((solarArray.panelType.watt)/((solarArray.panelType.length).times(solarArray.panelType.width)))/1000 // divide by thousand to get kW
+    var efficiency = ((solarArray.panelType.watt)/((solarArray.panelType.length).times(solarArray.panelType.width)))/1000// divide by thousand to get kW
     if (temperature > DEFAULT_PANEL_TEMPERATURE_CELSIUS) {
         val temperatureDifference = temperature - DEFAULT_PANEL_TEMPERATURE_CELSIUS
         val efficiencyLossPercentage = temperatureDifference * TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS
@@ -73,7 +74,6 @@ private fun calculateAdjustedSolarIrradiance(
     monthlySnow: Map<String, Double>,
     monthlyRadiance: Map<String, Double>,
 ): Map<String, Double> {
-    Log.i("calsSnow", monthlySnow.toString())
     return monthlyRadiance.mapValues { (month, radiance) ->
         var adjustedIrradiance = radiance
         val snowFactor = monthlySnow[month]?.let { calculateSnowLossFactor(it, month)} ?: 1.0
@@ -119,6 +119,7 @@ private fun calculateCloudLossFactor(cloudCover: Double): Double {
 // https://www.otovo.no/blog/solcellepanel-solceller/solceller-norge-virkningsgrad/#sollys-og-innfallsvinkelhelling-av-solceller
 //Calculates the impact the angle of the panel has on solar panel efficiency
 private fun calculateAngleImpact(inclineAngle: Double): Double {
+    Log.i("AzIN", inclineAngle.toString())
     if (inclineAngle in MINIMUM_OPTIMAL_INCLINE_ANGLE..MAXIMUM_OPTIMAL_INCLINE_ANGLE) {
         return 1.0
     }
@@ -136,6 +137,7 @@ private fun calculateAngleImpact(inclineAngle: Double): Double {
 // efficiency loss per degree = 0.4/180 = 0.002
 //Calculates the impact the direction of the panel has on solar panel efficiency
 private fun calculateDirectionImpact(azimuth: Double): Double {
+    Log.i("Az", azimuth.toString())
     val directionOffset = abs(180 - azimuth) // 180 degrees for perfect south, which is optimal for sunshine in the northern hemisphere
     return maxOf(0.5, 1 - (directionOffset * DIRECTION_EFFICIENCY_DECREASE_PER_DEGREE))
 }
