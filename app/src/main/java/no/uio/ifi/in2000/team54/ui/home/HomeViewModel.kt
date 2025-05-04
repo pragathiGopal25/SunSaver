@@ -7,6 +7,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
@@ -223,6 +226,11 @@ class HomeViewModel : ViewModel() {
                         loadingMessage = "Ingen solanlegg er opprettet"
                     )
                 }
+                _homeUiState.update { currentState ->
+                    currentState.copy(
+                        electricityProductionData = emptyMap() // CLEAR the graph data here
+                    )
+                }
                 return
             }
 
@@ -261,6 +269,36 @@ class HomeViewModel : ViewModel() {
 
     }
 
+    fun removeSolarArray(solarArray: SolarArray) {
+        viewModelScope.launch {
+            try {
+                val oldId = solarArray.id
+                _sunSaverRepository.deleteSolarArray(solarArray)
+
+                _homeUiState
+                    .map { it.solarArrays }
+                    .distinctUntilChanged()
+                    .first { updatedList -> !updatedList.any { it.id == oldId } } // checks that the deleted soalrarray id is no longer there
+
+                val updatedList = _homeUiState.value.solarArrays
+
+                if (updatedList.isNotEmpty()) {
+                    val newSelected = updatedList.last()
+                    _homeUiState.update { it.copy(selectedSolarArray = newSelected) }
+                } else {
+                    useWeatherData(null)
+                    _homeUiState.update { it.copy(selectedSolarArray = null) }
+                }
+
+            } catch (ex: Exception) {
+                _homeUiState.update {
+                    it.copy(loadingState = "Klarte ikke å velge solcelleanlegg")
+                }
+            }
+        }
+    }
+
+
     private fun loadElectricityPrices(solarArray: SolarArray) {
         viewModelScope.launch {
             try {
@@ -284,6 +322,7 @@ class HomeViewModel : ViewModel() {
                             realPrice = round(priceDataTuple[1] * 100.0) / 100.0,
                             solarPrice = round(priceDataTuple[0] * 100.0) / 100.0,
                         )
+
                         electricityPriceMap.computeIfAbsent(
                             solarArray,
                             { mutableMapOf() })[scope] = priceData
