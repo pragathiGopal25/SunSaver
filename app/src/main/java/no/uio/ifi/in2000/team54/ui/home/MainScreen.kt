@@ -47,15 +47,16 @@ fun MainScreen() {
             modifier = Modifier.padding(innerpadding)
         ) {
             composable("home") { HomeScreen(homeViewModel = homeViewModel, navController = navController) }
-            composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, homeViewModel) }
             composable("info") { InfoScreen() }
+            composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState) }
+          
 
             composable(
                 "editsolararrays/{arrayName}",
                 arguments = listOf(navArgument("arrayName") { type = NavType.StringType })
             ) { backStackEntry ->
                 val arrayName = backStackEntry.arguments?.getString("arrayName") ?: ""
-                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, homeViewModel, arrayName)
+                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, arrayName)
             }
         }
     }

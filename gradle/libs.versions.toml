@@ -1,5 +1,8 @@
 [versions]
 agp = "8.8.2"
+androidxJunit = "1.1.5"
+espressoCoreVersion = "3.5.1"
+hiltAndroidCompiler = "2.56.1"
 mapbox = "11.10.2"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -13,12 +16,23 @@ activityCompose = "1.10.0"
 composeBom = "2024.04.01"
 mapboxSdkTurf = "7.3.2"
 mapsCompose = "11.10.2"
+roomRuntime = "2.7.0"
 vico = "2.1.0"
 
 navigationCompose = "2.8.9"
 
 [libraries]
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.3.0" }
+
+androidx-espresso-core-v351 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
+androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "roomRuntime" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidCompiler" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidCompiler" }
 mapbox = { module = "com.mapbox.maps:android", version.ref = "mapbox" }
 mapbox-compose = { module = "com.mapbox.extension:maps-compose", version.ref = "mapsCompose" }
 mapbox-sdk-turf = { module = "com.mapbox.mapboxsdk:mapbox-sdk-turf", version.ref = "mapboxSdkTurf" }
