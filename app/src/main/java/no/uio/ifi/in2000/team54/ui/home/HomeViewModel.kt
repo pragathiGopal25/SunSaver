@@ -1,12 +1,14 @@
 package no.uio.ifi.in2000.team54.ui.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
@@ -245,33 +247,28 @@ class HomeViewModel : ViewModel() {
     fun removeSolarArray(solarArray: SolarArray) {
         viewModelScope.launch {
             try {
-                val oldSize = _homeUiState.value.solarArrays.size
-
+                val oldId = solarArray.id
                 _sunSaverRepository.deleteSolarArray(solarArray)
 
-                _homeUiState.collect { currentState ->
-                    val updatedList = currentState.solarArrays
-                    if (updatedList.size != oldSize) { // Check if the size has actually changed
+                _homeUiState
+                    .map { it.solarArrays }
+                    .distinctUntilChanged()
+                    .first { updatedList -> !updatedList.any { it.id == oldId } } // checks that the deleted soalrarray id is no longer there
 
-                        if (updatedList.isNotEmpty()) {
-                            selectSolarArray(updatedList.last())
-                        } else {
-                            useWeatherData(null)
-                            _homeUiState.update { state ->
-                                state.copy(
-                                    selectedSolarArray = null
-                                )
-                            }
-                        }
-                        return@collect
-                    }
+                val updatedList = _homeUiState.value.solarArrays
+
+                if (updatedList.isNotEmpty()) {
+                    val newSelected = updatedList.last()
+                    _homeUiState.update { it.copy(selectedSolarArray = newSelected) }
+                    selectSolarArray(newSelected) // will trigger graph & price update
+                } else {
+                    useWeatherData(null)
+                    _homeUiState.update { it.copy(selectedSolarArray = null) }
                 }
 
             } catch (ex: Exception) {
-                _homeUiState.update { currentState ->
-                    currentState.copy(
-                        loadingState = "Klarte ikke å velge solcelleanlegg"
-                    )
+                _homeUiState.update {
+                    it.copy(loadingState = "Klarte ikke å velge solcelleanlegg")
                 }
             }
         }
