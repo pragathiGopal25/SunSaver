@@ -1,6 +1,5 @@
 package no.uio.ifi.in2000.team54.ui.home
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
@@ -124,7 +123,6 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             if (homeUiState.value.solarArrays.isEmpty()) return@launch
             try {
-                Log.i("solarArrayProsses", solarArray.name)
                 _homeUiState.update { currentState ->
                     currentState.copy(
                         selectedSolarArray = solarArray,
@@ -133,14 +131,12 @@ class HomeViewModel : ViewModel() {
                 }
                 // get frost data if the data is changed // todo: only when the address is changed
                 if (!weatherDataMap.containsKey(solarArray) || isUpdated) {
-                    Log.i("solar", "no info, getting data")
                     getWeatherData(solarArray)
                 }
                 // recalculate if new data or data is changed
                 if (!electricityProductionMap.containsKey(solarArray) || isUpdated) {
                     useWeatherData(solarArray)
                 }
-                Log.i("solar","here")
                 _homeUiState.update { currentState ->
                     currentState.copy(
                         //Hvorfor trenger vi at dette er en map med "strømproduksjon som key?
@@ -242,7 +238,6 @@ class HomeViewModel : ViewModel() {
 
             try {
                 val weatherData = weatherDataMap[solarArray]!!
-                Log.i("solar", "calculating weather data")
                 val electricityProduction: Map<String, Double> =
                     calculateMonthlyElectricityProduction(
                         monthlyTemperatures = weatherData.temp,
