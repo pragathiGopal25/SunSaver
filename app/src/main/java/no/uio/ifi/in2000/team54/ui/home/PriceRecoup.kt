@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import java.util.Locale
 
 @Composable
@@ -26,9 +29,17 @@ fun TimeUntilRecouped(viewModel: HomeViewModel) {
     val uiState by viewModel.homeUiState.collectAsState()
     val loadingState by viewModel.priceLoadingState.collectAsState()
 
-    if (loadingState.loadingMessage != "") {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(loadingState.loadingMessage)
+    if (loadingState.isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(302.dp), contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(
+                color = DarkYellow,
+                modifier = Modifier
+                    .width(70.dp)
+            )
         }
         return
     }

@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team54.data.shared
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import no.uio.ifi.in2000.team54.database.SolarArrayWithRoofSections
 import no.uio.ifi.in2000.team54.database.SunSaverDao
 import javax.inject.Inject
