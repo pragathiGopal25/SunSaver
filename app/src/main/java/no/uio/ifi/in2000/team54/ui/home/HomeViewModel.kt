@@ -7,9 +7,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
@@ -56,6 +53,8 @@ enum class TimeScope {
 class HomeViewModel : ViewModel() {
     private val _repository = FrostRepository()
     private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
+    private val electricityPriceRepository =
+        ElectricityPriceRepository(ElectricityPriceDatasource())
 
     // loading states
     private val _graphLoadingState = MutableStateFlow(LoadingState())
@@ -64,11 +63,10 @@ class HomeViewModel : ViewModel() {
     val priceLoadingState = _priceLoadingState.asStateFlow()
 
     // home ui state
-    private val _homeUiState = MutableStateFlow(HomeUiState())
+    private val _homeUiState = MutableStateFlow(HomeUiState(
+        loadingState = LoadingState().loadingMessage
+    ))
     val homeUiState = _homeUiState.asStateFlow()
-
-    private val electricityPriceRepository =
-        ElectricityPriceRepository(ElectricityPriceDatasource())
 
     //Når vi oppdaterer selectedSolarArray så kan data hentes fra denne mappen
     //Hvis det ikke ligger her så skal det legges inn
@@ -85,6 +83,13 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             _sunSaverRepository.getAllSolarArrays()
                 .collect { solarArraysList  ->
+                    if (solarArraysList.isEmpty()) {
+                        _homeUiState.value = HomeUiState(
+                            loadingState = LoadingState().loadingMessage
+                        )
+                        _graphLoadingState.value = LoadingState()
+                        _priceLoadingState.value = LoadingState()
+                    }
                     var selectedSolarArray = solarArraysList.firstOrNull()
                     val savedList = _homeUiState.value.solarArrays
 
@@ -119,6 +124,7 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             if (homeUiState.value.solarArrays.isEmpty()) return@launch
             try {
+                Log.i("solarArrayProsses", solarArray.name)
                 _homeUiState.update { currentState ->
                     currentState.copy(
                         selectedSolarArray = solarArray,
@@ -272,27 +278,10 @@ class HomeViewModel : ViewModel() {
     fun removeSolarArray(solarArray: SolarArray) {
         viewModelScope.launch {
             try {
-                val oldId = solarArray.id
                 _sunSaverRepository.deleteSolarArray(solarArray)
-
-                _homeUiState
-                    .map { it.solarArrays }
-                    .distinctUntilChanged()
-                    .first { updatedList -> !updatedList.any { it.id == oldId } } // checks that the deleted soalrarray id is no longer there
-
-                val updatedList = _homeUiState.value.solarArrays
-
-                if (updatedList.isNotEmpty()) {
-                    val newSelected = updatedList.last()
-                    _homeUiState.update { it.copy(selectedSolarArray = newSelected) }
-                } else {
-                    useWeatherData(null)
-                    _homeUiState.update { it.copy(selectedSolarArray = null) }
-                }
-
             } catch (ex: Exception) {
                 _homeUiState.update {
-                    it.copy(loadingState = "Klarte ikke å velge solcelleanlegg")
+                    it.copy(loadingState = "Klarte ikke å slette et solcelleanlegg")
                 }
             }
         }
