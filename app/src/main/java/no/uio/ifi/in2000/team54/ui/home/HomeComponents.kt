@@ -143,7 +143,7 @@ fun HomeScreenTopBar() {
 
 @Composable
 fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
-    val solarArrays = homeViewModel.solarArrays.collectAsState()
+    val homeUiState = homeViewModel.homeUiState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -151,10 +151,10 @@ fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
             .horizontalScroll(rememberScrollState())
     ) {
         Row {
-            if (solarArrays.value.isEmpty()) {
+            if (homeUiState.value.solarArrays.isEmpty()) {
                 NoSolarArrayCard()
             } else {
-                solarArrays.value.forEach {
+                homeUiState.value.solarArrays.forEach {
                     SolarArrayCard(it, homeViewModel, navController)
                 }
             }

@@ -9,37 +9,37 @@ class StringUtilUnitTest {
 
     @Test
     fun isNumberShouldReturnTrue() {
-        //TODO arrange
+        // arrange
         val string = "123034123412341235123585"
 
-        //TODO act
+        // act
         val result = string.isNumber()
 
-        //TODO assert
+        // assert
         assertTrue(result)
     }
 
     @Test
     fun isNumberShouldReturnFalseEdge() {
-        //TODO arrange
+        // arrange
         val string = "%"
 
-        //TODO act
+        // act
         val result = string.isNumber()
 
-        //TODO assert
+        // assert
         assertFalse(result)
     }
 
     @Test
     fun isNumberShouldReturnFalse() {
-        //TODO arrange
+        // arrange
         val string = "te1st"
 
-        //TODO act
+        // act
         val result = string.isNumber()
 
-        //TODO assert
+        // assert
         assertFalse(result)
     }
 }
