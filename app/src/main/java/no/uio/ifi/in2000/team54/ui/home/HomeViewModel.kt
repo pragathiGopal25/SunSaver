@@ -261,7 +261,6 @@ class HomeViewModel : ViewModel() {
                 if (updatedList.isNotEmpty()) {
                     val newSelected = updatedList.last()
                     _homeUiState.update { it.copy(selectedSolarArray = newSelected) }
-                    selectSolarArray(newSelected) // will trigger graph & price update
                 } else {
                     useWeatherData(null)
                     _homeUiState.update { it.copy(selectedSolarArray = null) }

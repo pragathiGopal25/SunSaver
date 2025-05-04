@@ -41,13 +41,6 @@ fun calculateMonthlyElectricityProduction(
     solarArray: SolarArray
 ): Map<String, Double> {
 
-    Log.i("SolarArrayIs", solarArray.name)
-    Log.i("SolarArraySn", monthlyCloud.toString())
-    Log.i("SolarArrayCl", monthlySnow.toString())
-    Log.i("SolarArrayIr", monthlyRadiance.toString())
-    Log.i("SolarArrayTe", monthlyTemperatures.toString())
-    Log.i("SolarArraySu", monthlySunhours.toString())
-
     val monthlyIrradiance = calculateAdjustedSolarIrradiance(monthlyCloud, monthlySnow, monthlyRadiance)
     val roofSections: List<RoofSection> = solarArray.roofSections
 
