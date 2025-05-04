@@ -195,6 +195,16 @@ class HomeViewModel : ViewModel() {
                 weatherData.sunhours = sunhoursData
 
                 weatherDataMap[solarArray] = weatherData
+                _priceLoadingState.update { currentState ->
+                    currentState.copy(
+                        loadingMessage = ""
+                    )
+                }
+                _graphLoadingState.update { currentState ->
+                    currentState.copy(
+                        loadingMessage = ""
+                    )
+                }
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
@@ -206,13 +216,7 @@ class HomeViewModel : ViewModel() {
                         loadingMessage = "Klarte ikke å hente data om været"
                     )
                 }
-            } finally {
-                _priceLoadingState.update { currentState ->
-                    currentState.copy(
-                        loadingMessage = ""
-                    )
-                }
-            }
+            } finally { }
         }
     }
 

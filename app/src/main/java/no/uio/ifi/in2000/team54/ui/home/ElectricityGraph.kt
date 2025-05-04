@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -68,14 +67,14 @@ fun GraphContainer(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel
 ) {
-    val graphDataUiState by viewModel.homeUiState.collectAsStateWithLifecycle()
+    val homeUiState by viewModel.homeUiState.collectAsStateWithLifecycle()
     val graphLoadingState by viewModel.graphLoadingState.collectAsStateWithLifecycle()
-    if (graphDataUiState.electricityProductionData.isEmpty()) {
+    if (graphLoadingState.loadingMessage != "") {
         Box(modifier.fillMaxSize(), Alignment.Center) {
             Text(text = graphLoadingState.loadingMessage)
         }
     } else {
-        ElectricityGraph(graphDataUiState = graphDataUiState)
+        ElectricityGraph(homeUiState = homeUiState)
     }
 }
 
@@ -85,7 +84,7 @@ private val LegendLabelKey = ExtraStore.Key<Set<String>>()
 @Composable
 fun ElectricityGraph(
     modifier: Modifier = Modifier,
-    graphDataUiState: HomeUiState
+    homeUiState: HomeUiState
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
@@ -93,17 +92,17 @@ fun ElectricityGraph(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        LaunchedEffect(graphDataUiState) {
+        LaunchedEffect(homeUiState) {
             modelProducer.runTransaction {
                 lineSeries {
-                    graphDataUiState.electricityProductionData.forEach { (_, list) ->
+                    homeUiState.electricityProductionData.forEach { (_, list) ->
                         series(
                             list
                         )
                     }
                 }
                 extras { extraStore ->
-                    extraStore[LegendLabelKey] = graphDataUiState.electricityProductionData.keys
+                    extraStore[LegendLabelKey] = homeUiState.electricityProductionData.keys
                 }
             }
         }
