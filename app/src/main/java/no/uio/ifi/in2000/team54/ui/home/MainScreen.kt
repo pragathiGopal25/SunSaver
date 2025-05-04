@@ -17,7 +17,7 @@ import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import no.uio.ifi.in2000.team54.ui.home.pages.InfoScreen
+import no.uio.ifi.in2000.team54.ui.info.InfoScreen
 
 @Composable
 fun MainScreen() {
