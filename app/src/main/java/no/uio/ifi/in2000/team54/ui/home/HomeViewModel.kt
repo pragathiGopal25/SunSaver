@@ -95,8 +95,9 @@ class HomeViewModel : ViewModel() {
                     }
 
                     if (firstSolarArray != null) {
-
-                        getWeatherData(firstSolarArray.coordinates)
+                        if (!electricityProductionMap.containsKey(firstSolarArray)) {
+                            getWeatherData(firstSolarArray.coordinates)
+                        }
                         useWeatherData(firstSolarArray)
                         selectSolarArray(firstSolarArray)
                     }
