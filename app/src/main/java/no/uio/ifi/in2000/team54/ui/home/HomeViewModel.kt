@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
@@ -259,11 +261,18 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             _sharedRepository.removeSolarArray(solarArray)
             try {
-                useWeatherData(null)
-                _homeUiState.update { currentState ->
-                    currentState.copy(
-                        selectedSolarArray = null,
-                    )
+                if (solarArrays.value.isNotEmpty()) {
+                    val newSelectedSolarArray = solarArrays.value.lastOrNull()
+                    if (newSelectedSolarArray != null) {
+                        selectSolarArray(newSelectedSolarArray) // <- Use existing logic
+                    }
+                } else {
+                    useWeatherData(null)
+                    _homeUiState.update { currentState ->
+                        currentState.copy(
+                            selectedSolarArray = null
+                        )
+                    }
                 }
             } catch (ex: Exception) {
                 _homeUiState.update { currentState ->

@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.util
 
+import android.util.Log
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import kotlin.math.abs
@@ -39,6 +40,14 @@ fun calculateMonthlyElectricityProduction(
     monthlySunhours: Map<String, Double>,
     solarArray: SolarArray
 ): Map<String, Double> {
+
+    Log.i("SolarArrayIs", solarArray.name)
+    Log.i("SolarArraySn", monthlyCloud.toString())
+    Log.i("SolarArrayCl", monthlySnow.toString())
+    Log.i("SolarArrayIr", monthlyRadiance.toString())
+    Log.i("SolarArrayTe", monthlyTemperatures.toString())
+    Log.i("SolarArraySu", monthlySunhours.toString())
+
     val monthlyIrradiance = calculateAdjustedSolarIrradiance(monthlyCloud, monthlySnow, monthlyRadiance)
     val roofSections: List<RoofSection> = solarArray.roofSections
 
