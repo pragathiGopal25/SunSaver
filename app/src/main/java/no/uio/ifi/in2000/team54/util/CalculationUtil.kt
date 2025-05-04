@@ -25,7 +25,14 @@ fun calculateMonthlyElectricityProduction(
     solarArray: SolarArray
 ): Map<String, Double> {
 
-    Log.i("testing sunhours", monthlySunhours.toString())
+    Log.i("SolarArrayIs", solarArray.name)
+    Log.i("SolarArraySn", monthlyCloud.toString())
+    Log.i("SolarArrayCl", monthlySnow.toString())
+    Log.i("SolarArrayIr", monthlyRadiance.toString())
+    Log.i("SolarArrayTe", monthlyTemperatures.toString())
+    Log.i("SolarArraySu", monthlySunhours.toString())
+
+
     val monthlyIrradiance = calculateAdjustedSolarIrradiance(monthlyCloud, monthlySnow, monthlyRadiance)
     val roofSections: List<RoofSection> = solarArray.roofSections
     val panelArea = solarArray.panelType.length.times(solarArray.panelType.width)
@@ -40,7 +47,7 @@ fun calculateMonthlyElectricityProduction(
         // substitute roofSection.area with panelArea.time(roofsection.panel)
         // need to calculate per roofSection and sum up
         roofSections.sumOf { roofSection ->
-            irradiance * sunHours * efficiency * (panelArea.times(roofSection.panels)) * calculateDirectionImpact(
+            irradiance * sunHours * efficiency * panelArea * roofSection.panels * calculateDirectionImpact(
                 roofSection.direction
             ) * calculateAngleImpact(roofSection.incline)
         } / 1000.0 // Convert to kWh
@@ -66,7 +73,7 @@ private fun calculateAdjustedSolarIrradiance(
     monthlySnow: Map<String, Double>,
     monthlyRadiance: Map<String, Double>,
 ): Map<String, Double> {
-
+    Log.i("calsSnow", monthlySnow.toString())
     return monthlyRadiance.mapValues { (month, radiance) ->
         var adjustedIrradiance = radiance
         val snowFactor = monthlySnow[month]?.let { calculateSnowLossFactor(it, month)} ?: 1.0

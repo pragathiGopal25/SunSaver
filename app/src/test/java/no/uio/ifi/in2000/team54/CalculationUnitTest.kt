@@ -13,8 +13,8 @@ class HomeViewModelUnitTest {
     @Test
     fun testCalculationShouldReturnTrue() {
         // arrange
-
         val testRoofSection = RoofSection(
+            id = 1,
             area = 10.0,
             incline = 45.0,
             direction = 10.0,
@@ -26,11 +26,13 @@ class HomeViewModelUnitTest {
             55.5, 55.5
         )
         val testArray = SolarArray(
+            id = 1,
             name = "test",
             panelType = SolarPanelType.PREMIUM,
             roofSections = testList,
             coordinates = coordinates,
-            powerConsumption = 10.0
+            powerConsumption = 10.0,
+            address = "Test Address 333"
         )
 
         val monthlyCloud: Map<String, Double> = mapOf(

@@ -2,9 +2,13 @@ package no.uio.ifi.in2000.team54.ui.splashscreen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,16 +20,20 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.airbnb.lottie.compose.*
-import no.uio.ifi.in2000.team54.ui.home.MainScreen
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import no.uio.ifi.in2000.team54.R
+import no.uio.ifi.in2000.team54.ui.home.MainScreen
 
 @Composable
 fun SplashScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         kotlinx.coroutines.delay(2000)
         navController.navigate("main") {
-            popUpTo("splash") {inclusive = true}
+            popUpTo("splash") { inclusive = true }
         }
     }
     Column(
@@ -38,6 +46,13 @@ fun SplashScreen(navController: NavController) {
     ) {
         MyLottie()
     }
+    Box(
+        modifier = Modifier
+            .padding(top = 525.dp)
+            .fillMaxWidth()
+            .height(100.dp)
+            .background(Color(0xFFFFE0A6))
+    )
 }
 
 @Composable
@@ -54,7 +69,7 @@ fun SunSplashScreen() {
         composable("splash") {
             SplashScreen(navController)
         }
-        composable ("main") {
+        composable("main") {
             MainScreen()
         }
     }
