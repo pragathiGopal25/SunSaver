@@ -3,7 +3,6 @@ package no.uio.ifi.in2000.team54.ui.home
 import android.text.Layout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -12,7 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -21,7 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.mapbox.maps.extension.style.expressions.dsl.generated.mod
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
@@ -87,8 +84,7 @@ fun GraphContainer(
                 )
             }
         }
-    }
-    else {
+    } else {
         ElectricityGraph(graphDataUiState = graphDataUiState)
     }
 }

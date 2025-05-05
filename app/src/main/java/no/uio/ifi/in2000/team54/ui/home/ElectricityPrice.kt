@@ -56,6 +56,7 @@ fun PriceContainer(viewModel: HomeViewModel) {
     val uiState by viewModel.homeUiState.collectAsState()
     val loadingState by viewModel.priceLoadingState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
+
     if (loadingState.isLoading) {
         Box(
             modifier = Modifier
@@ -69,7 +70,17 @@ fun PriceContainer(viewModel: HomeViewModel) {
             )
         }
         return
+    } else if (loadingState.loadingMessage != "") {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(302.dp), contentAlignment = Alignment.Center
+        ) {
+            Text(text = loadingState.loadingMessage)
+        }
+        return
     }
+
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,

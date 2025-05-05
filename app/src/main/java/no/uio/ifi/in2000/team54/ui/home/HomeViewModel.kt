@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team54.ui.home
 
 
+import androidx.compose.runtime.internal.isLiveLiteralsEnabled
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
@@ -162,6 +163,7 @@ class HomeViewModel : ViewModel() {
                 priceJob.join()
                 loadElectricityPrices(solarArray)
 
+
             } catch (ex: Exception) {
                 _homeUiState.update { currentState ->
                     currentState.copy(
@@ -174,20 +176,16 @@ class HomeViewModel : ViewModel() {
 
     // asynkronisert kombinering av data
     private suspend fun getWeatherData(solarArray: SolarArray) {
-
         coroutineScope { // Starter alle kallene parallellt
             try {
-
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
-                        isLoading = true,
-                        loadingMessage = "Henter data om været ..."
+                        isLoading = true
                     )
                 }
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        isLoading = true,
-                        loadingMessage = "Henter data om været ..."
+                        isLoading = true
                     )
                 }
 
@@ -223,12 +221,14 @@ class HomeViewModel : ViewModel() {
                         loadingMessage = "Klarte ikke å hente data om været"
                     )
                 }
-            } finally {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        isLoading = false,
-                        loadingMessage = ""
+                        isLoading = false
                     )
+                }
+            } finally {
+                _graphLoadingState.update {
+                    it.copy(isLoading = false)
                 }
             }
         }
@@ -236,14 +236,27 @@ class HomeViewModel : ViewModel() {
 
     // get price data in a way that can be done async
     private suspend fun getPriceData(solarArray: SolarArray) {
-        val area = electricityPriceRepository.getPriceArea(solarArray)
-        timeScopeToDays.forEach { (scope, days) ->
-            val avgDailyElectricityPrice =
-                electricityPriceRepository.getPriceDataInterval(days, area).average()
+        try {
+            _priceLoadingState.update {
+                it.copy(isLoading = true)
+            }
+            val area = electricityPriceRepository.getPriceArea(solarArray)
+            timeScopeToDays.forEach { (scope, days) ->
+                val avgDailyElectricityPrice =
+                    electricityPriceRepository.getPriceDataInterval(days, area).average()
 
-            priceDataMap.computeIfAbsent(
-                solarArray
-            ) { mutableMapOf() }[scope] = avgDailyElectricityPrice
+                priceDataMap.computeIfAbsent(
+                    solarArray
+                ) { mutableMapOf() }[scope] = avgDailyElectricityPrice
+            }
+        } catch (e: Exception) {
+            _priceLoadingState.update {
+                it.copy(loadingMessage = "Kunne ikke hente strømpriser")
+            }
+        } finally {
+            _priceLoadingState.update {
+                it.copy(isLoading = false)
+            }
         }
     }
 
@@ -291,14 +304,7 @@ class HomeViewModel : ViewModel() {
                     loadingMessage = "Noe gikk galt med innhenting av data."
                 )
             }
-        } finally {
-            _priceLoadingState.update { currentState ->
-                currentState.copy(
-                    loadingMessage = ""
-                )
-            }
         }
-
     }
 
     fun removeSolarArray(solarArray: SolarArray) {
@@ -319,7 +325,7 @@ class HomeViewModel : ViewModel() {
             try {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Laster inn strømpriser..."
+                        isLoading = true
                     )
                 }
                 if (!electricityPriceMap.containsKey(solarArray)) {
@@ -345,8 +351,15 @@ class HomeViewModel : ViewModel() {
                             { mutableMapOf() })[scope] = priceData
                     }
                 }
+
                 seePrices(_homeUiState.value.timeScope, solarArray)
                 calculateRecoup(solarArray)
+
+                _priceLoadingState.update { currentState ->
+                    currentState.copy(
+                        loadingMessage = ""
+                    )
+                }
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
@@ -356,7 +369,7 @@ class HomeViewModel : ViewModel() {
             } finally {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = ""
+                        isLoading = false
                     )
                 }
             }

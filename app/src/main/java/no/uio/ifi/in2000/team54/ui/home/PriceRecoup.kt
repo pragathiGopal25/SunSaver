@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import java.util.Locale
 
 @Composable
 fun TimeUntilRecouped(viewModel: HomeViewModel) {
@@ -42,24 +41,28 @@ fun TimeUntilRecouped(viewModel: HomeViewModel) {
             )
         }
         return
-    }
-
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Column(
+    } else if (loadingState.loadingMessage != "") {
+        Box(
             modifier = Modifier
-                .padding(bottom = 8.dp, top = 3.dp, start = 4.dp, end = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxSize()
+                .height(302.dp), contentAlignment = Alignment.Center
         ) {
-            Text("Tid til du har tjent inn din investering i solcellepaneler:")
-            Spacer(Modifier.height(10.dp))
-            RecoupText(uiState.timeUntilRecoup)
+            Text(text = loadingState.loadingMessage)
         }
+        return
+    }
+    Column(
+        modifier = Modifier
+            .padding(bottom = 8.dp, top = 3.dp, start = 4.dp, end = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text("Tid til du har tjent inn din investering i solcellepaneler:")
+        Spacer(Modifier.height(10.dp))
+        RecoupText(uiState.timeUntilRecoup)
     }
 }
+
 @Composable
 private fun RecoupText(time: Double) {
     Row(
