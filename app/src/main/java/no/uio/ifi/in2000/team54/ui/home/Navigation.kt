@@ -40,9 +40,7 @@ fun NavBar(navController: NavController) {
 
     val navIconList = listOf(
         NavItem("Hjem", R.drawable.homeclicked, R.drawable.homeunclicked, "home"),
-        NavItem("Statistikk", R.drawable.statsclicked, R.drawable.statsunclicked, "stats"),
-        NavItem("Vær", R.drawable.weatherclicked, R.drawable.weatherunclicked, "weather"),
-        NavItem("Innstillinger", R.drawable.settingsclicked, R.drawable.settingsunclicked, "settings")
+        NavItem("Informasjon", R.drawable.info_clicked, R.drawable.info_unclicked, "info")
     )
 
     Box(

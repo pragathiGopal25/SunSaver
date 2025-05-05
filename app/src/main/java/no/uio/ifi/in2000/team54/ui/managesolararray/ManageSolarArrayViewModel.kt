@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -23,9 +24,10 @@ import no.uio.ifi.in2000.team54.model.building.Pos
 
 class ManageSolarArrayViewModel : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
-    private val _sharedRepository = RepositoryProvider.sharedRepository
+    private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
 
     // allows us to access the value of the current solar array object, and keep the viewmodel updated on any changes
+    // used only when we update
     private val _currentSolarArray = MutableStateFlow<SolarArray?>(null)
     val currentSolarArray: StateFlow<SolarArray?> = _currentSolarArray.asStateFlow()
 
@@ -87,16 +89,17 @@ class ManageSolarArrayViewModel : ViewModel() {
         )
     }
     // used in SearchField method, and it allows the ui to remember the map address when navigating between screens
-    fun setCurrentSolarArray(solarArray: SolarArray?) {
-        _currentSolarArray.value = solarArray
+    fun updateSolarArrayAddress(solarArray: SolarArray?) {
         // Update the search address when selecting a solar array to edit
         val pos: Pos = Pos.fromPoint(solarArray?.coordinates!!.toPoint())
         queryAddressAtPos(pos)
-        _mapSearchAddress.value = SearchAddressState(solarArray.address ?: "")
-
+        _mapSearchAddress.value = SearchAddressState(solarArray.address)
     }
+
     fun addSolarArray(newSolarArray: SolarArray) {
-        _sharedRepository.addSolarArray(newSolarArray)
+        viewModelScope.launch {
+            _sunSaverRepository.addSolarArray(newSolarArray)
+        }
     }
     fun queryAddressAtPos(pos: Pos) {
         viewModelScope.launch {
@@ -105,9 +108,25 @@ class ManageSolarArrayViewModel : ViewModel() {
             setMapAddress(address)
         }
     }
+
     // To Update the roof sections and other values when user edits
     fun updateSolarArray(newSolarArray: SolarArray){
-        _sharedRepository.updateSolarArray(newSolarArray)
+        viewModelScope.launch {
+            _sunSaverRepository.updateSolarArray(newSolarArray)
+        }
+    }
+
+    fun getSolarArray(name: String){
+        viewModelScope.launch {
+            _currentSolarArray.value = _sunSaverRepository.getAllSolarArrays()
+                .filter { it.isNotEmpty() }
+                .first()
+                .find { it.name == name }
+        }
+    }
+
+    fun resetUpdSolarArray() {
+        _currentSolarArray.value = null
     }
 }
 

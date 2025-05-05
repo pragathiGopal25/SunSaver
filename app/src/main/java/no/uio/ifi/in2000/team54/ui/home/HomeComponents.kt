@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,8 +18,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -46,10 +50,12 @@ import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.ui.theme.Background
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
 import no.uio.ifi.in2000.team54.ui.theme.Lighter
+import no.uio.ifi.in2000.team54.ui.theme.Red
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
@@ -143,7 +149,7 @@ fun HomeScreenTopBar() {
 
 @Composable
 fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
-    val solarArrays = homeViewModel.solarArrays.collectAsState()
+    val homeUiState = homeViewModel.homeUiState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -151,10 +157,10 @@ fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
             .horizontalScroll(rememberScrollState())
     ) {
         Row {
-            if (solarArrays.value.isEmpty()) {
+            if (homeUiState.value.solarArrays.isEmpty()) {
                 NoSolarArrayCard()
             } else {
-                solarArrays.value.forEach {
+                homeUiState.value.solarArrays.forEach {
                     SolarArrayCard(it, homeViewModel, navController)
                 }
             }
@@ -187,22 +193,48 @@ fun SolarArrayCard(
             ),
     ) {
         Column {
-            IconButton(
-                onClick = {
-                    navController.navigate("editsolararrays/${solarArray.name}")
-                },
+            Row(
                 modifier = Modifier
-                    .background(LightOrange)
-                    .padding(top = 6.dp, end = 4.dp)
-                    .size(30.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .align(Alignment.End)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.circle),
-                    contentDescription = "Redigere Anlegg",
-                    tint = Color.Unspecified // if you don't want to tint it
-                )
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                IconButton(
+                    onClick = {
+                        //TOdo: add deleting option
+                        viewModel.removeSolarArray(solarArray)
+                    },
+                    modifier = Modifier
+                        .background(LightOrange)
+                        .padding(top = 6.dp, end = 20.dp)
+                        .size(35.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.delete),
+                        modifier = Modifier
+                            .padding(top = 2.dp, end = 7.dp, start = 5.dp)
+                            .size(30.dp),
+                        contentDescription = "Slett Anlegg",
+                        tint = Red,// if you don't want to tint it
+
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        navController.navigate("editsolararrays/${solarArray.name}")
+                    },
+                    modifier = Modifier
+                        .background(LightOrange)
+                        .padding(top = 6.dp, end = 5.dp)
+                        .size(28.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.circle),
+                        contentDescription = "Redigere Anlegg",
+                        tint = Color.Unspecified // if you don't want to tint it
+                    )
+                }
             }
             Image(
                 painter = painterResource(R.drawable.house),
