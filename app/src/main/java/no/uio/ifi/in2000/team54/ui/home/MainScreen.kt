@@ -32,7 +32,7 @@ fun MainScreen() {
         snackbarHost = { Snackbar(snackbarState) },
         bottomBar = {
             val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-            if (currentRoute.equals("managesolararray") || currentRoute.equals("editsolararrays/{arrayName}")) {
+            if (currentRoute.equals("managesolararray") || currentRoute.equals("editsolararrays/{arrayId}")) {
                 return@Scaffold
             }
 
