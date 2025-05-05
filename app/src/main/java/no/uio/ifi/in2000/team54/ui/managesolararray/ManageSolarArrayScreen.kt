@@ -314,7 +314,7 @@ private fun ArraySettingsMainSection(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DragHandle(draggableState)
-        SearchField(mapState, mapViewportState, draggableState, viewModel)
+        SearchField(mapState,snackbarState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(15.dp),

@@ -133,14 +133,14 @@ class HomeViewModel : ViewModel() {
                 }
 
                 val priceJob = launch {
-                    // get electricity prices if the data is changed
+                    // get electricity prices if the data is changed // todo: remove isUpdated if only coords needed to update
                     if (!priceDataMap.containsKey(solarArray) || isUpdated) {
                         getPriceData(solarArray)
                     }
                 }
 
-                // get frost data if the data is changed // todo: only when the address is changed
-                if (!weatherDataMap.containsKey(solarArray) || isUpdated) {
+                // get frost data if the data is changed
+                if (!weatherDataMap.containsKey(solarArray)) {
                     getWeatherData(solarArray)
                 }
 
