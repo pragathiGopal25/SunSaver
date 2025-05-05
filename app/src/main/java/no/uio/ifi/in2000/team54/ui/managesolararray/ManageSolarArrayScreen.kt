@@ -90,7 +90,7 @@ fun ManageSolarArrayScreen(
     viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     snackbarState: SnackbarHostState,
-    updateArray: String? = "",
+    updateArray: Long? = -1L,
 ) {
     val solarEntity by viewModel.currentSolarArray.collectAsState()
     val roofSections = remember { mutableStateListOf<RoofSection>() }
@@ -99,8 +99,8 @@ fun ManageSolarArrayScreen(
     }
 
     LaunchedEffect(updateArray) {
-        if (!updateArray.isNullOrEmpty()) {
-            viewModel.getSolarArray(updateArray)
+        if (updateArray != -1L) {
+            viewModel.getSolarArray(updateArray!!.toLong())
         }
     }
 
