@@ -9,14 +9,13 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
 
     //Get the average electricity price with and without solar panel
     // The avg is in NOK per kWh
-    suspend fun getPriceData(
+    fun getPriceData(
         days: Int,
-        area: String,
         dailySolarPowerGeneration: Double,
-        monthlyPowerConsumption: Double
+        monthlyPowerConsumption: Double,
+        avgDailyElectricityPrice: Double
     ): List<Double> {
-        val avgDailyElectricityPrice = getPriceDataInterval(days, area).average() //Denne kan gis som parameter, så man kan hente data parallelt
-        val dailyPowerConsumption = monthlyPowerConsumption/30.0
+        val dailyPowerConsumption = monthlyPowerConsumption / 30.0
         return listOf(
             (dailyPowerConsumption - dailySolarPowerGeneration) * days * avgDailyElectricityPrice,
             avgDailyElectricityPrice * days * dailyPowerConsumption
@@ -104,12 +103,12 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
 
     //Definerer de 5 sonene for strømpriser (strøm har forskjellig pris forskjellige deler av landet)
     //Dette er en rough estimat fordi de sonene har ganske kompliserte grenser
-    fun getPriceArea(solarArray: SolarArray):String {
+    fun getPriceArea(solarArray: SolarArray): String {
         val coords = solarArray.coordinates
-        return when{
+        return when {
             coords.latitude > 64.5 -> "NO4"
             coords.latitude < 59.45 && coords.longitude < 10.5 -> "NO2"
-            coords.latitude in 59.3 .. 61.8 && coords.longitude < 8.2 -> "NO5"
+            coords.latitude in 59.3..61.8 && coords.longitude < 8.2 -> "NO5"
             coords.latitude in 61.9..64.5 && coords.longitude < 8.6 -> "NO3"
             else -> "NO1"
         }
