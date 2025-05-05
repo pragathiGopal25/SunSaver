@@ -108,6 +108,7 @@ class ManageSolarArrayViewModel : ViewModel() {
             setMapAddress(address)
         }
     }
+
     // To Update the roof sections and other values when user edits
     fun updateSolarArray(newSolarArray: SolarArray){
         viewModelScope.launch {
