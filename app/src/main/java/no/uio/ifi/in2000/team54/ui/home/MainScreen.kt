@@ -39,7 +39,6 @@ fun MainScreen() {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        snackbarHost = { Snackbar(snackbarState) },
         bottomBar = {
             val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
             if (currentRoute.equals("managesolararray") || currentRoute.equals("editsolararrays/{arrayId}")) {
@@ -75,5 +74,7 @@ fun MainScreen() {
                 ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, arrayId)
             }
         }
+
+        Snackbar(snackbarState)
     }
 }

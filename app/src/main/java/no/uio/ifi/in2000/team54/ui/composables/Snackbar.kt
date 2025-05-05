@@ -3,7 +3,6 @@ package no.uio.ifi.in2000.team54.ui.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,17 +22,15 @@ import no.uio.ifi.in2000.team54.ui.theme.SoftRed
 
 @Composable
 fun Snackbar(snackbarState: SnackbarHostState) {
-
-    SnackbarHost(hostState = snackbarState) {
-        val message = snackbarState.currentSnackbarData?.visuals?.message
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-                .padding(horizontal = 16.dp)
-                .padding(top = 100.dp)
-        ) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 15.dp)
+            .padding(horizontal = 35.dp),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        SnackbarHost(hostState = snackbarState) {
+            val message = snackbarState.currentSnackbarData?.visuals?.message
             Text(
                 modifier = Modifier
                     .padding(4.dp)
@@ -41,9 +38,8 @@ fun Snackbar(snackbarState: SnackbarHostState) {
                     .clip(RoundedCornerShape(20))
                     .background(SoftRed)
                     .border(3.dp, Red, RoundedCornerShape(20))
-                    .padding(vertical = 10.dp)
-                    .align(Alignment.TopCenter),
-                text = message ?: "", // need to do this or it breaks the fade-out animation
+                    .padding(vertical = 10.dp),
+                text = message ?: "",
                 color = Red,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
