@@ -6,8 +6,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
@@ -15,6 +15,7 @@ import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.Elements
+import no.uio.ifi.in2000.team54.ui.network.NetworkObserver
 import no.uio.ifi.in2000.team54.util.calculateMonthlyElectricityProduction
 import kotlin.math.round
 
@@ -50,7 +51,9 @@ enum class TimeScope {
     DAY, MONTH, YEAR
 }
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(
+    private val networkObserver: NetworkObserver
+) : ViewModel() {
     private val _repository = FrostRepository()
     private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
     private val electricityPriceRepository =
@@ -80,7 +83,14 @@ class HomeViewModel : ViewModel() {
     private val timeScopeToDays =
         mapOf(TimeScope.DAY to 1, TimeScope.MONTH to 30, TimeScope.YEAR to 365)
 
+    private val _isOnline = MutableStateFlow(true)
+    val isOnline = _isOnline.asStateFlow()
+
     init {
+        _isOnline.value = networkObserver.isNetworkAvailable()
+
+        observeNetwork()
+
         viewModelScope.launch {
             _sunSaverRepository.getAllSolarArrays()
                 .collect { solarArraysList ->
@@ -166,6 +176,14 @@ class HomeViewModel : ViewModel() {
                         loadingState = "Klarte ikke å velge solcelleanlegg"
                     )
                 }
+            }
+        }
+    }
+
+    private fun observeNetwork() {
+        viewModelScope.launch {
+            networkObserver.isConnected.collectLatest { connected ->
+                _isOnline.value = connected
             }
         }
     }
