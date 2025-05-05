@@ -412,7 +412,7 @@ private fun SaveButton(
         border = BorderStroke(1.dp, DarkYellow),
         modifier = Modifier
             .width(250.dp)
-            .padding(bottom = 60.dp, top = 20.dp)
+            .padding(top = 5.dp)
     ) {
         Text(
             "Lagre",
