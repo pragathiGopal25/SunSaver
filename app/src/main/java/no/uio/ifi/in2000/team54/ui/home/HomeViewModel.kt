@@ -181,9 +181,7 @@ class HomeViewModel(
     }
 
     private fun observeNetwork() {
-
         viewModelScope.launch {
-
             networkObserver.isConnected.collectLatest { connected ->
                 _isOnline.value = connected
             }

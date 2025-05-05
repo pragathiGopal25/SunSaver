@@ -47,17 +47,17 @@ class ManageSolarArrayViewModel() : ViewModel() {
         .mapLatest { state ->
             try {
                 // we know the address isn't null here because we filter out all null addresses above
-                MapRoofSectionsState(repository.getRoofSections(state.address!!), false, null)
+                MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
             } catch (e: Exception) {
                 delay(1000) // delayed so that the Building API gets time to respond
                 // if it fails to get the roof information, don't display any in the map
-                MapRoofSectionsState(emptyList(), true, "Noe gikk galt under datainnhentingen.")
+                MapRoofSectionsState(emptyList(), true)
             }
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = MapRoofSectionsState(emptyList(), false, null)
+            initialValue = MapRoofSectionsState(emptyList(), false)
         )
 
     @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
@@ -67,15 +67,15 @@ class ManageSolarArrayViewModel() : ViewModel() {
 
             try {
                 val suggestions = repository.getAddressSuggestions(state.query)
-                AddressSuggestionsState(suggestions, null)
+                AddressSuggestionsState(suggestions)
             } catch (e: Exception) {
-                AddressSuggestionsState(emptyList(), "Noe gikk galt med innhenting av data")
+                AddressSuggestionsState(emptyList())
             }
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = AddressSuggestionsState(emptyList(), null)
+            initialValue = AddressSuggestionsState(emptyList())
         )
 
     fun setMapAddress(address: Address) {
@@ -149,8 +149,7 @@ data class AddressState(
 
 data class MapRoofSectionsState(
     val roofSections: List<MapRoofSection>,
-    val isError: Boolean,
-    val errorMessage: String?
+    val isError: Boolean
 )
 
 data class SearchAddressState(
@@ -158,7 +157,5 @@ data class SearchAddressState(
 )
 
 data class AddressSuggestionsState(
-    val suggestions: List<Address>,
-    val errorMessage: String?
-
+    val suggestions: List<Address>
 )
