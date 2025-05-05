@@ -70,8 +70,6 @@ class HomeViewModel : ViewModel() {
     )
     val homeUiState = _homeUiState.asStateFlow()
 
-    //Når vi oppdaterer selectedSolarArray så kan data hentes fra denne mappen
-    //Hvis det ikke ligger her så skal det legges inn
     // saved data
     private val electricityProductionMap: MutableMap<SolarArray, List<Double>> = mutableMapOf()
     private val electricityPriceMap: MutableMap<SolarArray, MutableMap<TimeScope, PriceData>> =
@@ -140,10 +138,6 @@ class HomeViewModel : ViewModel() {
                         getPriceData(solarArray)
                     }
                 }
-
-                // Denne feilen kommer på adressen T. Liens vei 10
-                // Error fetching nearest source: Parent job is Cancelling
-
 
                 // get frost data if the data is changed // todo: only when the address is changed
                 if (!weatherDataMap.containsKey(solarArray) || isUpdated) {
@@ -235,6 +229,7 @@ class HomeViewModel : ViewModel() {
         }
     }
 
+    // get price data in a way that can be done async
     private suspend fun getPriceData(solarArray: SolarArray) {
         val area = electricityPriceRepository.getPriceArea(solarArray)
         timeScopeToDays.forEach { (scope, days) ->
