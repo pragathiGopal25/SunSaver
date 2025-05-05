@@ -27,12 +27,12 @@ fun calculateMonthlyElectricityProduction(
     solarArray: SolarArray
 ): Map<String, Double> {
 
-    Log.i("SolarArrayIsNAME", solarArray.name)
+    /*Log.i("SolarArrayIsNAME", solarArray.name)
     Log.i("SolarArraySnow", monthlyCloud.toString())
     Log.i("SolarArrayCloud", monthlySnow.toString())
     Log.i("SolarArrayIrradiance", monthlyRadiance.toString())
     Log.i("SolarArrayTemp", monthlyTemperatures.toString())
-    Log.i("SolarArraySunHours", monthlySunhours.toString())
+    Log.i("SolarArraySunHours", monthlySunhours.toString())*/
 
     val monthlyIrradiance = calculateAdjustedSolarIrradiance(monthlyCloud, monthlySnow, monthlyRadiance)
     val roofSections: List<RoofSection> = solarArray.roofSections
@@ -53,19 +53,18 @@ fun calculateMonthlyElectricityProduction(
 }
 
 //Calculate the efficiency of the solar panel based on temperature in celsius
-//If the temperature is more than default (25 deg) the efficiency decreases
-
 // temperature gain: https://www.bostonsolar.us/solar-blog-resource-center/blog/how-do-temperature-and-shade-affect-solar-panel-efficiency/
 private fun calculatePanelEfficiency(temperature: Double, solarArray: SolarArray): Double {
     // Efficiency: https://www.photonicuniverse.com/en/resources/articles/full/7.html
     val panelArea = solarArray.panelType.length.times(solarArray.panelType.width)
     var efficiency = ((solarArray.panelType.watt)/(panelArea * 1000))// divide by thousand to get kW
+    // if temperature is more than 25 degrees, we decrease efficiency by the temperature coefficient
     if (temperature > DEFAULT_PANEL_TEMPERATURE_CELSIUS) {
         val temperatureDifference = temperature - DEFAULT_PANEL_TEMPERATURE_CELSIUS
         val efficiencyLossPercentage = temperatureDifference * TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS
         efficiency -= efficiency * (efficiencyLossPercentage / 100.0)
     }  else if (temperature < DEFAULT_PANEL_TEMPERATURE_CELSIUS) {
-     // Efficiency gain when temperature is lower than 25°C
+     // Efficiency increases when the temperature is lower, so we make sure to add on to it here.
         val temperatureDifference = DEFAULT_PANEL_TEMPERATURE_CELSIUS - temperature
         val efficiencyGainPercentage = temperatureDifference * TEMPERATURE_EFFICIENCY_GAIN_PER_CELSIUS
         efficiency += efficiency * (efficiencyGainPercentage / 100.0)
@@ -125,7 +124,6 @@ private fun calculateAngleImpact(inclineAngle: Double): Double {
     if (tempInclineAngle < 5){ // for flat roofs solar panels are installed at an angle of 10 degrees
         tempInclineAngle = 10.0
     }
-
     if (tempInclineAngle in MINIMUM_OPTIMAL_INCLINE_ANGLE..MAXIMUM_OPTIMAL_INCLINE_ANGLE) {
         return 1.0
     }
@@ -143,7 +141,6 @@ private fun calculateAngleImpact(inclineAngle: Double): Double {
 // efficiency loss per degree = 0.4/180 = 0.002
 //Calculates the impact the direction of the panel has on solar panel efficiency
 private fun calculateDirectionImpact(azimuth: Double): Double {
-    Log.i("Az", azimuth.toString())
     val directionOffset = abs(180 - azimuth) // 180 degrees for perfect south, which is optimal for sunshine in the northern hemisphere
     return maxOf(0.5, 1 - (directionOffset * DIRECTION_EFFICIENCY_DECREASE_PER_DEGREE))
 }
