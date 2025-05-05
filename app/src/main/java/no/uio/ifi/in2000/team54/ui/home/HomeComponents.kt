@@ -5,12 +5,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,24 +19,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,19 +40,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.SolarArray
-import no.uio.ifi.in2000.team54.ui.composables.Snackbar
 import no.uio.ifi.in2000.team54.ui.theme.Background
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
 import no.uio.ifi.in2000.team54.ui.theme.Lighter
+import no.uio.ifi.in2000.team54.ui.theme.Red
 import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
@@ -78,22 +66,6 @@ fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
             .background(Background)
     ) {
         HomeScreenTopBar()
-        Column(
-            modifier = Modifier
-                .verticalScroll(scroll)
-        ) {
-            SolarArrayList(homeViewModel, navController)
-            SelectedSolarArrayTitle(homeViewModel)
-            //Putter strømproduksjon øverst fordi den laster inn mye raskere
-            HomeCard(
-                name = "Strømproduksjon", modifier = Modifier.height(302.dp),
-                content = { GraphContainer(viewModel = homeViewModel) }
-            )
-            HomeCard(
-                name = "Sparing", modifier = Modifier,
-                content = { PriceContainer(viewModel = homeViewModel) }
-            )
-        }
         Column(
             modifier = Modifier
                 .verticalScroll(scroll)
@@ -173,7 +145,7 @@ fun HomeScreenTopBar() {
 
 @Composable
 fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
-    val solarArrays = homeViewModel.solarArrays.collectAsState()
+    val homeUiState = homeViewModel.homeUiState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -181,10 +153,10 @@ fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
             .horizontalScroll(rememberScrollState())
     ) {
         Row {
-            if (solarArrays.value.isEmpty()) {
+            if (homeUiState.value.solarArrays.isEmpty()) {
                 NoSolarArrayCard()
             } else {
-                solarArrays.value.forEach {
+                homeUiState.value.solarArrays.forEach {
                     SolarArrayCard(it, homeViewModel, navController)
                 }
             }
@@ -217,22 +189,48 @@ fun SolarArrayCard(
             ),
     ) {
         Column {
-            IconButton(
-                onClick = {
-                    navController.navigate("editsolararrays/${solarArray.name}")
-                },
+            Row(
                 modifier = Modifier
-                    .background(LightOrange)
-                    .padding(top = 6.dp, end = 4.dp)
-                    .size(30.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .align(Alignment.End)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.circle),
-                    contentDescription = "Redigere Anlegg",
-                    tint = Color.Unspecified // if you don't want to tint it
-                )
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                IconButton(
+                    onClick = {
+                        //TOdo: add deleting option
+                        viewModel.removeSolarArray(solarArray)
+                    },
+                    modifier = Modifier
+                        .background(LightOrange)
+                        .padding(top = 6.dp, end = 20.dp)
+                        .size(35.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.delete),
+                        modifier = Modifier
+                            .padding(top = 2.dp, end = 7.dp, start = 5.dp)
+                            .size(30.dp),
+                        contentDescription = "Slett Anlegg",
+                        tint = Red,// if you don't want to tint it
+
+                    )
+                }
+                IconButton(
+                    onClick = {
+                        navController.navigate("editsolararrays/${solarArray.id}")
+                    },
+                    modifier = Modifier
+                        .background(LightOrange)
+                        .padding(top = 6.dp, end = 5.dp)
+                        .size(28.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.circle),
+                        contentDescription = "Redigere Anlegg",
+                        tint = Color.Unspecified // if you don't want to tint it
+                    )
+                }
             }
             Image(
                 painter = painterResource(R.drawable.house),
@@ -323,7 +321,6 @@ fun SelectedSolarArrayTitle(viewModel: HomeViewModel) {
     }
 }
 
-
 @Composable
 fun HomeCard(
     name: String,
@@ -363,5 +360,3 @@ fun HomeCard(
         }
     }
 }
-
-
