@@ -134,6 +134,9 @@ class HomeViewModel : ViewModel() {
                         electricityProductionData = emptyMap()
                     )
                 }
+                _priceLoadingState.update {
+                    it.copy(loadingMessage = "")
+                }
 
                 val priceJob = launch {
                     // get electricity prices if the data is changed
@@ -162,7 +165,6 @@ class HomeViewModel : ViewModel() {
 
                 priceJob.join()
                 loadElectricityPrices(solarArray)
-
 
             } catch (ex: Exception) {
                 _homeUiState.update { currentState ->
