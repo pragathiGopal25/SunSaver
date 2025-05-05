@@ -86,7 +86,6 @@ class HomeViewModel(
     private val _isOnline = MutableStateFlow(true)
     val isOnline = _isOnline.asStateFlow()
 
-
     init {
         _isOnline.value = networkObserver.isNetworkAvailable()
 
