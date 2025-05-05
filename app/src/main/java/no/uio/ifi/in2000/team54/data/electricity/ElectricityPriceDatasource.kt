@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.data.electricity
 
+import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -23,7 +24,7 @@ class ElectricityPriceDatasource {
 
             return response
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("getElectricityPrices", "${e.message}")
             return emptyList()
         }
     }

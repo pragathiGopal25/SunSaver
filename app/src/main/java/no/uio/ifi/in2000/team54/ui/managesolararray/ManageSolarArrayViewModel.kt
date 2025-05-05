@@ -32,7 +32,7 @@ class ManageSolarArrayViewModel() : ViewModel() {
     val currentSolarArray: StateFlow<SolarArray?> = _currentSolarArray.asStateFlow()
 
     private val _mapAddress = MutableStateFlow(
-        AddressState(null, null)
+        AddressState(null)
     )
     private val _mapSearchAddress = MutableStateFlow(
         SearchAddressState("")
@@ -64,13 +64,8 @@ class ManageSolarArrayViewModel() : ViewModel() {
     val mapSearchAddressSuggestions = _mapSearchAddress
         .debounce(250)
         .mapLatest { state ->
-
-            try {
-                val suggestions = repository.getAddressSuggestions(state.query)
-                AddressSuggestionsState(suggestions)
-            } catch (e: Exception) {
-                AddressSuggestionsState(emptyList())
-            }
+            val suggestions = repository.getAddressSuggestions(state.query)
+            AddressSuggestionsState(suggestions)
         }
         .stateIn(
             scope = viewModelScope,
@@ -106,18 +101,9 @@ class ManageSolarArrayViewModel() : ViewModel() {
 
     fun queryAddressAtPos(pos: Pos) {
         viewModelScope.launch {
-            try {
-
-                val address = repository.getNearestAddressToPos(pos) ?: run {
-                    _mapAddress.value = AddressState(null, "Fant ingen adresse for posisjonen.")
-                    return@launch
-                }
-
-                setSearchAddress(address.toFormatted())
-                setMapAddress(address)
-            } catch (e: Exception) {
-                _mapAddress.value = AddressState(null, "Noe gikk galt med innhenting av data")
-            }
+            val address = repository.getNearestAddressToPos(pos) ?: return@launch
+            setSearchAddress(address.toFormatted())
+            setMapAddress(address)
         }
     }
 
@@ -144,7 +130,6 @@ class ManageSolarArrayViewModel() : ViewModel() {
 
 data class AddressState(
     val address: Address?,
-    val errorMessage: String?
 )
 
 data class MapRoofSectionsState(

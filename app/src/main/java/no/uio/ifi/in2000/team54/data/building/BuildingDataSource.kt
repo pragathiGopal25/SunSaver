@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.data.building
 
+import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -48,7 +49,7 @@ class BuildingDataSource() {
             }
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("getAddressSuggestions", "${e.message}")
             return emptyList()
         }
     }
@@ -70,7 +71,7 @@ class BuildingDataSource() {
                 response.body<AddressSuggestionsResponse>().suggestions
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("getAddressFromPos", "${e.message}")
             return emptyList()
         }
     }
@@ -90,7 +91,7 @@ class BuildingDataSource() {
             }
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("getCadastreId", "${e.message}")
             return null
         }
     }
@@ -107,7 +108,7 @@ class BuildingDataSource() {
             }
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("getBuildingIds", "${e.message}")
             return emptyList()
         }
     }
@@ -124,7 +125,7 @@ class BuildingDataSource() {
                 response.body<RoofSectionsResponse>().roofSections
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("getRoofSections", "${e.message}")
             return emptyList()
         }
     }
