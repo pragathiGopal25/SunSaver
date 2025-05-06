@@ -314,6 +314,10 @@ class HomeViewModel(
 
     fun removeSolarArray(solarArray: SolarArray) {
         viewModelScope.launch {
+            if (_graphLoadingState.value.isLoading && _priceLoadingState.value.isLoading) {
+                _snackbarMessage.emit("Vent til data laster")
+                return@launch
+            }
             try {
                 _sunSaverRepository.deleteSolarArray(solarArray)
             } catch (ex: Exception) {
