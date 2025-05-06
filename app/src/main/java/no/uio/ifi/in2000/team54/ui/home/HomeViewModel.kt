@@ -130,27 +130,23 @@ class HomeViewModel(
         viewModelScope.launch {
             if (_homeUiState.value.solarArrays.isEmpty()) return@launch
             try {
-                _homeUiState.update { currentState ->
-                    currentState.copy(
-                        selectedSolarArray = solarArray,
-                        electricityProductionData = emptyMap()
-                    )
-                }
+                _homeUiState.update { it.copy(selectedSolarArray = solarArray) }
+
                 // start loading
                 _graphLoadingState.update { it.copy(isLoading = true) }
-
-                _priceLoadingState.update {
-                    it.copy(statusMessage = "")
-                }
+                _priceLoadingState.update { it.copy(isLoading = true) }
 
                 val priceJob = launch {
                     // get electricity prices if the data is changed
                     if (!priceDataMap.containsKey(solarArray) || isUpdated) {
                         getPriceData(solarArray)
+                    } else {
+                        // in case the previous selected was failing, clear the error message
+                        _priceLoadingState.update { it.copy(statusMessage = "") }
                     }
                 }
 
-                // get frost data if the data is changed // todo: only when the address is changed
+                // get frost data if the data is changed //
                 if (!weatherDataMap.containsKey(solarArray) || isUpdated) {
                     getWeatherData(solarArray)
                 }
@@ -160,15 +156,7 @@ class HomeViewModel(
                     useWeatherData(solarArray)
                 } else {
                     // in case the previous selected was failing, clear the error message
-                    _graphLoadingState.update { currentState ->
-                        currentState.copy(
-                            statusMessage = ""
-                        )
-                    }
-                }
-
-                _graphLoadingState.update { // ready to show the graph (or the error message)
-                    it.copy(isLoading = false)
+                    _graphLoadingState.update { it.copy( statusMessage = "") }
                 }
 
                 _homeUiState.update { currentState ->
@@ -179,8 +167,14 @@ class HomeViewModel(
                     )
                 }
 
+                // ready to show the graph (or the error message)
+                _graphLoadingState.update { it.copy(isLoading = false) }
+
                 priceJob.join()
                 loadElectricityPrices(solarArray)
+
+                // ready to show the prices (or error message)
+                _priceLoadingState.update { it.copy(isLoading = false) }
 
             } catch (ex: Exception) {
 
@@ -255,9 +249,6 @@ class HomeViewModel(
     // get price data in a way that can be done async
     private suspend fun getPriceData(solarArray: SolarArray) {
         try {
-            _priceLoadingState.update {
-                it.copy(isLoading = true)
-            }
             val area = electricityPriceRepository.getPriceArea(solarArray)
             timeScopeToDays.forEach { (scope, days) ->
                 val avgDailyElectricityPrice =
@@ -269,11 +260,10 @@ class HomeViewModel(
             }
         } catch (e: Exception) {
             _priceLoadingState.update {
-                it.copy(statusMessage = "Kunne ikke hente strømpriser")
-            }
-        } finally {
-            _priceLoadingState.update {
-                it.copy(isLoading = false)
+                it.copy(
+                    statusMessage = "Kunne ikke hente strømpriser",
+                    isLoading = false
+                )
             }
         }
     }
@@ -300,12 +290,14 @@ class HomeViewModel(
         } catch (e: Exception) {
             _graphLoadingState.update { currentState ->
                 currentState.copy(
-                    statusMessage = "Noe gikk galt med innhenting av data."
+                    statusMessage = "Noe gikk galt med innhenting av data.",
+                    isLoading = false
                 )
             }
             _priceLoadingState.update { currentState ->
                 currentState.copy(
-                    statusMessage = "Noe gikk galt med innhenting av data."
+                    statusMessage = "Noe gikk galt med innhenting av data.",
+                    isLoading = false
                 )
             }
         }
@@ -324,11 +316,6 @@ class HomeViewModel(
 
     private fun loadElectricityPrices(solarArray: SolarArray) {
         try {
-            _priceLoadingState.update { currentState ->
-                currentState.copy(
-                    isLoading = true
-                )
-            }
             if (!electricityPriceMap.containsKey(solarArray)) {
                 timeScopeToDays.forEach { (scope, days) ->
                     val powerUsage =
@@ -355,26 +342,14 @@ class HomeViewModel(
 
             seePrices(_homeUiState.value.timeScope, solarArray)
             calculateRecoup(solarArray)
-
-            _priceLoadingState.update { currentState ->
-                currentState.copy(
-                    statusMessage = ""
-                )
-            }
         } catch (ex: Exception) {
             _priceLoadingState.update { currentState ->
                 currentState.copy(
-                    statusMessage = "Klarte ikke å laste inn strømpriser"
-                )
-            }
-        } finally {
-            _priceLoadingState.update { currentState ->
-                currentState.copy(
+                    statusMessage = "Klarte ikke å laste inn strømpriser",
                     isLoading = false
                 )
             }
         }
-
     }
 
     private fun seePrices(timeScope: TimeScope, solarArray: SolarArray) {
@@ -389,7 +364,8 @@ class HomeViewModel(
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        statusMessage = "Klarte ikke å laste inn strømpriser"
+                        statusMessage = "Klarte ikke å laste inn strømpriser",
+                        isLoading = false
                     )
                 }
             }
@@ -408,7 +384,8 @@ class HomeViewModel(
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        statusMessage = "Kunne ikke endre tidsintervall."
+                        statusMessage = "Kunne ikke endre tidsintervall.",
+                        isLoading = false
                     )
                 }
             }
