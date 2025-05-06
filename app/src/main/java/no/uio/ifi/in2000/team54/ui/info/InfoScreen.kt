@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team54.ui.info
 
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -26,7 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.Butter
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
@@ -34,6 +38,11 @@ import no.uio.ifi.in2000.team54.ui.theme.YellowText
 
 @Composable
 fun InfoScreen() {
+
+    var showPanelDialog by remember { mutableStateOf(false) }
+ // var showSolarDialog by remember { mutableStateOf(false) }
+//  var showSupplierDialog by remember { mutableStateOf(false) }
+//  var showOnboardDialog by remember { mutableStateOf(false) }
     Box (
         Modifier
             .fillMaxSize()
@@ -73,18 +82,25 @@ fun InfoScreen() {
                 modifier = Modifier.fillMaxWidth(). padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                InfoCardSolarPanel(modifier = Modifier.weight(1f))
-                InfoCardLeverandor(modifier = Modifier.weight(1f))
+                PanelInfo(
+                    modifier = Modifier.weight(1f),
+                    onClick = { showPanelDialog = true }
+                )
+
+                SupplierCard(modifier = Modifier.weight(1f))
             }
             Spacer(modifier = Modifier.height(30.dp))
             Row(
                 modifier = Modifier.fillMaxWidth() .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                InfoCardSunEnergy(modifier = Modifier.weight(1f))
-                InfoCardGetStarted(modifier = Modifier.weight(1f))
+                SolarEnergyCard(modifier = Modifier.weight(1f))
+                GetStarted(modifier = Modifier.weight(1f))
             }
         }
+    }
+    if (showPanelDialog) {
+        PanelDialog(onDismissRequest = { showPanelDialog = false })
     }
 }
 
@@ -97,7 +113,7 @@ fun InfoScreenTopBar() {
             .padding(top = 23.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        Spacer(Modifier.padding(top = 23.dp))
+        Spacer(Modifier.padding(top = 10.dp))
         Text(
             text = "Velkommen til",
             style = MaterialTheme.typography.headlineLarge,
@@ -118,10 +134,11 @@ fun InfoScreenTopBar() {
 }
 
 @Composable
-fun InfoCardSolarPanel(modifier: Modifier = Modifier) {
+fun PanelInfo(modifier: Modifier = Modifier,   onClick: () -> Unit) {
     OutlinedCard( modifier = modifier
         .height(200.dp)
-        .width(200.dp),
+        .width(200.dp)
+        .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = Butter)
 
@@ -153,7 +170,8 @@ fun InfoCardSolarPanel(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Finn ut mer om\nhvordan solcellepaneler fungerer.",
+                text = "Finn ut mer om \n" +
+                        "hvordan solcellepaneler fungerer.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -162,9 +180,8 @@ fun InfoCardSolarPanel(modifier: Modifier = Modifier) {
     }
 }
 
-
 @Composable
-fun InfoCardLeverandor(modifier: Modifier = Modifier) {
+fun SupplierCard(modifier: Modifier = Modifier) {
     OutlinedCard( modifier = modifier
         .height(200.dp)
         .width(200.dp),
@@ -211,7 +228,7 @@ fun InfoCardLeverandor(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun InfoCardSunEnergy(modifier: Modifier = Modifier) {
+fun SolarEnergyCard(modifier: Modifier = Modifier) {
     OutlinedCard( modifier = modifier
         .height(200.dp)
         .width(200.dp),
@@ -256,7 +273,7 @@ fun InfoCardSunEnergy(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun InfoCardGetStarted(modifier: Modifier = Modifier) {
+fun GetStarted(modifier: Modifier = Modifier) {
     OutlinedCard( modifier = modifier
         .height(200.dp)
         .width(200.dp),
@@ -291,7 +308,7 @@ fun InfoCardGetStarted(modifier: Modifier = Modifier) {
 
             Text(
                 text = "Bli en " +
-                        " profesjonell SunSaver",
+                        " profesjonell SunSaver!",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -300,8 +317,10 @@ fun InfoCardGetStarted(modifier: Modifier = Modifier) {
     }
 }
 
+
+
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun InfoPreview() {
     InfoScreen()
 }
