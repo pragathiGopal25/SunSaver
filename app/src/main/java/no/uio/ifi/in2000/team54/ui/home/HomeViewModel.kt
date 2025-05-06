@@ -130,8 +130,6 @@ class HomeViewModel(
         viewModelScope.launch {
             if (_homeUiState.value.solarArrays.isEmpty()) return@launch
             try {
-                if (_priceLoadingState.value.isLoading) return@launch
-                if (_graphLoadingState.value.isLoading) return@launch
                 _homeUiState.update { it.copy(selectedSolarArray = solarArray) }
 
                 // start loading
