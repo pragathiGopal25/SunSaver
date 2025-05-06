@@ -38,8 +38,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.Beige
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
@@ -102,16 +104,20 @@ fun PriceContainer(viewModel: HomeViewModel) {
                     .clickable(onClick = {
                         expanded = !expanded
                     })
-                    .shadow(elevation = 1.dp, shape = RoundedCornerShape(20.dp))
-                    .background(Beige)
-                    .padding(2.dp),
+                    .padding(vertical = 2.dp, horizontal = 15.dp)
+                    .shadow(elevation = 1.dp, shape = RoundedCornerShape(10.dp))
+                    .background(RandomBeige)
+                    .fillMaxWidth(),
                 contentAlignment = Alignment.CenterStart
             ) {
                 Column(horizontalAlignment = AbsoluteAlignment.Left, modifier = Modifier.padding(2.dp)) {
                     if (!expanded) {
                         Text(
+                            modifier = Modifier
+                                .fillMaxWidth(),
                             text = "Hva betyr dette? Trykk her for mer informasjon",
-                            fontWeight = FontWeight.Light
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center
                         )
                     }
                     Spacer(Modifier.height(3.dp))
@@ -120,19 +126,25 @@ fun PriceContainer(viewModel: HomeViewModel) {
                             Text(
                                 """
                                     >Du har produsert et overskudd med strøm, og kan derfor selge tilbake til markedet. Overskuddet du kan selge er markert i den høyre boksen med et negativt tall.
-                                    >- Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
-                                    >- Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
-                                    >- Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
-                                    """.trimMargin(">")
+                                    >• Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
+                                    >• Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
+                                    >• Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
+                                    """.trimMargin(">"),
+                                fontSize = 12.sp,
+                                modifier = Modifier
+                                    .padding(horizontal = 10.dp, vertical = 2.dp)
                             )
                         } else {
                             Text(
                                 """
                                      >Du vil spare ${uiState.priceData.saved} NOK ${timePerspective[uiState.timeScope]}, fordi strømmen i utgangspunktet koster ${uiState.priceData.realPrice} NOK uten solcelleanlegget ditt, mens du vil betale ${uiState.priceData.solarPrice} NOK.
-                                    >- Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
-                                    >- Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
-                                    >- Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
-                                    """.trimMargin(">")
+                                    >• Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
+                                    >• Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
+                                    >• Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
+                                    """.trimMargin(">"),
+                                fontSize = 12.sp,
+                                modifier = Modifier
+                                    .padding(horizontal = 10.dp, vertical = 2.dp)
                             )
                         }
                     }
