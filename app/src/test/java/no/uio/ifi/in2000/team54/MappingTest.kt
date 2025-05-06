@@ -5,8 +5,8 @@ import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.util.toDomain
 import no.uio.ifi.in2000.team54.util.toEntity
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.junit.Assert.*
 
 
 class MappingTest {

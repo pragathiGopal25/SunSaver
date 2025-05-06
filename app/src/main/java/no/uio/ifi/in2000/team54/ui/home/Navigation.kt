@@ -30,7 +30,6 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.LightOrange
-import no.uio.ifi.in2000.team54.ui.theme.Red
 import no.uio.ifi.in2000.team54.ui.theme.YellowNav
 
 @Composable
