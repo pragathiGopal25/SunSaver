@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team54.ui.managesolararray
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
@@ -21,9 +22,10 @@ import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
+import javax.inject.Inject
 
-class ManageSolarArrayViewModel() : ViewModel() {
-    private val repository: BuildingRepository = BuildingRepository()
+@HiltViewModel
+class ManageSolarArrayViewModel @Inject constructor(private val repository: BuildingRepository) : ViewModel() {
     private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
 
     // allows us to access the value of the current solar array object, and keep the viewmodel updated on any changes

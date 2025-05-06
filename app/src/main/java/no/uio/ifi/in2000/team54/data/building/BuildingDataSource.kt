@@ -3,13 +3,10 @@ package no.uio.ifi.in2000.team54.data.building
 import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -22,14 +19,9 @@ import kotlinx.serialization.json.long
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
+import javax.inject.Inject
 
-class BuildingDataSource() {
-
-    private val httpClient = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json()
-        }
-    }
+class BuildingDataSource @Inject constructor(private val httpClient: HttpClient) {
 
     suspend fun getAddressSuggestions(address: String): List<Address> {
         try {

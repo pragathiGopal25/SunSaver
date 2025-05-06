@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapState
@@ -87,11 +88,12 @@ enum class ArraySettingsMenuAnchors { Bottom, Top }
 
 @Composable
 fun ManageSolarArrayScreen(
-    viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     snackbarState: SnackbarHostState,
     updateArray: Long? = -1L,
 ) {
+    val viewModel = hiltViewModel<ManageSolarArrayViewModel>()
+
     val solarEntity by viewModel.currentSolarArray.collectAsState()
     val roofSections = remember { mutableStateListOf<RoofSection>() }
     val solarPanelType = rememberSaveable {

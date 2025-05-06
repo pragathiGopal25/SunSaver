@@ -3,10 +3,9 @@ package no.uio.ifi.in2000.team54.data.building
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
+import javax.inject.Inject
 
-class BuildingRepository() {
-
-    private val dataSource = BuildingDataSource()
+class BuildingRepository @Inject constructor(private val dataSource: BuildingDataSource) {
 
     suspend fun getAddressSuggestions(address: String): List<Address> {
         return dataSource.getAddressSuggestions(address)
