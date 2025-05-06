@@ -69,7 +69,8 @@ fun InfoScreen() {
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+
+                modifier = Modifier.fillMaxWidth(). padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 InfoCardSolarPanel(modifier = Modifier.weight(1f))
@@ -77,14 +78,12 @@ fun InfoScreen() {
             }
             Spacer(modifier = Modifier.height(30.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth() .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                InfoCardSolarPanel(modifier = Modifier.weight(1f))
-                InfoCardLeverandor(modifier = Modifier.weight(1f))
+                InfoCardSunEnergy(modifier = Modifier.weight(1f))
+                InfoCardGetStarted(modifier = Modifier.weight(1f))
             }
-
-
         }
     }
 }
@@ -204,6 +203,98 @@ fun InfoCardLeverandor(modifier: Modifier = Modifier) {
                         "ulike leverandører \n" +
                         "som tilbyr \n" +
                         "solcelleanlegg.",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+fun InfoCardSunEnergy(modifier: Modifier = Modifier) {
+    OutlinedCard( modifier = modifier
+        .height(200.dp)
+        .width(200.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.outlinedCardColors(containerColor = Butter)
+
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Fordeler med \n" +
+                        "solenergi ",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Image(
+                painter = painterResource(R.drawable.boardgraph),
+                contentDescription = "Fordeler med \n" +
+                        "solenergi ",
+                modifier = Modifier
+                    .size(80.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Utforsk fordeler ved å \n " +
+                        "installere solcelleanlegg ",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+fun InfoCardGetStarted(modifier: Modifier = Modifier) {
+    OutlinedCard( modifier = modifier
+        .height(200.dp)
+        .width(200.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.outlinedCardColors(containerColor = Butter)
+
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Kom i gang! ",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Image(
+                painter = painterResource(R.drawable.todolist),
+                contentDescription = "Fordeler med \n" +
+                        "solenergi ",
+                modifier = Modifier
+                    .size(75.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Følg disse trinnene og bli \n " +
+                        "en profesjonell SunSaver",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
