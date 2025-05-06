@@ -186,8 +186,8 @@ class HomeViewModel(
                 // ready to show the prices (or error message)
                 _priceLoadingState.update { it.copy(isLoading = false) }
 
-            } catch (ex: Exception) {
-                _snackbarMessage.emit("Klarte ikke å velge solcelleanlegg")
+            } catch (_: Exception) {
+
             }
         }
     }
