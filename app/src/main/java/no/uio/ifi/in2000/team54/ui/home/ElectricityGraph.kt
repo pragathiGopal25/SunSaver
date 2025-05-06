@@ -80,9 +80,9 @@ fun GraphContainer(
                     .width(70.dp)
             )
         }
-    } else if (graphLoadingState.loadingMessage != "") {
+    } else if (graphLoadingState.statusMessage != "") {
         Box(modifier.fillMaxSize(), Alignment.Center) {
-            Text(text = graphLoadingState.loadingMessage)
+            Text(text = graphLoadingState.statusMessage)
         }
     } else {
         ElectricityGraph(homeUiState = homeUiState)

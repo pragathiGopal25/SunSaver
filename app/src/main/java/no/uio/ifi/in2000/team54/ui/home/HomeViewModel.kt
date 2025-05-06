@@ -30,7 +30,8 @@ data class HomeUiState(
 
 data class LoadingState(
     val isLoading: Boolean = false,
-    val loadingMessage: String = "Ingen solanlegg er opprettet",
+    // empty means the data is already processed
+    val statusMessage: String = "Ingen solanlegg er opprettet",
 )
 
 data class PriceData(
@@ -135,12 +136,11 @@ class HomeViewModel(
                         electricityProductionData = emptyMap()
                     )
                 }
-                _graphLoadingState.update {
-                    it.copy(isLoading = true)
-                }
+                // start loading
+                _graphLoadingState.update { it.copy(isLoading = true) }
 
                 _priceLoadingState.update {
-                    it.copy(loadingMessage = "")
+                    it.copy(statusMessage = "")
                 }
 
                 val priceJob = launch {
@@ -153,25 +153,21 @@ class HomeViewModel(
                 // get frost data if the data is changed // todo: only when the address is changed
                 if (!weatherDataMap.containsKey(solarArray) || isUpdated) {
                     getWeatherData(solarArray)
-                } else {
-                    _graphLoadingState.update {
-                        it.copy(isLoading = true)
-                    }
                 }
 
                 // recalculate if new data or data is changed
                 if (!electricityProductionMap.containsKey(solarArray) || isUpdated) {
                     useWeatherData(solarArray)
                 } else {
-                    // in case
+                    // in case the previous selected was failing, clear the error message
                     _graphLoadingState.update { currentState ->
                         currentState.copy(
-                            loadingMessage = ""
+                            statusMessage = ""
                         )
                     }
                 }
 
-                _graphLoadingState.update {
+                _graphLoadingState.update { // ready to show the graph (or the error message)
                     it.copy(isLoading = false)
                 }
 
@@ -233,9 +229,10 @@ class HomeViewModel(
                 weatherData.sunhours = sunhoursData
 
                 weatherDataMap[solarArray] = weatherData
+
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = ""
+                        statusMessage = ""
                     )
                 }
                 _graphLoadingState.update { currentState ->
@@ -246,13 +243,13 @@ class HomeViewModel(
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Klarte ikke å hente data om været",
+                        statusMessage = "Klarte ikke å hente data om været",
                         isLoading = false
                     )
                 }
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Klarte ikke å hente data om været",
+                        statusMessage = "Klarte ikke å hente data om været",
                         isLoading = false
                     )
                 }
@@ -277,7 +274,7 @@ class HomeViewModel(
             }
         } catch (e: Exception) {
             _priceLoadingState.update {
-                it.copy(loadingMessage = "Kunne ikke hente strømpriser")
+                it.copy(statusMessage = "Kunne ikke hente strømpriser")
             }
         } finally {
             _priceLoadingState.update {
@@ -303,12 +300,12 @@ class HomeViewModel(
         } catch (e: Exception) {
             _graphLoadingState.update { currentState ->
                 currentState.copy(
-                    loadingMessage = "Noe gikk galt med innhenting av data."
+                    statusMessage = "Noe gikk galt med innhenting av data."
                 )
             }
             _priceLoadingState.update { currentState ->
                 currentState.copy(
-                    loadingMessage = "Noe gikk galt med innhenting av data."
+                    statusMessage = "Noe gikk galt med innhenting av data."
                 )
             }
         }
@@ -361,13 +358,13 @@ class HomeViewModel(
 
             _priceLoadingState.update { currentState ->
                 currentState.copy(
-                    loadingMessage = ""
+                    statusMessage = ""
                 )
             }
         } catch (ex: Exception) {
             _priceLoadingState.update { currentState ->
                 currentState.copy(
-                    loadingMessage = "Klarte ikke å laste inn strømpriser"
+                    statusMessage = "Klarte ikke å laste inn strømpriser"
                 )
             }
         } finally {
@@ -392,7 +389,7 @@ class HomeViewModel(
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Klarte ikke å laste inn strømpriser"
+                        statusMessage = "Klarte ikke å laste inn strømpriser"
                     )
                 }
             }
@@ -411,7 +408,7 @@ class HomeViewModel(
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Kunne ikke endre tidsintervall."
+                        statusMessage = "Kunne ikke endre tidsintervall."
                     )
                 }
             }
