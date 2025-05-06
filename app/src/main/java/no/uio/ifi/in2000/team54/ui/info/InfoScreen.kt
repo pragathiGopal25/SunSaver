@@ -199,8 +199,7 @@ fun InfoCardLeverandor(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Undersøk liste over \n" +
-                        "ulike leverandører \n" +
+                text = "Liste over leverandører \n" +
                         "som tilbyr \n" +
                         "solcelleanlegg.",
                 style = MaterialTheme.typography.bodyMedium,
