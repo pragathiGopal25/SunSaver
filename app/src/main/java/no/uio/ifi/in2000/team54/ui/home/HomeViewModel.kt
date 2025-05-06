@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
@@ -70,6 +72,10 @@ class HomeViewModel(
     private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
 
+    // snackbar
+    private val _snackbarMessage = MutableSharedFlow<String>()
+    val snackbarMessage = _snackbarMessage.asSharedFlow()
+
     // saved data
     private val electricityProductionMap: MutableMap<SolarArray, List<Double>> = mutableMapOf()
     private val electricityPriceMap: MutableMap<SolarArray, MutableMap<TimeScope, PriceData>> =
@@ -129,6 +135,10 @@ class HomeViewModel(
     fun selectSolarArray(solarArray: SolarArray, isUpdated: Boolean = false) {
         viewModelScope.launch {
             if (_homeUiState.value.solarArrays.isEmpty()) return@launch
+            if (_graphLoadingState.value.isLoading && _priceLoadingState.value.isLoading) {
+                _snackbarMessage.emit("Vent til data laster")
+                return@launch
+            }
             try {
                 _homeUiState.update { it.copy(selectedSolarArray = solarArray) }
 
@@ -177,9 +187,7 @@ class HomeViewModel(
                 _priceLoadingState.update { it.copy(isLoading = false) }
 
             } catch (ex: Exception) {
-
-            // todo: snackbar  "Klarte ikke å velge solcelleanlegg"
-
+                _snackbarMessage.emit("Klarte ikke å velge solcelleanlegg")
             }
         }
     }
@@ -224,11 +232,6 @@ class HomeViewModel(
 
                 weatherDataMap[solarArray] = weatherData
 
-                _priceLoadingState.update { currentState ->
-                    currentState.copy(
-                        statusMessage = ""
-                    )
-                }
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
@@ -258,6 +261,12 @@ class HomeViewModel(
                     solarArray
                 ) { mutableMapOf() }[scope] = avgDailyElectricityPrice
             }
+
+            _priceLoadingState.update { currentState ->
+                currentState.copy(
+                    statusMessage = ""
+                )
+            }
         } catch (e: Exception) {
             _priceLoadingState.update {
                 it.copy(
@@ -282,7 +291,7 @@ class HomeViewModel(
                 )
             electricityProductionMap[solarArray] = electricityProduction.values.toList()
 
-            _graphLoadingState.update { currentState -> //
+            _graphLoadingState.update { currentState ->
                 currentState.copy(
                     statusMessage = ""
                 )
@@ -308,7 +317,7 @@ class HomeViewModel(
             try {
                 _sunSaverRepository.deleteSolarArray(solarArray)
             } catch (ex: Exception) {
-                // todo: snackbar Klarte ikke å slette et solcelleanlegg
+                _snackbarMessage.emit("Klarte ikke å slette solcelleanlegg")
             }
         }
     }
