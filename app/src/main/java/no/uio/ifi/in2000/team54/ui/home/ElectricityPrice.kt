@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonColors
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -44,6 +45,7 @@ import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.Beige
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 import kotlin.math.round
@@ -54,16 +56,31 @@ fun PriceContainer(viewModel: HomeViewModel) {
     val uiState by viewModel.homeUiState.collectAsState()
     val loadingState by viewModel.priceLoadingState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
-    if (loadingState.loadingMessage != "") {
+
+    if (loadingState.isLoading) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .height(302.dp), contentAlignment = Alignment.Center
         ) {
-            Text(loadingState.loadingMessage)
+            CircularProgressIndicator(
+                color = DarkYellow,
+                modifier = Modifier
+                    .width(70.dp)
+            )
+        }
+        return
+    } else if (loadingState.loadingMessage != "") {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(302.dp), contentAlignment = Alignment.Center
+        ) {
+            Text(text = loadingState.loadingMessage)
         }
         return
     }
+
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
