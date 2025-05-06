@@ -54,7 +54,7 @@ fun InfoScreen() {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Lær mer om solcellepaneler og solenergi.",
+                text = "Lær mer om solcellepaneler",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Center
@@ -290,11 +290,9 @@ fun InfoCardGetStarted(modifier: Modifier = Modifier) {
                     .size(75.dp)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             Text(
-                text = "Følg disse trinnene og bli \n " +
-                        "en profesjonell SunSaver",
+                text = "Bli en " +
+                        " profesjonell SunSaver",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
