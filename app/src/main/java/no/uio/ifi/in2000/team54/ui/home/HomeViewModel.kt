@@ -25,7 +25,6 @@ data class HomeUiState(
     val priceData: PriceData = PriceData(0.0, 0.0),
     val electricityProductionData: Map<String, List<Double>> = emptyMap(),
     val timeScope: TimeScope = TimeScope.DAY,
-    val loadingState: String = "",
     val timeUntilRecoup: Double = 0.0
 )
 
@@ -67,11 +66,7 @@ class HomeViewModel(
     val priceLoadingState = _priceLoadingState.asStateFlow()
 
     // home ui state
-    private val _homeUiState = MutableStateFlow(
-        HomeUiState(
-            loadingState = LoadingState().loadingMessage
-        )
-    )
+    private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
 
     // saved data
@@ -95,9 +90,7 @@ class HomeViewModel(
             _sunSaverRepository.getAllSolarArrays()
                 .collect { solarArraysList ->
                     if (solarArraysList.isEmpty()) {
-                        _homeUiState.value = HomeUiState(
-                            loadingState = LoadingState().loadingMessage
-                        )
+                        _homeUiState.value = HomeUiState()
                         _graphLoadingState.value = LoadingState()
                         _priceLoadingState.value = LoadingState()
                     }
@@ -174,11 +167,9 @@ class HomeViewModel(
                 loadElectricityPrices(solarArray)
 
             } catch (ex: Exception) {
-                _homeUiState.update { currentState ->
-                    currentState.copy(
-                        loadingState = "Klarte ikke å velge solcelleanlegg"
-                    )
-                }
+
+            // todo: snackbar  "Klarte ikke å velge solcelleanlegg"
+
             }
         }
     }
@@ -339,9 +330,7 @@ class HomeViewModel(
             try {
                 _sunSaverRepository.deleteSolarArray(solarArray)
             } catch (ex: Exception) {
-                _homeUiState.update {
-                    it.copy(loadingState = "Klarte ikke å slette et solcelleanlegg")
-                }
+                // todo: snackbar Klarte ikke å slette et solcelleanlegg
             }
         }
     }
