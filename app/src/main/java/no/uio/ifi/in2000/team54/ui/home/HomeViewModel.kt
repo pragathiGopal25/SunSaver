@@ -235,11 +235,6 @@ class HomeViewModel(
                         statusMessage = ""
                     )
                 }
-                _graphLoadingState.update { currentState ->
-                    currentState.copy(
-                        loadingMessage = ""
-                    )
-                }
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
@@ -297,6 +292,11 @@ class HomeViewModel(
                 )
             electricityProductionMap[solarArray] = electricityProduction.values.toList()
 
+            _graphLoadingState.update { currentState -> //
+                currentState.copy(
+                    statusMessage = ""
+                )
+            }
         } catch (e: Exception) {
             _graphLoadingState.update { currentState ->
                 currentState.copy(
