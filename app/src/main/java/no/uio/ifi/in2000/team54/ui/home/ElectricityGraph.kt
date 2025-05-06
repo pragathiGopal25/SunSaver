@@ -72,17 +72,17 @@ fun GraphContainer(
 ) {
     val homeUiState by viewModel.homeUiState.collectAsStateWithLifecycle()
     val graphLoadingState by viewModel.graphLoadingState.collectAsStateWithLifecycle()
-    if (graphLoadingState.loadingMessage != "") {
+    if (graphLoadingState.isLoading) {
         Box(modifier.fillMaxSize(), Alignment.Center) {
-            if (!graphLoadingState.isLoading) {
-                Text(text = graphLoadingState.loadingMessage)
-            } else {
-                CircularProgressIndicator(
-                    color = DarkYellow,
-                    modifier = Modifier
-                        .width(70.dp)
-                )
-            }
+            CircularProgressIndicator(
+                color = DarkYellow,
+                modifier = Modifier
+                    .width(70.dp)
+            )
+        }
+    } else if (graphLoadingState.loadingMessage != "") {
+        Box(modifier.fillMaxSize(), Alignment.Center) {
+            Text(text = graphLoadingState.loadingMessage)
         }
     } else {
         ElectricityGraph(homeUiState = homeUiState)
@@ -90,7 +90,6 @@ fun GraphContainer(
 }
 
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
-
 
 @Composable
 fun ElectricityGraph(
