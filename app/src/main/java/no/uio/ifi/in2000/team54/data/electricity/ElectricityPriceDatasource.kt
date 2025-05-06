@@ -8,13 +8,9 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import no.uio.ifi.in2000.team54.model.electricity.ElectricityPriceInfo
+import javax.inject.Inject
 
-class ElectricityPriceDatasource {
-    private val client = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json()
-        }
-    }
+class ElectricityPriceDatasource @Inject constructor(private val client: HttpClient){
 
     suspend fun getElectricityPrices(area: String, date: String): List<ElectricityPriceInfo> {
         try {
@@ -28,5 +24,5 @@ class ElectricityPriceDatasource {
             return emptyList()
         }
     }
-
+    
 }

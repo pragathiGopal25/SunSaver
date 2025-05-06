@@ -92,6 +92,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
+    implementation("androidx.activity:activity-ktx:1.10.1")
 
     androidTestImplementation(libs.hilt.android.testing)
 }

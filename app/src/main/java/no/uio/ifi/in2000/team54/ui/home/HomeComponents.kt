@@ -43,9 +43,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.SolarArray
+import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayViewModel
 import no.uio.ifi.in2000.team54.ui.theme.Background
 import no.uio.ifi.in2000.team54.ui.theme.GreyText
 import no.uio.ifi.in2000.team54.ui.theme.Light
@@ -57,7 +59,9 @@ import no.uio.ifi.in2000.team54.ui.theme.YellowText
 import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
 
 @Composable
-fun HomeScreen(homeViewModel: HomeViewModel, navController: NavController) {
+fun HomeScreen(navController: NavController) {
+    val homeViewModel = hiltViewModel<HomeViewModel>()
+
     val scroll = rememberScrollState()
 
     Column(

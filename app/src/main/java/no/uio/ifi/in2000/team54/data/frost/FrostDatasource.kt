@@ -19,17 +19,9 @@ import no.uio.ifi.in2000.team54.model.frost.ObservationData
 import no.uio.ifi.in2000.team54.model.frost.ObservationResponse
 import no.uio.ifi.in2000.team54.model.frost.SensorSystem
 import no.uio.ifi.in2000.team54.model.frost.SourceResponse
+import javax.inject.Inject
 
-class FrostDatasource {
-    private val client = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    ignoreUnknownKeys = true
-                }
-            )
-        }
-    }
+class FrostDatasource @Inject constructor(private val client: HttpClient) {
 
     // authentication
     private val raw = "b8d04ecc-dc8a-40a9-942e-2acfb8aba15d" + ":" // client id for team54@uio.no
