@@ -17,8 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import no.uio.ifi.in2000.team54.ui.theme.YellowText
 import java.util.Locale
 
 @Composable
@@ -43,7 +45,7 @@ fun TimeUntilRecouped(viewModel: HomeViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Tid til du har tjent inn din investering i solcellepaneler:")
+            Text("Du vil ha tjent tilbake investeringen din i solcellepaneler om", textAlign = TextAlign.Center)
             Spacer(Modifier.height(10.dp))
             RecoupText(uiState.timeUntilRecoup)
         }
@@ -57,15 +59,15 @@ private fun RecoupText(time: Double) {
     ) {
         Text(
             text = time.toString(),
-            color = Color.Black,
-            fontSize = 34.sp,
+            color = YellowText,
+            fontSize = 40.sp,
             fontWeight = FontWeight.Bold
         )
 
         Text(
-            text = "År",
-            color = Color.Black,
-            fontSize = 30.sp,
+            text = "år",
+            color = YellowText,
+            fontSize = 36.sp,
             fontWeight = FontWeight.Medium
         )
     }
