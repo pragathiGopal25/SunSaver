@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
 import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
@@ -376,8 +375,8 @@ class HomeViewModel @Inject constructor(
                         )
 
                         electricityPriceMap.computeIfAbsent(
-                            solarArray,
-                            { mutableMapOf() })[scope] = priceData
+                            solarArray
+                        ) { mutableMapOf() }[scope] = priceData
                     }
                 }
 

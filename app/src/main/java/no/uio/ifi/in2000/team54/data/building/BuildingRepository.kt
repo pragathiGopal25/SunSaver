@@ -19,7 +19,7 @@ class BuildingRepository @Inject constructor(private val dataSource: BuildingDat
     suspend fun getBuildingIds(address: Address): List<String> {
         val cadastreId = dataSource.getCadastreId(address) ?: return emptyList()
         val buildingIds = dataSource.getBuildingIds(cadastreId)
-        return buildingIds.filter { !it.contains("-") }!!
+        return buildingIds.filter { !it.contains("-") }
 
     }
 

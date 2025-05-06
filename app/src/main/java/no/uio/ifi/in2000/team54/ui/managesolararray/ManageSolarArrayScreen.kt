@@ -328,7 +328,7 @@ private fun ArraySettingsMainSection(
                 )
         ) {
             RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
-            ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
+            ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection) { editingRoofSection = null }
             SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
             PriceSummaryCard(solarPanelType, roofSections) //Inni denne ligger totalkosten
             SaveButton {
