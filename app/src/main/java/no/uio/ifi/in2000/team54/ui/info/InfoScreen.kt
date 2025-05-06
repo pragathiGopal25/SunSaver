@@ -51,7 +51,7 @@ fun InfoScreen() {
         ) {
             InfoScreenTopBar()
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Lær mer om solcellepaneler og solenergi.",
