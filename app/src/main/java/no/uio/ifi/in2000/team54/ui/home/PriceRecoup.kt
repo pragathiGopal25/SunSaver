@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -42,13 +41,13 @@ fun TimeUntilRecouped(viewModel: HomeViewModel) {
             )
         }
         return
-    } else if (loadingState.loadingMessage != "") {
+    } else if (loadingState.statusMessage != "") {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .height(302.dp), contentAlignment = Alignment.Center
         ) {
-            Text(text = loadingState.loadingMessage)
+            Text(text = loadingState.statusMessage)
         }
         return
     }
