@@ -1,5 +1,6 @@
 package no.uio.ifi.in2000.team54.data.building
 
+import android.util.Log
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
@@ -22,71 +23,111 @@ import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
 
-class BuildingDataSource {
+class BuildingDataSource() {
+
     private val httpClient = HttpClient(CIO) {
         install(ContentNegotiation) {
             json()
         }
     }
-    
-    suspend fun getAddressSuggestions(address: String): List<Address> {
-        val response = httpClient.get("https://ws.geonorge.no/adresser/v1/sok") {
-            parameter("sok", address)
-            parameter("fuzzy", true)
-            parameter("utkoordsys", 4258)
-            parameter("treffPerSide", 10)
-            parameter("side", 0)
-            parameter("asciiKompatibel", true)
-        }
 
-        if (response.status != HttpStatusCode.OK) {
+    suspend fun getAddressSuggestions(address: String): List<Address> {
+        try {
+            val response = httpClient.get("https://ws.geonorge.no/adresser/v1/sok") {
+                parameter("sok", address)
+                parameter("fuzzy", true)
+                parameter("utkoordsys", 4258)
+                parameter("treffPerSide", 10)
+                parameter("side", 0)
+                parameter("asciiKompatibel", true)
+            }
+
+            return if (response.status != HttpStatusCode.OK) {
+                emptyList()
+            } else {
+                response.body<AddressSuggestionsResponse>().suggestions
+            }
+
+        } catch (e: Exception) {
+            Log.e("getAddressSuggestions", "${e.message}")
             return emptyList()
         }
-
-        return response.body<AddressSuggestionsResponse>().suggestions
     }
 
     suspend fun getAddressFromPos(pos: Pos): List<Address> {
-        val response = httpClient.get("https://ws.geonorge.no/adresser/v1/punktsok") {
-            parameter("lat", pos.lat)
-            parameter("lon", pos.lon)
-            parameter("radius", 10)
-            parameter("utkoordsys", 4258)
-            parameter("side", 0)
-            parameter("asciiKompatibel", true)
-        }
+        try {
+            val response = httpClient.get("https://ws.geonorge.no/adresser/v1/punktsok") {
+                parameter("lat", pos.lat)
+                parameter("lon", pos.lon)
+                parameter("radius", 10)
+                parameter("utkoordsys", 4258)
+                parameter("side", 0)
+                parameter("asciiKompatibel", true)
+            }
 
-        if (response.status != HttpStatusCode.OK) {
+            return if (response.status != HttpStatusCode.OK) {
+                emptyList()
+            } else {
+                response.body<AddressSuggestionsResponse>().suggestions
+            }
+        } catch (e: Exception) {
+            Log.e("getAddressFromPos", "${e.message}")
             return emptyList()
         }
-
-        return response.body<AddressSuggestionsResponse>().suggestions
     }
 
     suspend fun getCadastreId(address: Address): Long? {
-        val response = httpClient.get(
-            "https://seeiendom.kartverket.no/api/matrikkelenhet/" +
-                    "${address.communityNumber}/" +
-                    "${address.cadastralNumber}/" +
-                    "${address.propertyNumber}"
-        )
+        try {
+            val response = httpClient.get(
+                "https://seeiendom.kartverket.no/api/matrikkelenhet/" +
+                        "${address.communityNumber}/" +
+                        "${address.cadastralNumber}/" +
+                        "${address.propertyNumber}"
+            )
+            return if (response.status != HttpStatusCode.OK) {
+                null
+            } else {
+                Json.parseToJsonElement(response.bodyAsText()).jsonObject["matrikkelenhetId"]?.jsonPrimitive?.long
+            }
 
-        return Json.parseToJsonElement(response.bodyAsText()).jsonObject["matrikkelenhetId"]?.jsonPrimitive?.long
+        } catch (e: Exception) {
+            Log.e("getCadastreId", "${e.message}")
+            return null
+        }
     }
 
     suspend fun getBuildingIds(cadastreId: Long): List<String> {
-        val response = httpClient.get("https://seeiendom.kartverket.no/api/bygningerForMatrikkelenhet/$cadastreId")
-        return Json.parseToJsonElement(response.bodyAsText()).jsonArray
-            .mapNotNull { it.jsonObject["bygningsnummer"] }
-            .map { it.jsonPrimitive.content }
+        try {
+            val response = httpClient.get("https://seeiendom.kartverket.no/api/bygningerForMatrikkelenhet/$cadastreId")
+            return if (response.status != HttpStatusCode.OK) {
+                emptyList()
+            } else {
+                Json.parseToJsonElement(response.bodyAsText()).jsonArray
+                    .mapNotNull { it.jsonObject["bygningsnummer"] }
+                    .map { it.jsonPrimitive.content }
+            }
+
+        } catch (e: Exception) {
+            Log.e("getBuildingIds", "${e.message}")
+            return emptyList()
+        }
     }
 
-    suspend fun getRoofSections(buildingId: String): List<MapRoofSection> {
-        val response = httpClient.get("https://sol-api.fjordkraft.no/roof-information/query-by-buildings") {
-            parameter("buildingIds", buildingId)
-        }
 
-        return response.body<RoofSectionsResponse>().roofSections
+    suspend fun getRoofSections(buildingId: String): List<MapRoofSection> {
+        try {
+            val response = httpClient.get("https://sol-api.fjordkraft.no/roof-information/query-by-buildings") {
+                parameter("buildingIds", buildingId)
+            }
+            return if (response.status != HttpStatusCode.OK) {
+                emptyList()
+            } else {
+                response.body<RoofSectionsResponse>().roofSections
+            }
+        } catch (e: Exception) {
+            Log.e("getRoofSections", "${e.message}")
+            return emptyList()
+        }
     }
 }
 

@@ -5,11 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -52,6 +53,7 @@ import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 
 val monthFormatter =
     CartesianValueFormatter { _, value, _ -> // overriding "format" method in CastertianValueFormatter
@@ -68,24 +70,31 @@ fun GraphContainer(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel
 ) {
-    val graphDataUiState by viewModel.homeUiState.collectAsStateWithLifecycle()
+    val homeUiState by viewModel.homeUiState.collectAsStateWithLifecycle()
     val graphLoadingState by viewModel.graphLoadingState.collectAsStateWithLifecycle()
-    if (graphDataUiState.electricityProductionData.isEmpty()) {
+    if (graphLoadingState.isLoading) {
         Box(modifier.fillMaxSize(), Alignment.Center) {
-            Text(text = graphLoadingState.loadingMessage)
+            CircularProgressIndicator(
+                color = DarkYellow,
+                modifier = Modifier
+                    .width(70.dp)
+            )
+        }
+    } else if (graphLoadingState.statusMessage != "") {
+        Box(modifier.fillMaxSize(), Alignment.Center) {
+            Text(text = graphLoadingState.statusMessage)
         }
     } else {
-        ElectricityGraph(graphDataUiState = graphDataUiState)
+        ElectricityGraph(homeUiState = homeUiState)
     }
 }
 
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
 
-
 @Composable
 fun ElectricityGraph(
     modifier: Modifier = Modifier,
-    graphDataUiState: HomeUiState
+    homeUiState: HomeUiState
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
@@ -93,17 +102,17 @@ fun ElectricityGraph(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        LaunchedEffect(graphDataUiState) {
+        LaunchedEffect(homeUiState) {
             modelProducer.runTransaction {
                 lineSeries {
-                    graphDataUiState.electricityProductionData.forEach { (_, list) ->
+                    homeUiState.electricityProductionData.forEach { (_, list) ->
                         series(
                             list
                         )
                     }
                 }
                 extras { extraStore ->
-                    extraStore[LegendLabelKey] = graphDataUiState.electricityProductionData.keys
+                    extraStore[LegendLabelKey] = homeUiState.electricityProductionData.keys
                 }
             }
         }
@@ -164,71 +173,6 @@ fun ElectricityGraph(
     }
 }
 
-/*
-private val LegendLabelKey = ExtraStore.Key<Set<String>>()
-@Composable
-fun ElectricityGraph2(modifier: Modifier = Modifier) {
-    val modelProducer = remember { CartesianChartModelProducer() }
-
-    LaunchedEffect(Unit) {
-        modelProducer.runTransaction {
-            lineSeries { data.forEach { (_, map) -> series(map) } }
-            extras { extraStore -> extraStore[LegendLabelKey] = data.keys }
-        }
-    }
-
-    val lineColors = listOf(Color(0xff916cda), Color(0xffd877d8))
-    val legendItemLabelComponent = rememberTextComponent(vicoTheme.textColor)
-    CartesianChartHost(
-        rememberCartesianChart(
-            rememberLineCartesianLayer(
-                LineCartesianLayer.LineProvider.series(
-                    lineColors.map { color ->
-                        LineCartesianLayer.rememberLine(
-                            fill = LineCartesianLayer.LineFill.single(fill(color)),
-                            areaFill = null,
-                            pointProvider =
-                            LineCartesianLayer.PointProvider.single(
-                                LineCartesianLayer.point(rememberShapeComponent(fill(color), CorneredShape.Pill))
-                            ),
-                        )
-                    }
-                )
-            ),
-            startAxis = VerticalAxis.rememberStart(
-                title = "Strøm produsert (kWh)",
-                titleComponent = TextComponent()
-            ),
-            bottomAxis = HorizontalAxis.rememberBottom(
-                title = "Tid (Måneder)",
-                titleComponent = TextComponent(),
-                valueFormatter = monthFormatter
-            ),
-            marker = rememberMarker(),
-            legend =
-            rememberVerticalLegend(
-                items = { extraStore ->
-                    extraStore[LegendLabelKey].forEachIndexed { index, label ->
-                        add(
-                            LegendItem(
-                                shapeComponent(fill(lineColors[index]), CorneredShape.Pill),
-                                legendItemLabelComponent,
-                                label,
-                            )
-                        )
-                    }
-                },
-                padding = insets(top = 10.dp),
-            ),
-        ),
-        modelProducer,
-        modifier.padding(10.dp).height(300.dp),
-        rememberVicoScrollState(scrollEnabled = false),
-    )
-}
-
-*/
-// copied from vicos github, some adjustments to be made
 @Composable
 fun rememberMarker(
     valueFormatter: DefaultCartesianMarker.ValueFormatter =

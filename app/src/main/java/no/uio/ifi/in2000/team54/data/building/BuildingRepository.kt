@@ -4,7 +4,8 @@ import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
 
-class BuildingRepository {
+class BuildingRepository() {
+
     private val dataSource = BuildingDataSource()
 
     suspend fun getAddressSuggestions(address: String): List<Address> {
@@ -12,17 +13,15 @@ class BuildingRepository {
     }
 
     suspend fun getNearestAddressToPos(pos: Pos): Address? {
-        val addresses = dataSource.getAddressFromPos(pos)
-        if (addresses.isEmpty()) {
-            return null
-        }
-
-        return addresses.minBy { it.distanceFromPoint }
+        val address = dataSource.getAddressFromPos(pos)
+        return address.minByOrNull { it.distanceFromPoint }
     }
 
     suspend fun getBuildingIds(address: Address): List<String> {
         val cadastreId = dataSource.getCadastreId(address) ?: return emptyList()
-        return dataSource.getBuildingIds(cadastreId).filter { !it.contains("-") }
+        val buildingIds = dataSource.getBuildingIds(cadastreId)
+        return buildingIds.filter { !it.contains("-") }!!
+
     }
 
     suspend fun getRoofSections(address: Address): List<MapRoofSection> {
@@ -31,6 +30,8 @@ class BuildingRepository {
             return emptyList()
         }
 
-        return buildingIds.flatMap { dataSource.getRoofSections(it) }.toList()
+        return buildingIds.map { id ->
+            dataSource.getRoofSections(id)
+        }.flatten()
     }
 }

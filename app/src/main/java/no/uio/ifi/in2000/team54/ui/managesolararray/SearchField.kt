@@ -82,7 +82,7 @@ fun SearchField(
                     .build()
             )
         } else {
-            searchAddress.value = ""
+            viewModel.setSearchAddress("")
         }
     }
     val selectSuggestion: (Address) -> Unit = remember {
@@ -102,9 +102,8 @@ fun SearchField(
     }
     Column {
         SearchTextField(
-            address = searchAddress.value,
+            address = addressState.value.query,
             onAddressChange = { address ->
-                searchAddress.value = address
                 viewModel.setSearchAddress(address)
             },
             onDone = {
