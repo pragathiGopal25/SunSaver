@@ -61,8 +61,8 @@ class ElectricityPriceRepository(private val datasource: ElectricityPriceDatasou
             if (days in 2..30 && i % 3 != 0) continue //Limit requests
             if (days > 30 && i % 14 != 0) continue //Limit requests
             datasource.getElectricityPrices(area, currentDate).forEach {
-                // Regner med strømstøtte som tilsvarer at du betaler 90% om prisen er > 75 øre per kwh
-                nokPerKwh.add(if (it.nokPrKiloWh > 0.75) 0.9 * it.nokPrKiloWh else it.nokPrKiloWh)
+                // Regner med strømstøtte som tilsvarer at staten dekker 90% av prisen som er over 75 øre pr kwh
+                nokPerKwh.add(if (it.nokPrKiloWh > 0.75) 0.1 * (it.nokPrKiloWh - 0.75) + 0.75 else it.nokPrKiloWh)
             }
             currentDate = decrementDate(currentDate)
         }
