@@ -88,11 +88,11 @@ enum class ArraySettingsMenuAnchors { Bottom, Top }
 
 @Composable
 fun ManageSolarArrayScreen(
+    viewModel: ManageSolarArrayViewModel,
     navController: NavController,
     snackbarState: SnackbarHostState,
     updateArray: Long? = -1L,
 ) {
-    val viewModel = hiltViewModel<ManageSolarArrayViewModel>()
 
     val solarEntity by viewModel.currentSolarArray.collectAsState()
     val roofSections = remember { mutableStateListOf<RoofSection>() }

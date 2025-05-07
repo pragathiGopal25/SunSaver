@@ -21,12 +21,14 @@ import androidx.navigation.navArgument
 import no.uio.ifi.in2000.team54.ui.composables.Snackbar
 import no.uio.ifi.in2000.team54.ui.info.InfoScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayScreen
+import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayViewModel
 
 @Composable
 fun MainScreen() {
     val navController = rememberNavController()
 
     val homeViewModel = hiltViewModel<HomeViewModel>()
+    val manageSolarArrayViewModel = hiltViewModel<ManageSolarArrayViewModel>()
 
     val snackbarState = remember { SnackbarHostState() }
     val isOnline by homeViewModel.isOnline.collectAsState(initial = true)
@@ -58,25 +60,31 @@ fun MainScreen() {
         ) {
             composable("home") {
                 HomeScreen(
-                    navController = navController,
-                    snackbarHostState = snackbarState
-                )
-            }
-            composable("home") {
-                HomeScreen(
-                    navController = navController,
-                    snackbarHostState = snackbarState
+                    homeViewModel,
+                    navController,
+                    snackbarState
                 )
             }
             composable("info") { InfoScreen() }
-            composable("managesolararray") { ManageSolarArrayScreen(navController, snackbarState) }
+            composable("managesolararray") {
+                ManageSolarArrayScreen(
+                    manageSolarArrayViewModel,
+                    navController,
+                    snackbarState
+                )
+            }
 
             composable(
                 "editsolararrays/{arrayId}",
                 arguments = listOf(navArgument("arrayId") { type = NavType.LongType })
             ) { backStackEntry ->
                 val arrayId = backStackEntry.arguments?.getLong("arrayId") ?: -1L
-                ManageSolarArrayScreen(navController, snackbarState, arrayId)
+                ManageSolarArrayScreen(
+                    manageSolarArrayViewModel,
+                    navController,
+                    snackbarState,
+                    arrayId
+                )
             }
         }
 
