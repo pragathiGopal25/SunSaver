@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
@@ -15,6 +17,7 @@ import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.Elements
+import no.uio.ifi.in2000.team54.ui.network.NetworkObserver
 import no.uio.ifi.in2000.team54.util.calculateMonthlyElectricityProduction
 import kotlin.math.round
 
@@ -24,12 +27,13 @@ data class HomeUiState(
     val priceData: PriceData = PriceData(0.0, 0.0),
     val electricityProductionData: Map<String, List<Double>> = emptyMap(),
     val timeScope: TimeScope = TimeScope.DAY,
-    val loadingState: String = "",
     val timeUntilRecoup: Double = 0.0
 )
 
 data class LoadingState(
-    val loadingMessage: String = "Ingen solanlegg er opprettet",
+    val isLoading: Boolean = false,
+    // empty means the data is already processed
+    val statusMessage: String = "Ingen solanlegg er opprettet",
 )
 
 data class PriceData(
@@ -50,7 +54,9 @@ enum class TimeScope {
     DAY, MONTH, YEAR
 }
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(
+    private val networkObserver: NetworkObserver
+) : ViewModel() {
     private val _repository = FrostRepository()
     private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
     private val electricityPriceRepository =
@@ -63,12 +69,12 @@ class HomeViewModel : ViewModel() {
     val priceLoadingState = _priceLoadingState.asStateFlow()
 
     // home ui state
-    private val _homeUiState = MutableStateFlow(
-        HomeUiState(
-            loadingState = LoadingState().loadingMessage
-        )
-    )
+    private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState = _homeUiState.asStateFlow()
+
+    // snackbar
+    private val _snackbarMessage = MutableSharedFlow<String>()
+    val snackbarMessage = _snackbarMessage.asSharedFlow()
 
     // saved data
     private val electricityProductionMap: MutableMap<SolarArray, List<Double>> = mutableMapOf()
@@ -80,16 +86,21 @@ class HomeViewModel : ViewModel() {
     private val timeScopeToDays =
         mapOf(TimeScope.DAY to 1, TimeScope.MONTH to 30, TimeScope.YEAR to 365)
 
+    private val _isOnline = MutableStateFlow(true)
+    val isOnline = _isOnline.asStateFlow()
+
     init {
+        _isOnline.value = networkObserver.isNetworkAvailable()
+        observeNetwork()
+
         viewModelScope.launch {
             _sunSaverRepository.getAllSolarArrays()
                 .collect { solarArraysList ->
                     if (solarArraysList.isEmpty()) {
-                        _homeUiState.value = HomeUiState(
-                            loadingState = LoadingState().loadingMessage
-                        )
+                        _homeUiState.value = HomeUiState()
                         _graphLoadingState.value = LoadingState()
                         _priceLoadingState.value = LoadingState()
+                        return@collect
                     }
                     var selectedSolarArray = solarArraysList.firstOrNull()
                     val savedList = _homeUiState.value.solarArrays
@@ -123,19 +134,25 @@ class HomeViewModel : ViewModel() {
 
     fun selectSolarArray(solarArray: SolarArray, isUpdated: Boolean = false) {
         viewModelScope.launch {
-            if (homeUiState.value.solarArrays.isEmpty()) return@launch
+            if (_homeUiState.value.solarArrays.isEmpty()) return@launch
+            if (_graphLoadingState.value.isLoading && _priceLoadingState.value.isLoading) {
+                _snackbarMessage.emit("Vent til data laster")
+                return@launch
+            }
             try {
-                _homeUiState.update { currentState ->
-                    currentState.copy(
-                        selectedSolarArray = solarArray,
-                        electricityProductionData = emptyMap()
-                    )
-                }
+                _homeUiState.update { it.copy(selectedSolarArray = solarArray) }
+
+                // start loading
+                _graphLoadingState.update { it.copy(isLoading = true) }
+                _priceLoadingState.update { it.copy(isLoading = true) }
 
                 val priceJob = launch {
                     // get electricity prices if the data is changed
                     if (!priceDataMap.containsKey(solarArray)) {
                         getPriceData(solarArray)
+                    } else {
+                        // in case the previous selected was failing, clear the error message
+                        _priceLoadingState.update { it.copy(statusMessage = "") }
                     }
                 }
 
@@ -147,6 +164,9 @@ class HomeViewModel : ViewModel() {
                 // recalculate if new data or data is changed
                 if (!electricityProductionMap.containsKey(solarArray) || isUpdated) {
                     useWeatherData(solarArray)
+                } else {
+                    // in case the previous selected was failing, clear the error message
+                    _graphLoadingState.update { it.copy( statusMessage = "") }
                 }
 
                 _homeUiState.update { currentState ->
@@ -157,33 +177,36 @@ class HomeViewModel : ViewModel() {
                     )
                 }
 
+                // ready to show the graph (or the error message)
+                _graphLoadingState.update { it.copy(isLoading = false) }
+
                 priceJob.join()
                 loadElectricityPrices(solarArray)
 
-            } catch (ex: Exception) {
-                _homeUiState.update { currentState ->
-                    currentState.copy(
-                        loadingState = "Klarte ikke å velge solcelleanlegg"
-                    )
-                }
+                // ready to show the prices (or error message)
+                _priceLoadingState.update { it.copy(isLoading = false) }
+
+            } catch (_: Exception) {
+
+            }
+        }
+    }
+
+    private fun observeNetwork() {
+        viewModelScope.launch {
+            networkObserver.isConnected.collectLatest { connected ->
+                _isOnline.value = connected
             }
         }
     }
 
     // asynkronisert kombinering av data
     private suspend fun getWeatherData(solarArray: SolarArray) {
-
         coroutineScope { // Starter alle kallene parallellt
             try {
-
-                _graphLoadingState.update { currentState ->
-                    currentState.copy(
-                        loadingMessage = "Henter data om været ..."
-                    )
-                }
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Henter data om været ..."
+                        isLoading = true
                     )
                 }
 
@@ -208,64 +231,53 @@ class HomeViewModel : ViewModel() {
                 weatherData.sunhours = sunhoursData
 
                 weatherDataMap[solarArray] = weatherData
-                _priceLoadingState.update { currentState ->
-                    currentState.copy(
-                        loadingMessage = ""
-                    )
-                }
-                _graphLoadingState.update { currentState ->
-                    currentState.copy(
-                        loadingMessage = ""
-                    )
-                }
+
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Klarte ikke å hente data om været"
+                        statusMessage = "Klarte ikke å hente data om været",
+                        isLoading = false
                     )
                 }
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Klarte ikke å hente data om været"
+                        statusMessage = "Klarte ikke å hente data om været",
+                        isLoading = false
                     )
                 }
-            } finally { }
+            }
         }
     }
 
     // get price data in a way that can be done async
     private suspend fun getPriceData(solarArray: SolarArray) {
-        val area = electricityPriceRepository.getPriceArea(solarArray)
-        timeScopeToDays.forEach { (scope, days) ->
-            val avgDailyElectricityPrice =
-                electricityPriceRepository.getPriceDataInterval(days, area).average()
+        try {
+            val area = electricityPriceRepository.getPriceArea(solarArray)
+            timeScopeToDays.forEach { (scope, days) ->
+                val avgDailyElectricityPrice =
+                    electricityPriceRepository.getPriceDataInterval(days, area).average()
 
-            priceDataMap.computeIfAbsent(
-                solarArray
-            ) { mutableMapOf() }[scope] = avgDailyElectricityPrice
+                priceDataMap.computeIfAbsent(
+                    solarArray
+                ) { mutableMapOf() }[scope] = avgDailyElectricityPrice
+            }
+
+            _priceLoadingState.update { currentState ->
+                currentState.copy(
+                    statusMessage = ""
+                )
+            }
+        } catch (e: Exception) {
+            _priceLoadingState.update {
+                it.copy(
+                    statusMessage = "Kunne ikke hente strømpriser",
+                    isLoading = false
+                )
+            }
         }
     }
 
-    private fun useWeatherData(solarArray: SolarArray?) {
-        if (solarArray == null) { // safety
-            _graphLoadingState.update { currentState ->
-                currentState.copy(
-                    loadingMessage = "Ingen solanlegg er opprettet"
-                )
-            }
-            _priceLoadingState.update { currentState ->
-                currentState.copy(
-                    loadingMessage = "Ingen solanlegg er opprettet"
-                )
-            }
-            _homeUiState.update { currentState ->
-                currentState.copy(
-                    electricityProductionData = emptyMap() // CLEAR the graph data here
-                )
-            }
-            return
-        }
-
+    private fun useWeatherData(solarArray: SolarArray) {
         try {
             val weatherData = weatherDataMap[solarArray]!!
             val electricityProduction: Map<String, Double> =
@@ -279,85 +291,76 @@ class HomeViewModel : ViewModel() {
                 )
             electricityProductionMap[solarArray] = electricityProduction.values.toList()
 
+            _graphLoadingState.update { currentState ->
+                currentState.copy(
+                    statusMessage = ""
+                )
+            }
         } catch (e: Exception) {
             _graphLoadingState.update { currentState ->
                 currentState.copy(
-                    loadingMessage = "Noe gikk galt med innhenting av data."
+                    statusMessage = "Noe gikk galt med innhenting av data.",
+                    isLoading = false
                 )
             }
             _priceLoadingState.update { currentState ->
                 currentState.copy(
-                    loadingMessage = "Noe gikk galt med innhenting av data."
-                )
-            }
-        } finally {
-            _priceLoadingState.update { currentState ->
-                currentState.copy(
-                    loadingMessage = ""
+                    statusMessage = "Noe gikk galt med innhenting av data.",
+                    isLoading = false
                 )
             }
         }
-
     }
 
     fun removeSolarArray(solarArray: SolarArray) {
         viewModelScope.launch {
+            if (_graphLoadingState.value.isLoading && _priceLoadingState.value.isLoading) {
+                _snackbarMessage.emit("Vent til data laster")
+                return@launch
+            }
             try {
                 _sunSaverRepository.deleteSolarArray(solarArray)
             } catch (ex: Exception) {
-                _homeUiState.update {
-                    it.copy(loadingState = "Klarte ikke å slette et solcelleanlegg")
-                }
+                _snackbarMessage.emit("Klarte ikke å slette solcelleanlegg")
             }
         }
     }
 
 
     private fun loadElectricityPrices(solarArray: SolarArray) {
-        viewModelScope.launch {
-            try {
-                _priceLoadingState.update { currentState ->
-                    currentState.copy(
-                        loadingMessage = "Laster inn strømpriser..."
-                    )
-                }
-                if (!electricityPriceMap.containsKey(solarArray)) {
-                    timeScopeToDays.forEach { (scope, days) ->
-                        val powerUsage =
-                            if (scope == TimeScope.YEAR) electricityProductionMap[solarArray]!!.average()
-                            else electricityProductionMap[solarArray]!![electricityPriceRepository.getMonth()]
+        try {
+            if (!electricityPriceMap.containsKey(solarArray)) {
+                timeScopeToDays.forEach { (scope, days) ->
+                    val powerUsage =
+                        if (scope == TimeScope.YEAR) electricityProductionMap[solarArray]!!.average()
+                        else electricityProductionMap[solarArray]!![electricityPriceRepository.getMonth()]
 
-                        val priceDataTuple = electricityPriceRepository.getPriceData(
-                            days,
-                            powerUsage,
-                            solarArray.powerConsumption,
-                            priceDataMap[solarArray]!![scope]!!
-                        )
-
-                        val priceData = PriceData(
-                            realPrice = round(priceDataTuple[1] * 100.0) / 100.0,
-                            solarPrice = round(priceDataTuple[0] * 100.0) / 100.0,
-                        )
-
-                        electricityPriceMap.computeIfAbsent(
-                            solarArray,
-                            { mutableMapOf() })[scope] = priceData
-                    }
-                }
-                seePrices(_homeUiState.value.timeScope, solarArray)
-                calculateRecoup(solarArray)
-            } catch (ex: Exception) {
-                _priceLoadingState.update { currentState ->
-                    currentState.copy(
-                        loadingMessage = "Klarte ikke å laste inn strømpriser"
+                    val priceDataTuple = electricityPriceRepository.getPriceData(
+                        days,
+                        powerUsage,
+                        solarArray.powerConsumption,
+                        priceDataMap[solarArray]!![scope]!!
                     )
-                }
-            } finally {
-                _priceLoadingState.update { currentState ->
-                    currentState.copy(
-                        loadingMessage = ""
+
+                    val priceData = PriceData(
+                        realPrice = round(priceDataTuple[1] * 100.0) / 100.0,
+                        solarPrice = round(priceDataTuple[0] * 100.0) / 100.0,
                     )
+
+                    electricityPriceMap.computeIfAbsent(
+                        solarArray,
+                        { mutableMapOf() })[scope] = priceData
                 }
+            }
+
+            seePrices(_homeUiState.value.timeScope, solarArray)
+            calculateRecoup(solarArray)
+        } catch (ex: Exception) {
+            _priceLoadingState.update { currentState ->
+                currentState.copy(
+                    statusMessage = "Klarte ikke å laste inn strømpriser",
+                    isLoading = false
+                )
             }
         }
     }
@@ -374,7 +377,8 @@ class HomeViewModel : ViewModel() {
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Klarte ikke å laste inn strømpriser"
+                        statusMessage = "Klarte ikke å laste inn strømpriser",
+                        isLoading = false
                     )
                 }
             }
@@ -393,7 +397,8 @@ class HomeViewModel : ViewModel() {
             } catch (ex: Exception) {
                 _priceLoadingState.update { currentState ->
                     currentState.copy(
-                        loadingMessage = "Kunne ikke endre tidsintervall."
+                        statusMessage = "Kunne ikke endre tidsintervall.",
+                        isLoading = false
                     )
                 }
             }

@@ -22,7 +22,7 @@ import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
 
-class ManageSolarArrayViewModel : ViewModel() {
+class ManageSolarArrayViewModel() : ViewModel() {
     private val repository: BuildingRepository = BuildingRepository()
     private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
 
@@ -48,7 +48,6 @@ class ManageSolarArrayViewModel : ViewModel() {
             try {
                 // we know the address isn't null here because we filter out all null addresses above
                 MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
-
             } catch (e: Exception) {
                 delay(1000) // delayed so that the Building API gets time to respond
                 // if it fails to get the roof information, don't display any in the map
@@ -65,11 +64,7 @@ class ManageSolarArrayViewModel : ViewModel() {
     val mapSearchAddressSuggestions = _mapSearchAddress
         .debounce(250)
         .mapLatest { state ->
-            val suggestions = try {
-                repository.getAddressSuggestions(state.query)
-            } catch (e: Exception) {
-                emptyList() // could not find any addresses for the users input
-            }
+            val suggestions = repository.getAddressSuggestions(state.query)
             AddressSuggestionsState(suggestions)
         }
         .stateIn(
@@ -83,11 +78,13 @@ class ManageSolarArrayViewModel : ViewModel() {
             address = address
         )
     }
+
     fun setSearchAddress(query: String) {
         _mapSearchAddress.value = _mapSearchAddress.value.copy(
             query = query
         )
     }
+
     // used in SearchField method, and it allows the ui to remember the map address when navigating between screens
     fun updateSolarArrayAddress(solarArray: SolarArray?) {
         // Update the search address when selecting a solar array to edit
@@ -101,6 +98,7 @@ class ManageSolarArrayViewModel : ViewModel() {
             _sunSaverRepository.addSolarArray(newSolarArray)
         }
     }
+
     fun queryAddressAtPos(pos: Pos) {
         viewModelScope.launch {
             val address = repository.getNearestAddressToPos(pos) ?: return@launch
@@ -110,13 +108,13 @@ class ManageSolarArrayViewModel : ViewModel() {
     }
 
     // To Update the roof sections and other values when user edits
-    fun updateSolarArray(newSolarArray: SolarArray){
+    fun updateSolarArray(newSolarArray: SolarArray) {
         viewModelScope.launch {
             _sunSaverRepository.updateSolarArray(newSolarArray)
         }
     }
 
-    fun getSolarArray(id: Long){
+    fun getSolarArray(id: Long) {
         viewModelScope.launch {
             _currentSolarArray.value = _sunSaverRepository.getAllSolarArrays()
                 .filter { it.isNotEmpty() }
@@ -131,15 +129,18 @@ class ManageSolarArrayViewModel : ViewModel() {
 }
 
 data class AddressState(
-    val address: Address?
+    val address: Address?,
 )
+
 data class MapRoofSectionsState(
     val roofSections: List<MapRoofSection>,
     val isError: Boolean
 )
+
 data class SearchAddressState(
     val query: String
 )
+
 data class AddressSuggestionsState(
-    val suggestions: List<Address>,
+    val suggestions: List<Address>
 )
