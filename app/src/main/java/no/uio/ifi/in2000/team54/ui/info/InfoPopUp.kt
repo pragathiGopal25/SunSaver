@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,23 +37,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import no.uio.ifi.in2000.team54.R
+import no.uio.ifi.in2000.team54.ui.info.FactDialog
 import no.uio.ifi.in2000.team54.ui.theme.Butter
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 
 @Composable
-fun PanelDialog(onDismissRequest: () -> Unit) {
-    val scroll = rememberScrollState()
+fun FactDialog(onDismissRequest: () -> Unit) {
     Dialog(onDismissRequest = onDismissRequest) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             OutlinedCard(
                 modifier = Modifier
-                    .height(394.dp)
+                    .height(391.dp)
                     .width(325.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.outlinedCardColors(containerColor = Butter)
@@ -60,7 +62,7 @@ fun PanelDialog(onDismissRequest: () -> Unit) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(8.dp)
+                        .padding(13.dp)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -71,30 +73,31 @@ fun PanelDialog(onDismissRequest: () -> Unit) {
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold
                         )
+                        Spacer(Modifier.height(3.dp))
                         Image(
                             painter = painterResource(R.drawable.panel_info),
                             contentDescription = null,
-                            contentScale = ContentScale.Fit,
+                            contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .height(193.dp)
-                                .width(247.dp)
+                                .height(120.dp)
+                                .width(250.dp)
+                                .clip(RoundedCornerShape(16.dp))
                         )
-                        Spacer(Modifier.padding(3.dp))
+                        Spacer(Modifier.height(11.dp))
                     }
 
                     Column(
                         modifier = Modifier
-                            .weight(1f)
-                            .verticalScroll(scroll)
-                            .padding(top = 8.dp),
-                        horizontalAlignment = Alignment.Start
+                            .width(300.dp)
+                            .padding(start = 10.dp, end = 7.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
                             text = "Solcellepaneler omdanner sollys direkte til " +
                                     "elektrisk energi ved hjelp av halvledermaterialer, " +
                                     "vanligvis silisium.",
                             modifier = Modifier
-                                .padding(9.dp)
+                                .padding(11.dp)
                                 .fillMaxWidth()
                         )
 
@@ -102,14 +105,14 @@ fun PanelDialog(onDismissRequest: () -> Unit) {
                             text = "Panelene installeres ofte på hustak eller åpne arealer for " +
                                     "å fange mest mulig sollys.",
                             modifier = Modifier
-                                .padding(9.dp)
+                                .padding(11.dp)
                                 .fillMaxWidth()
                         )
                         Text(
                             text = "Solenergien brukes enten direkte hjemmet eller mates inn i" +
                                     " strømnettet.",
                             modifier = Modifier
-                                .padding(9.dp)
+                                .padding(11.dp)
                                 .fillMaxWidth()
                         )
                     }
@@ -331,5 +334,5 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
 @Composable
 fun DialogPreview() {
     var showDialog by remember { mutableStateOf(false) }
-    SolarDialog(onDismissRequest = { showDialog = false })
+    FactDialog(onDismissRequest = { showDialog = false })
 }

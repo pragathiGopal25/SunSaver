@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -26,11 +27,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.patrykandpatrick.vico.compose.common.shape.rounded
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.Butter
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
@@ -39,7 +43,7 @@ import no.uio.ifi.in2000.team54.ui.theme.YellowText
 @Composable
 fun InfoScreen(navController: NavController) {
 
-    var showPanelDialog by remember { mutableStateOf(false) }
+    var showFactDialog by remember { mutableStateOf(false) }
     var showSolarDialog by remember { mutableStateOf(false) }
 //  var showOnboardDialog by remember { mutableStateOf(false) }
     Box (
@@ -81,7 +85,7 @@ fun InfoScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth(). padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                PanelInfo(modifier = Modifier.weight(1f), onClick = { showPanelDialog = true })
+                SolarFacts(modifier = Modifier.weight(1f), onClick = { showFactDialog = true })
 
                 SupplierInfo(modifier = Modifier.weight(1f), onClick = { navController.navigate("supplier")})
             }
@@ -95,8 +99,8 @@ fun InfoScreen(navController: NavController) {
             }
         }
     }
-    if (showPanelDialog) {
-        PanelDialog(onDismissRequest = { showPanelDialog = false })
+    if (showFactDialog) {
+        FactDialog(onDismissRequest = { showFactDialog = false })
     }
 
     if (showSolarDialog) {
@@ -135,7 +139,7 @@ fun InfoScreenTopBar() {
 }
 
 @Composable
-fun PanelInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun SolarFacts(modifier: Modifier = Modifier, onClick: () -> Unit) {
     OutlinedCard( modifier = modifier
         .height(200.dp)
         .width(200.dp)
@@ -163,9 +167,8 @@ fun PanelInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
 
             Image(
                 painter = painterResource(R.drawable.solarpanel),
-                contentDescription = "Solcellepanel",
-                modifier = Modifier
-                    .size(75.dp)
+                contentDescription = null,
+                modifier = Modifier.size(75.dp)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
