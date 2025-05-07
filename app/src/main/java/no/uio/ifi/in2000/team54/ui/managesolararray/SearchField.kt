@@ -90,17 +90,30 @@ fun SearchField(
     }
     val selectSuggestion: (Address) -> Unit = remember {
         { suggestion ->
-            viewModel.setSearchAddress(suggestion.toFormatted())
-            viewModel.setMapAddress(suggestion)
+            val selectedAddress = suggestion.toFormatted()
+            val currentAddress = addressState.value.query
 
-            scope.launch {
-                draggableState.animateTo(ArraySettingsMenuAnchors.Bottom)
-                mapViewportState.easeTo(
-                    CameraOptions.Builder()
-                        .center(suggestion.pos.toPoint())
-                        .zoom(19.0)
-                        .build()
-                )
+            //  only show snackbar if suggested address is different than the one in the searchfield
+            if (solarEntity != null && selectedAddress != currentAddress) {
+                if (!snackbarShown.value) {
+                    snackbarShown.value = true
+                    scope.launch {
+                        snackbarState.showSnackbar("Du kan ikke endre adressen når du redigerer et eksisterende solcelleanlegg.")
+                    }
+                }
+            } else {
+                viewModel.setSearchAddress(suggestion.toFormatted())
+                viewModel.setMapAddress(suggestion)
+
+                scope.launch {
+                    draggableState.animateTo(ArraySettingsMenuAnchors.Bottom)
+                    mapViewportState.easeTo(
+                        CameraOptions.Builder()
+                            .center(suggestion.pos.toPoint())
+                            .zoom(19.0)
+                            .build()
+                    )
+                }
             }
         }
     }
