@@ -149,7 +149,7 @@ class HomeViewModel @Inject constructor(
 
                 val priceJob = launch {
                     // get electricity prices if the data is changed
-                    if (!priceDataMap.containsKey(solarArray) || isUpdated) {
+                    if (!priceDataMap.containsKey(solarArray)) {
                         getPriceData(solarArray)
                     } else {
                         // in case the previous selected was failing, clear the error message
@@ -157,8 +157,8 @@ class HomeViewModel @Inject constructor(
                     }
                 }
 
-                // get frost data if the data is changed //
-                if (!weatherDataMap.containsKey(solarArray) || isUpdated) {
+                // get frost data if the data is changed
+                if (!weatherDataMap.containsKey(solarArray)) {
                     getWeatherData(solarArray)
                 }
 

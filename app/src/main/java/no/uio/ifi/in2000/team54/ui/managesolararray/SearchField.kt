@@ -23,10 +23,10 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.model.building.Address
@@ -57,7 +56,7 @@ import no.uio.ifi.in2000.team54.ui.theme.Light
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SearchField(
-    mapState: MapState,
+    snackbarState: SnackbarHostState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
     viewModel: ManageSolarArrayViewModel,
@@ -69,8 +68,8 @@ fun SearchField(
     val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsStateWithLifecycle()
     var showSuggestions by remember { mutableStateOf(false) }
     // Use the address from the selected solar array or the search address
-    val searchAddress = remember { mutableStateOf(addressState.value.query) }
     val solarEntity by viewModel.currentSolarArray.collectAsStateWithLifecycle()
+    val snackbarShown = remember { mutableStateOf(false) } // to prevent showing snackbar everytime the cursor moves on the search field
 
     // recomposes everytime there is a change in the solar entity
     LaunchedEffect(solarEntity) {
@@ -88,16 +87,30 @@ fun SearchField(
     }
     val selectSuggestion: (Address) -> Unit = remember {
         { suggestion ->
-            viewModel.setSearchAddress(suggestion.toFormatted())
-            viewModel.setMapAddress(suggestion)
-            scope.launch {
-                draggableState.animateTo(ArraySettingsMenuAnchors.Bottom)
-                mapViewportState.easeTo(
-                    CameraOptions.Builder()
-                        .center(suggestion.pos.toPoint())
-                        .zoom(19.0)
-                        .build()
-                )
+            val selectedAddress = suggestion.toFormatted()
+            val currentAddress = addressState.value.query
+
+            //  only show snackbar if suggested address is different than the one in the searchfield
+            if (solarEntity != null && selectedAddress != currentAddress) {
+                if (!snackbarShown.value) {
+                    snackbarShown.value = true
+                    scope.launch {
+                        snackbarState.showSnackbar("Du kan ikke endre adressen når du redigerer et eksisterende solcelleanlegg.")
+                    }
+                }
+            } else {
+                viewModel.setSearchAddress(suggestion.toFormatted())
+                viewModel.setMapAddress(suggestion)
+
+                scope.launch {
+                    draggableState.animateTo(ArraySettingsMenuAnchors.Bottom)
+                    mapViewportState.easeTo(
+                        CameraOptions.Builder()
+                            .center(suggestion.pos.toPoint())
+                            .zoom(19.0)
+                            .build()
+                    )
+                }
             }
         }
     }
@@ -105,7 +118,16 @@ fun SearchField(
         SearchTextField(
             address = addressState.value.query,
             onAddressChange = { address ->
-                viewModel.setSearchAddress(address)
+                if (solarEntity != null) {
+                    if (!snackbarShown.value) {
+                        snackbarShown.value = true
+                        scope.launch {
+                            snackbarState.showSnackbar("Du kan ikke endre adressen når du redigerer et eksisterende solcelleanlegg.")
+                        }
+                    }
+                } else {
+                    viewModel.setSearchAddress(address)
+                }
             },
             onDone = {
                 keyboardController?.hide()
@@ -118,6 +140,8 @@ fun SearchField(
                     scope.launch {
                         draggableState.animateTo(ArraySettingsMenuAnchors.Top)
                     }
+                } else {
+                     snackbarShown.value = false
                 }
             }
         )

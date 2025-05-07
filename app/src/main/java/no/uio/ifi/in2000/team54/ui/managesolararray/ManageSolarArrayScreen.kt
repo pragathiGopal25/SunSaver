@@ -44,7 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -315,7 +314,7 @@ private fun ArraySettingsMainSection(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DragHandle(draggableState)
-        SearchField(mapState, mapViewportState, draggableState, viewModel)
+        SearchField(snackbarState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(15.dp),
