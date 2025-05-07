@@ -67,13 +67,13 @@ fun PriceContainer(viewModel: HomeViewModel) {
             )
         }
         return
-    } else if (loadingState.loadingMessage != "") {
+    } else if (loadingState.statusMessage != "") {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .height(302.dp), contentAlignment = Alignment.Center
         ) {
-            Text(text = loadingState.loadingMessage)
+            Text(text = loadingState.statusMessage)
         }
         return
     }
