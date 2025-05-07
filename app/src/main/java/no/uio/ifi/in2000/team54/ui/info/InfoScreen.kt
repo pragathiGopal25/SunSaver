@@ -29,19 +29,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.Butter
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 
 
 @Composable
-fun InfoScreen() {
+fun InfoScreen(navController: NavController) {
 
     var showPanelDialog by remember { mutableStateOf(false) }
     var showSolarDialog by remember { mutableStateOf(false) }
-//  var showSupplierDialog by remember { mutableStateOf(false) }
 //  var showOnboardDialog by remember { mutableStateOf(false) }
     Box (
         Modifier
@@ -84,7 +83,7 @@ fun InfoScreen() {
             ) {
                 PanelInfo(modifier = Modifier.weight(1f), onClick = { showPanelDialog = true })
 
-                SupplierCard(modifier = Modifier.weight(1f))
+                SupplierInfo(modifier = Modifier.weight(1f), onClick = { navController.navigate("supplier")})
             }
             Spacer(modifier = Modifier.height(30.dp))
             Row(
@@ -103,6 +102,7 @@ fun InfoScreen() {
     if (showSolarDialog) {
         SolarDialog(onDismissRequest = { showSolarDialog = false })
     }
+
 }
 
 @Composable
@@ -135,7 +135,7 @@ fun InfoScreenTopBar() {
 }
 
 @Composable
-fun PanelInfo(modifier: Modifier = Modifier,   onClick: () -> Unit) {
+fun PanelInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
     OutlinedCard( modifier = modifier
         .height(200.dp)
         .width(200.dp)
@@ -182,10 +182,11 @@ fun PanelInfo(modifier: Modifier = Modifier,   onClick: () -> Unit) {
 }
 
 @Composable
-fun SupplierCard(modifier: Modifier = Modifier) {
+fun SupplierInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
     OutlinedCard( modifier = modifier
         .height(200.dp)
-        .width(200.dp),
+        .width(200.dp)
+        .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = Butter)
 
@@ -319,10 +320,3 @@ fun GetStarted(modifier: Modifier = Modifier) {
     }
 }
 
-
-
-@Preview(showBackground = true)
-@Composable
-fun InfoPreview() {
-    InfoScreen()
-}
