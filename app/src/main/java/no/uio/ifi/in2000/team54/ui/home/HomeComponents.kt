@@ -245,7 +245,7 @@ fun SolarArrayCard(
                 }
             }
             Image(
-                painter = painterResource(R.drawable.`house.png`),
+                painter = painterResource(R.drawable.house),
                 contentDescription = "Hus med solcelleplaneter",
                 modifier = Modifier
                     .fillMaxWidth()
