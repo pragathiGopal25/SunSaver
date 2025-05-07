@@ -40,7 +40,7 @@ import no.uio.ifi.in2000.team54.ui.theme.YellowText
 fun InfoScreen() {
 
     var showPanelDialog by remember { mutableStateOf(false) }
- // var showSolarDialog by remember { mutableStateOf(false) }
+    var showSolarDialog by remember { mutableStateOf(false) }
 //  var showSupplierDialog by remember { mutableStateOf(false) }
 //  var showOnboardDialog by remember { mutableStateOf(false) }
     Box (
@@ -82,10 +82,7 @@ fun InfoScreen() {
                 modifier = Modifier.fillMaxWidth(). padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                PanelInfo(
-                    modifier = Modifier.weight(1f),
-                    onClick = { showPanelDialog = true }
-                )
+                PanelInfo(modifier = Modifier.weight(1f), onClick = { showPanelDialog = true })
 
                 SupplierCard(modifier = Modifier.weight(1f))
             }
@@ -94,13 +91,17 @@ fun InfoScreen() {
                 modifier = Modifier.fillMaxWidth() .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                SolarEnergyCard(modifier = Modifier.weight(1f))
+                SolarInfo(modifier = Modifier.weight(1f), onClick = { showSolarDialog = true })
                 GetStarted(modifier = Modifier.weight(1f))
             }
         }
     }
     if (showPanelDialog) {
         PanelDialog(onDismissRequest = { showPanelDialog = false })
+    }
+
+    if (showSolarDialog) {
+        SolarDialog(onDismissRequest = { showSolarDialog = false })
     }
 }
 
@@ -161,7 +162,7 @@ fun PanelInfo(modifier: Modifier = Modifier,   onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Image(
-                painter = painterResource(R.drawable.solapanel),
+                painter = painterResource(R.drawable.solarpanel),
                 contentDescription = "Solcellepanel",
                 modifier = Modifier
                     .size(75.dp)
@@ -228,10 +229,11 @@ fun SupplierCard(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SolarEnergyCard(modifier: Modifier = Modifier) {
+fun SolarInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
     OutlinedCard( modifier = modifier
         .height(200.dp)
-        .width(200.dp),
+        .width(200.dp)
+        .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = Butter)
 
