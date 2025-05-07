@@ -143,7 +143,7 @@ fun HomeScreenTopBar() {
             }
 
             Image(
-                painter = painterResource(R.drawable.mediumsizelogo),
+                painter = painterResource(R.drawable.logo_medium),
                 contentDescription = null,
                 modifier = Modifier
                     .size(120.dp)
@@ -218,7 +218,7 @@ fun SolarArrayCard(
                         .size(35.dp)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.delete),
+                        painter = painterResource(id = R.drawable.delete_icon),
                         modifier = Modifier
                             .padding(top = 2.dp, end = 7.dp, start = 5.dp)
                             .size(30.dp),
@@ -238,14 +238,14 @@ fun SolarArrayCard(
                         .clip(RoundedCornerShape(20.dp))
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.circle),
+                        painter = painterResource(id = R.drawable.edit_icon),
                         contentDescription = "Redigere Anlegg",
                         tint = Color.Unspecified // if you don't want to tint it
                     )
                 }
             }
             Image(
-                painter = painterResource(R.drawable.house),
+                painter = painterResource(R.drawable.`house.png`),
                 contentDescription = "Hus med solcelleplaneter",
                 modifier = Modifier
                     .fillMaxWidth()

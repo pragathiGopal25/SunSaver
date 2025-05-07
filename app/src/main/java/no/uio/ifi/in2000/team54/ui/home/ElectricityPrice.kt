@@ -99,11 +99,11 @@ fun PriceContainer(viewModel: HomeViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                ExpensesStatBox(false, "${uiState.priceData.realPrice}", R.drawable.withoutsolar)
+                ExpensesStatBox(false, "${uiState.priceData.realPrice}", R.drawable.no_solararray)
                 Spacer(Modifier.padding(7.dp))
                 ExpensesStatBox(true, "${uiState.priceData.saved}", R.drawable.coin)
                 Spacer(Modifier.padding(7.dp))
-                ExpensesStatBox(false, "${uiState.priceData.solarPrice}", R.drawable.solar)
+                ExpensesStatBox(false, "${uiState.priceData.solarPrice}", R.drawable.solararray)
             }
             Spacer(Modifier.padding(8.dp))
             val timePerspective = mapOf(
