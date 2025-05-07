@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapState
@@ -93,7 +94,7 @@ fun ManageSolarArrayScreen(
     updateArray: Long? = -1L,
 ) {
 
-    val solarEntity by viewModel.currentSolarArray.collectAsState()
+    val solarEntity by viewModel.currentSolarArray.collectAsStateWithLifecycle()
     val roofSections = remember { mutableStateListOf<RoofSection>() }
     val solarPanelType = rememberSaveable {
         mutableStateOf(solarEntity?.panelType ?: SolarPanelType.ECONOMY)
@@ -301,10 +302,10 @@ private fun ArraySettingsMainSection(
     roofSections: SnapshotStateList<RoofSection>,
     onSelectPanelType: (SolarPanelType) -> Unit,
 ) {
-    val addressState by viewModel.mapAddress.collectAsState()
+    val addressState by viewModel.mapAddress.collectAsStateWithLifecycle()
     var editingRoofSection by remember { mutableStateOf<Int?>(null) }
     var openSaveDialog by remember { mutableStateOf(false) }
-    val solarEntity by viewModel.currentSolarArray.collectAsState()
+    val solarEntity by viewModel.currentSolarArray.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
     val scroll = rememberScrollState()

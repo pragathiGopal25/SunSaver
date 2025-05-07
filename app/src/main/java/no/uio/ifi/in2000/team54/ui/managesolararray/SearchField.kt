@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
@@ -64,12 +65,12 @@ fun SearchField(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
-    val addressState = viewModel.mapSearchAddress.collectAsState()
-    val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsState()
+    val addressState = viewModel.mapSearchAddress.collectAsStateWithLifecycle()
+    val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsStateWithLifecycle()
     var showSuggestions by remember { mutableStateOf(false) }
     // Use the address from the selected solar array or the search address
     val searchAddress = remember { mutableStateOf(addressState.value.query) }
-    val solarEntity by viewModel.currentSolarArray.collectAsState()
+    val solarEntity by viewModel.currentSolarArray.collectAsStateWithLifecycle()
 
     // recomposes everytime there is a change in the solar entity
     LaunchedEffect(solarEntity) {

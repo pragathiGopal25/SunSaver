@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.SolarArray
@@ -157,7 +158,7 @@ fun HomeScreenTopBar() {
 
 @Composable
 fun SolarArrayList(homeViewModel: HomeViewModel, navController: NavController) {
-    val homeUiState = homeViewModel.homeUiState.collectAsState()
+    val homeUiState = homeViewModel.homeUiState.collectAsStateWithLifecycle()
 
     Box(
         modifier = Modifier
@@ -182,7 +183,7 @@ fun SolarArrayCard(
     viewModel: HomeViewModel,
     navController: NavController
 ) {
-    val uiState by viewModel.homeUiState.collectAsState()
+    val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
     val baseModifier = Modifier
         .width(200.dp)
         .height(250.dp)
@@ -308,7 +309,7 @@ fun NoSolarArrayCard() {
 
 @Composable
 fun SelectedSolarArrayTitle(viewModel: HomeViewModel) {
-    val uiState by viewModel.homeUiState.collectAsState()
+    val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
