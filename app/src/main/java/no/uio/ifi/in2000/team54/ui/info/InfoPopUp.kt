@@ -108,13 +108,7 @@ fun FactDialog(onDismissRequest: () -> Unit) {
                                 .padding(11.dp)
                                 .fillMaxWidth()
                         )
-                        Text(
-                            text = "Solenergien brukes enten direkte hjemmet eller mates inn i" +
-                                    " strømnettet.",
-                            modifier = Modifier
-                                .padding(11.dp)
-                                .fillMaxWidth()
-                        )
+
                     }
                 }
             }
@@ -151,8 +145,8 @@ fun FactDialog(onDismissRequest: () -> Unit) {
 
 @Composable
 fun SolarDialog(onDismissRequest: () -> Unit) {
-    val scrollTopCard = rememberScrollState()
-    val scrollBottomCard = rememberScrollState()
+    val scroll= rememberScrollState()
+
     Dialog(onDismissRequest = onDismissRequest) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
@@ -171,7 +165,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().verticalScroll(scroll)
                     ) {
                         Text(
                             text = "Hvorfor er solcellepaneler bra for miljøet?",
@@ -185,9 +179,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                 .padding(5.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .width(395.dp)
-                                .height(140.dp)
-                                .verticalScroll(scrollTopCard),
-
+                                .height(258.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(
                                 contentColor = Color.Black,
@@ -240,9 +232,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                 .padding(5.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .width(395.dp)
-                                .height(230.dp)
-                                .verticalScroll(scrollBottomCard),
-
+                                .height(336.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(
                                 contentColor = Color.Black,
