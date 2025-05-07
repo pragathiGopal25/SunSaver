@@ -65,7 +65,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapState
@@ -263,30 +262,29 @@ private fun ArraySettingsContent(
             viewModel,
             solarPanelType.value,
             roofSections,
-            { selectedType ->
-                solarPanelType.value = selectedType
+        ) { selectedType ->
+            solarPanelType.value = selectedType
 
-                // we need to clamp each roof section's amount of panels to the max amount of panels
-                // the roof section has space for, this is necessary when changing solar panel type
-                // because the different types are different sizes
-                roofSections.forEach { roofSection ->
-                    val maxPanelAmount = (roofSection.area / solarPanelType.value.area()).toInt()
-                    if (roofSection.panels <= maxPanelAmount) {
-                        return@forEach
-                    }
-
-                    // we need to create a new RoofSection object to trigger a re-render by the state changing
-                    roofSections[roofSections.indexOf(roofSection)] = RoofSection(
-                        roofSection.id,
-                        roofSection.area,
-                        roofSection.incline,
-                        roofSection.direction,
-                        maxPanelAmount,
-                        roofSection.mapId
-                    )
+            // we need to clamp each roof section's amount of panels to the max amount of panels
+            // the roof section has space for, this is necessary when changing solar panel type
+            // because the different types are different sizes
+            roofSections.forEach { roofSection ->
+                val maxPanelAmount = (roofSection.area / solarPanelType.value.area()).toInt()
+                if (roofSection.panels <= maxPanelAmount) {
+                    return@forEach
                 }
-            },
-        )
+
+                // we need to create a new RoofSection object to trigger a re-render by the state changing
+                roofSections[roofSections.indexOf(roofSection)] = RoofSection(
+                    roofSection.id,
+                    roofSection.area,
+                    roofSection.incline,
+                    roofSection.direction,
+                    maxPanelAmount,
+                    roofSection.mapId
+                )
+            }
+        }
     }
 }
 

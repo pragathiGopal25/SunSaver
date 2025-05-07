@@ -16,13 +16,6 @@ class BuildingRepository @Inject constructor(private val dataSource: BuildingDat
         return address.minByOrNull { it.distanceFromPoint }
     }
 
-    suspend fun getBuildingIds(address: Address): List<String> {
-        val cadastreId = dataSource.getCadastreId(address) ?: return emptyList()
-        val buildingIds = dataSource.getBuildingIds(cadastreId)
-        return buildingIds.filter { !it.contains("-") }
-
-    }
-
     suspend fun getRoofSections(address: Address): List<MapRoofSection> {
         val buildingIds = getBuildingIds(address)
         if (buildingIds.isEmpty()) {
@@ -32,5 +25,12 @@ class BuildingRepository @Inject constructor(private val dataSource: BuildingDat
         return buildingIds.map { id ->
             dataSource.getRoofSections(id)
         }.flatten()
+    }
+
+    private suspend fun getBuildingIds(address: Address): List<String> {
+        val cadastreId = dataSource.getCadastreId(address) ?: return emptyList()
+        val buildingIds = dataSource.getBuildingIds(cadastreId)
+        return buildingIds.filter { !it.contains("-") }
+
     }
 }
