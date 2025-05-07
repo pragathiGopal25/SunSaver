@@ -252,7 +252,7 @@ class HomeViewModel(
     // get price data in a way that can be done async
     private suspend fun getPriceData(solarArray: SolarArray) {
         try {
-            val area = electricityPriceRepository.getPriceArea(solarArray)
+            val area = electricityPriceRepository.getPriceArea(solarArray.coordinates)
             timeScopeToDays.forEach { (scope, days) ->
                 val avgDailyElectricityPrice =
                     electricityPriceRepository.getPriceDataInterval(days, area).average()
