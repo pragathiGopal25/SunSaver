@@ -56,11 +56,18 @@ fun MainScreen() {
             startDestination = "home",
             modifier = Modifier.padding(innerpadding)
         ) {
-            composable("home") { HomeScreen(
-                navController = navController,
-                snackbarHostState = snackbarState
-            )}
-            composable("home") { HomeScreen(navController = navController) }
+            composable("home") {
+                HomeScreen(
+                    navController = navController,
+                    snackbarHostState = snackbarState
+                )
+            }
+            composable("home") {
+                HomeScreen(
+                    navController = navController,
+                    snackbarHostState = snackbarState
+                )
+            }
             composable("info") { InfoScreen() }
             composable("managesolararray") { ManageSolarArrayScreen(navController, snackbarState) }
 
