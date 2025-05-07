@@ -92,29 +92,48 @@ class HomeViewModelUnitTest {
             "12" to 1.0
         )
 
+         val monthlySunhours = mapOf( // todo: Get from datasource!!
+            "01" to 74.0,
+            "02" to 90.0,
+            "03" to 150.0,
+            "04" to 200.0,
+            "05" to 210.0,
+            "06" to 230.0,
+            "07" to 210.0,
+            "08" to 180.0,
+            "09" to 150.0,
+            "10" to 90.0,
+            "11" to 60.0,
+            "12" to 55.0
+        )
+
+
         // act
         val expectedResult = mapOf(
-            "01" to 0.0703444,
-            "02" to 0.085554,
-            "03" to 0.14259,
-            "04" to 0.19012,
-            "05" to 0.19962600000000003,
-            "06" to 0.218638,
-            "07" to 0.19962600000000003,
-            "08" to 0.171108,
-            "09" to 0.14259,
-            "10" to 0.085554,
-            "11" to 0.05703600000000001,
-            "12" to 0.05228300000000001
+            "01" to 0.021734876042879995,
+            "02" to 0.026434308700799998,
+            "03" to 0.046930475592000004,
+            "04" to 0.062573967456,
+            "05" to 0.0657026658288,
+            "06" to 0.0719600625744,
+            "07" to 0.0657026658288,
+            "08" to 0.0563165707104,
+            "09" to 0.046930475592000004,
+            "10" to 0.0281582853552,
+            "11" to 0.017622872467200002,
+            "12" to 0.016154299761600002
         )
+
         val result = calculateMonthlyElectricityProduction(
             monthlyCloud = monthlyCloud,
             monthlySnow = monthlySnow,
             monthlyRadiance = monthlyRadiance,
             monthlyTemperatures = monthlyTemps,
-            solarArray = testArray,
-            monthlySunhours = emptyMap() // todo: fix
+            monthlySunhours = monthlySunhours,
+            solarArray = testArray
         )
+
+        println(result.toString())
 
         // assert
         expectedResult.forEach {
