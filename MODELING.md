@@ -126,7 +126,7 @@ classDiagram
     %% SunSaver
     class SunSaverRepository {
         - datasource: ISunSaverDatasource
-        + getAllSolarArrays(): Flow~list of SolarArray~
+        + getAllSolarArrays() Flow~list of SolarArray~
         + addSolarArray(SolarArray)
         + deleteSolarArray(SolarArray)
         + updateSolarArray(SolarArray)
@@ -139,9 +139,51 @@ classDiagram
         + update(SolarArrayWithRoofSections)
     }
     
-    SunSaverRepository -- SunSaverDatasource: lagrer og henter data
-    ManageSolarArrayViewModel -- SunSaverRepository: lagrer og henter data
-    HomeViewModel -- SunSaverRepository: lagrer og henter data
+    class SunSaverDatabase {
+        <<Abstract>>
+        + sunSaverDao() SunSaverDao
+    }
+
+    class SunSaverDao {
+        <<Interface>>
+        + insertSolarArray(SolarArrayEntity) Long
+        + insertRoofSections(List~RoofSectionEntity~)
+        + getAllSolarArrays() Flow~ list of SolarArrayWithRoofSections~
+        + delete(SolarArrayEntity)
+        + updateSolarArray(SolarArrayEntity)
+        + updateRoofSections(List~RoofSectionEntity~)
+        + deleteRoofSections(List~RoofSectionEntity~)
+        + getRoofSectionBySolarArrayId(Long) List~RoofSectionEntity~
+    }
+
+    class RoomDatabase {
+    }
+
+    SunSaverDatabase --|> RoomDatabase
+    SunSaverDatabase -- SunSaverDao
+    SunSaverDatasource -- SunSaverDao
+    SunSaverRepository -- ISunSaverDatasource: lagrer og henter data
+    ManageSolarArrayViewModel -- ISunSaverRepository: lagrer og henter data
+    HomeViewModel -- ISunSaverRepository: lagrer og henter data
+
+    class ISunSaverRepository {
+        <<Interface>>
+        + getAllSolarArrays() Flow~list of SolarArray~
+        + addSolarArray(SolarArray)
+        + deleteSolarArray(SolarArray)
+        + updateSolarArray(SolarArray)
+    }
+    ISunSaverRepository <|.. SunSaverRepository
+
+    class ISunSaverDatasource {
+        <<Interface>>
+        + insert(SolarArrayWithRoofSections) Long
+        + getAllSolarArrays(): Flow~list of SolarArrayWithRoofSections~
+        + delete(SolarArrayWithRoofSections)
+        + update(SolarArrayWithRoofSections)
+    }
+    ISunSaverDatasource <|.. SunSaverDatasource
+
    
 
     %% Building 
@@ -166,18 +208,14 @@ classDiagram
 
     %% should also include database's implementation somehow 
     %% probably just include abstract class sunSaverDatabase with its entities and dao
-
-    
-
-
-
 ```
 
 Kommentarer: 
 - Siden Mermaid og markdown ikke støttet to <> inni hverandre, har jeg brukt "of" i disse tilfellene. For eksempel Flow&lt;list of SolarArray&gt;. 
 - HomeViewModel ble veldig stor. Det er fordi den håndterer mye data, og har StateFlows (som i god praksis krever en privat mutable versjon og offentlig immutable)
+- Om databasen: Vi lager en abstrakt klasse SunSaverDatabase som arver fra RoomDatabase, og Room-biblioteket fikser implementasjonen for oss. Vi inkluderte RoomDatabase for å vise arv, men den er tom siden den kommer fra Room-biblioteket. 
 
-Vi hadde også to interface til: en for SunSaverRepository og en for SunSaverDatasource. Siden de implementeres kun av en klasse, så har de ikke så stor verdi i klassediagrammet, men de gjør diagrammet mye mindre oversiktlig. Derfor ble de utelatt fra diagrammet. 
+Lekeplass: 
 ```mermaid
 classDiagram
     class SunSaverDatasource {
@@ -191,7 +229,37 @@ classDiagram
         <<Interface>>
     }
     SunSaverRepositoryI <|.. SunSaverRepository
+
+    class SunSaverDatasourceI {
+        <<Interface>>
+    }
     SunSaverDatasourceI <|.. SunSaverDatasource
+
+
+
+    class SunSaverDatabase {
+        <<Abstract>>
+        + sunSaverDao() SunSaverDao
+    }
+
+    class SunSaverDao {
+        <<Interface>>
+        + insertSolarArray(SolarArrayEntity) Long
+        + insertRoofSections(List~RoofSectionEntity~)
+        + getAllSolarArrays() Flow~ list of SolarArrayWithRoofSections~
+        + delete(SolarArrayEntity)
+        + updateSolarArray(SolarArrayEntity)
+        + updateRoofSections(List~RoofSectionEntity~)
+        + deleteRoofSections(List~RoofSectionEntity~)
+        + getRoofSectionBySolarArrayId(Long) List~RoofSectionEntity~
+    }
+
+    class RoomDatabase {
+    }
+
+    SunSaverDatabase --|> RoomDatabase
+    SunSaverDatabase -- SunSaverDao
+    SunSaverDatasource -- SunSaverDao
 ```
 Homeviewmodel data classes
 - HomeUiState
@@ -212,45 +280,45 @@ classDiagram
     +IRRADIATION
     }
     class SolarArray {
-        +id: Long
-        +name: String
-        +panelType: SolarPanelType
-        +roofSections: RoofSection
-        +coordinates: Coordinates
-        +powerConsumption: Double
-        +address: String
+        + id: Long
+        + name: String
+        + panelType: SolarPanelType
+        + roofSections: RoofSection
+        + coordinates: Coordinates
+        + powerConsumption: Double
+        + address: String
     }
 
     class RoofSection {
-        +id: Long?
-        +area: Double
-        +incline: Double
-        +direction: Double
-        +panels: Int
-        +mapId: String?
+        + id: Long?
+        + area: Double
+        + incline: Double
+        + direction: Double
+        + panels: Int
+        + mapId: String?
     }
 
     class Coordinates {
-        +latitude: Double
-        +longitude: Double
-        +toPoint() Point
+        + latitude: Double
+        + longitude: Double
+        + toPoint() Point
     }
 
     class SolarPanelType {
     <<Enumeration>>
-    +ECONOMY
-    +PERFORMANCE
-    +PREMIUM
+    + ECONOMY
+    + PERFORMANCE
+    + PREMIUM
     --
-    +displayName: String
-    +watt: Int
-    +price: Double 
-    +installationPrice: Double
-    +length: Double
-    +width: Double
-    +totalPrice(amount Int) Double
-    +nameWithWatt() String
-    +area() Double
+    + displayName: String
+    + watt: Int
+    + price: Double 
+    + installationPrice: Double
+    + length: Double
+    + width: Double
+    + totalPrice(amount Int) Double
+    + nameWithWatt() String
+    + area() Double
   }
     SolarArray "1" *-- "1..*" RoofSection : roofsections
 ```
