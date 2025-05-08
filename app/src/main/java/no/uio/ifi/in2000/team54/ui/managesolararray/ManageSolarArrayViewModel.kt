@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
-import no.uio.ifi.in2000.team54.data.shared.SunSaverRepository
+import no.uio.ifi.in2000.team54.data.shared.ISunSaverRepository
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
@@ -27,7 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ManageSolarArrayViewModel @Inject constructor(
     private val buildingRepository: BuildingRepository,
-    private val sunSaverRepository: SunSaverRepository
+    private val sunSaverRepository: ISunSaverRepository
 ) : ViewModel() {
 
     // allows us to access the value of the current solar array object, and keep the viewmodel updated on any changes

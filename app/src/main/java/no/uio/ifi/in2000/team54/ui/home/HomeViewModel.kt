@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
 import no.uio.ifi.in2000.team54.data.frost.FrostRepository
-import no.uio.ifi.in2000.team54.data.shared.SunSaverRepository
+import no.uio.ifi.in2000.team54.data.shared.ISunSaverRepository
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.ui.network.NetworkObserver
@@ -60,7 +60,7 @@ class HomeViewModel @Inject constructor(
     private val networkObserver: NetworkObserver,
     private val frostRepository: FrostRepository,
     private val electricityPriceRepository: ElectricityPriceRepository,
-    private val sunSaverRepository: SunSaverRepository
+    private val sunSaverRepository: ISunSaverRepository
 ) : ViewModel() {
 
     // loading states
@@ -167,7 +167,7 @@ class HomeViewModel @Inject constructor(
                     useWeatherData(solarArray)
                 } else {
                     // in case the previous selected was failing, clear the error message
-                    _graphLoadingState.update { it.copy( statusMessage = "") }
+                    _graphLoadingState.update { it.copy(statusMessage = "") }
                 }
 
                 _homeUiState.update { currentState ->
