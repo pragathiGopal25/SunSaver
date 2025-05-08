@@ -101,10 +101,8 @@ fun SupplierScreen(navController: NavController) {
                 Solcelle()
                 Spacer(Modifier.height(15.dp))
             }
-
         }
     }
-
 }
 
 

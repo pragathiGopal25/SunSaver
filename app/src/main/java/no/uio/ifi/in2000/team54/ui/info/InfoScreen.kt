@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -27,16 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.patrykandpatrick.vico.compose.common.shape.rounded
 import no.uio.ifi.in2000.team54.R
-import no.uio.ifi.in2000.team54.ui.info.TutorialDialog
 import no.uio.ifi.in2000.team54.ui.theme.Butter
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 
@@ -254,8 +249,7 @@ fun SolarInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Fordeler med \n" +
-                        "solenergi ",
+                text = "Fordeler med \nsolenergi ",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -263,8 +257,7 @@ fun SolarInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
             )
             Image(
                 painter = painterResource(R.drawable.boardgraph),
-                contentDescription = "Fordeler med \n" +
-                        "solenergi ",
+                contentDescription = "Fordeler med \nsolenergi ",
                 modifier = Modifier
                     .size(80.dp)
             )
@@ -272,8 +265,7 @@ fun SolarInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Utforsk fordeler ved å \n " +
-                        "installere solcelleanlegg ",
+                text = "Utforsk fordeler ved å \ninstallere solcelleanlegg ",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -311,15 +303,13 @@ fun GetStarted(modifier: Modifier = Modifier, onClick: () -> Unit) {
 
             Image(
                 painter = painterResource(R.drawable.todolist),
-                contentDescription = "Fordeler med \n" +
-                        "solenergi ",
+                contentDescription = "Fordeler med \nsolenergi ",
                 modifier = Modifier
                     .size(75.dp)
             )
 
             Text(
-                text = "Bli en " +
-                        " profesjonell SunSaver!",
+                text = "Bli en profesjonell SunSaver!",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
