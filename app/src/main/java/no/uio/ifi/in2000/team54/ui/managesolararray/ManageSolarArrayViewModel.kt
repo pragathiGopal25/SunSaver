@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
-import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
+import no.uio.ifi.in2000.team54.data.shared.SunSaverRepository
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
@@ -25,8 +25,10 @@ import no.uio.ifi.in2000.team54.model.building.Pos
 import javax.inject.Inject
 
 @HiltViewModel
-class ManageSolarArrayViewModel @Inject constructor(private val repository: BuildingRepository) : ViewModel() {
-    private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
+class ManageSolarArrayViewModel @Inject constructor(
+    private val repository: BuildingRepository,
+    private val sunSaverRepository: SunSaverRepository
+) : ViewModel() {
 
     // allows us to access the value of the current solar array object, and keep the viewmodel updated on any changes
     // used only when we update
@@ -97,7 +99,7 @@ class ManageSolarArrayViewModel @Inject constructor(private val repository: Buil
 
     fun addSolarArray(newSolarArray: SolarArray) {
         viewModelScope.launch {
-            _sunSaverRepository.addSolarArray(newSolarArray)
+            sunSaverRepository.addSolarArray(newSolarArray)
         }
     }
 
@@ -112,13 +114,13 @@ class ManageSolarArrayViewModel @Inject constructor(private val repository: Buil
     // To Update the roof sections and other values when user edits
     fun updateSolarArray(newSolarArray: SolarArray) {
         viewModelScope.launch {
-            _sunSaverRepository.updateSolarArray(newSolarArray)
+            sunSaverRepository.updateSolarArray(newSolarArray)
         }
     }
 
     fun getSolarArray(id: Long) {
         viewModelScope.launch {
-            _currentSolarArray.value = _sunSaverRepository.getAllSolarArrays()
+            _currentSolarArray.value = sunSaverRepository.getAllSolarArrays()
                 .filter { it.isNotEmpty() }
                 .first()
                 .find { it.id == id }
