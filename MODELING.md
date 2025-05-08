@@ -19,7 +19,6 @@ TODO: babling om de ulike funksjonalitetene her
 Formålet med klassediagrammet er å vise strukturen i prosjektet vårt.
 ```mermaid
 classDiagram
-
     class SolarArray {
         + id: Long
         + name: String
@@ -43,7 +42,13 @@ classDiagram
     SolarArray -- ISunSaverRepository
     SolarArray -- ManageSolarArrayViewModel
  
-
+    class NetworkObserver {
+        + isConnected: Flow~Boolean~
+        - connectivityManager: ConnectivityManager
+        + isNetworkAvailable() Boolean
+    }
+    
+    NetworkObserver -- HomeViewModel
     %% LOTS of data classes??? TODO
     class HomeViewModel {
         - networkObserver: NetworkObserver
@@ -130,14 +135,19 @@ classDiagram
     class ManageSolarArrayViewModel {
         - repository: BuildingRepository
         - _sunSaverRepository: SunSaverRepository
+
         - _currentSolarArray: MutableStateFlow~SolarArray~
         + currentSolarArray: StateFlow~SolarArray~
+
         - _mapAddress: MutableStateFlow~AddressState~
         + mapAddress: StateFlow~AddressState~
+
         - _mapSearchAddress: MutableStateFlow~SearchAddressState~
         + mapAddress: StateFlow~SearchAddressState~
+        
         + mapRoofSections: StateFlow~MapRoofSectionsState~
         + mapSearchAddressSuggestions: StateFlow~AddressSuggestionsState~
+        
         + setMapAddress(Address)
         + setSearchAddress(String)
         + updateSolarArrayAddress(SolarArray?)
@@ -148,12 +158,41 @@ classDiagram
         + resetUpdSolarArray()
     }
 
-    %% Database part
-    class SunSaverDatabase {
-        <<Abstract>>
-        + sunSaverDao() SunSaverDao
+     %% SunSaver
+    class ISunSaverRepository {
+        <<Interface>>
+        + getAllSolarArrays() Flow~list of SolarArray~
+        + addSolarArray(SolarArray)
+        + deleteSolarArray(SolarArray)
+        + updateSolarArray(SolarArray)
     }
-
+    class SunSaverRepository {
+        - datasource: ISunSaverDatasource
+        + getAllSolarArrays() Flow~list of SolarArray~
+        + addSolarArray(SolarArray)
+        + deleteSolarArray(SolarArray)
+        + updateSolarArray(SolarArray)
+    }
+    ISunSaverRepository <|.. SunSaverRepository
+    SunSaverRepository -- ISunSaverDatasource: lagrer og henter data
+    
+    class SunSaverDatasource {
+        - sunSaverDao: SunSaverDao 
+        + insert(SolarArrayWithRoofSections) Long
+        + getAllSolarArrays(): Flow~list of SolarArrayWithRoofSections~
+        + delete(SolarArrayWithRoofSections)
+        + update(SolarArrayWithRoofSections)
+    }
+    class ISunSaverDatasource {
+        <<Interface>>
+        + insert(SolarArrayWithRoofSections) Long
+        + getAllSolarArrays(): Flow~list of SolarArrayWithRoofSections~
+        + delete(SolarArrayWithRoofSections)
+        + update(SolarArrayWithRoofSections)
+    }
+    ISunSaverDatasource <|.. SunSaverDatasource
+    SolarArrayWithRoofSections -- ISunSaverDatasource 
+    %% Database part
     class SunSaverDao {
         <<Interface>>
         + insertSolarArray(SolarArrayEntity) Long
@@ -166,11 +205,29 @@ classDiagram
         + getRoofSectionBySolarArrayId(Long) List~RoofSectionEntity~
     }
 
+    SunSaverDatasource -- SunSaverDao
+    
+    class SunSaverDatabase {
+        <<Abstract>>
+        + sunSaverDao() SunSaverDao
+    }
     class RoomDatabase {
     }
     SunSaverDatabase --|> RoomDatabase
-    SunSaverDatabase -- SunSaverDao
 
+    class SolarArrayWithRoofSections {
+        + solarArray: SolarArrayEntity
+        + roofSections: List~RoofSectionEntity~
+    }
+    class SolarArrayEntity {
+        + id: Long
+        + name: String
+        + panelType: String
+        + latitude: Double
+        + longitude: Double
+        + powerConsumption: Double
+        + address: String
+    }
     class RoofSectionEntity {
         + roofSectionId: Long
         + solarArrayId: Long
@@ -180,55 +237,20 @@ classDiagram
         + panels: Int
         + mapId: String
     }
+    
+    
+    SunSaverDao -- SunSaverDatabase
+    SolarArrayWithRoofSections -- SunSaverDao
+    SunSaverDao -- SolarArrayEntity
+    
 
-    RoofSectionEntity -- SunSaverDatabase
-    SolarArrayEntity -- SunSaverDatabase
+    SunSaverDatabase -- SolarArrayEntity: tabell
+    SunSaverDatabase -- RoofSectionEntity: tabell     
+    
     RoofSectionEntity "1..*" --* "1" SolarArrayEntity
-
-    %% SunSaver
-    class SunSaverRepository {
-        - datasource: ISunSaverDatasource
-        + getAllSolarArrays() Flow~list of SolarArray~
-        + addSolarArray(SolarArray)
-        + deleteSolarArray(SolarArray)
-        + updateSolarArray(SolarArray)
-    }
-    class SunSaverDatasource {
-        - sunSaverDao: SunSaverDao 
-        + insert(SolarArrayWithRoofSections) Long
-        + getAllSolarArrays(): Flow~list of SolarArrayWithRoofSections~
-        + delete(SolarArrayWithRoofSections)
-        + update(SolarArrayWithRoofSections)
-    }
-        class ISunSaverRepository {
-        <<Interface>>
-        + getAllSolarArrays() Flow~list of SolarArray~
-        + addSolarArray(SolarArray)
-        + deleteSolarArray(SolarArray)
-        + updateSolarArray(SolarArray)
-    }
-    ISunSaverRepository <|.. SunSaverRepository
-
-    class ISunSaverDatasource {
-        <<Interface>>
-        + insert(SolarArrayWithRoofSections) Long
-        + getAllSolarArrays(): Flow~list of SolarArrayWithRoofSections~
-        + delete(SolarArrayWithRoofSections)
-        + update(SolarArrayWithRoofSections)
-    }
-    ISunSaverDatasource <|.. SunSaverDatasource
-        class SolarArrayEntity {
-        + id: Long
-        + name: String
-        + panelType: String
-        + latitude: Double
-        + longitude: Double
-        + powerConsumption: Double
-        + address: String
-    }
-   
-    SunSaverDatasource -- SunSaverDao
-    SunSaverRepository -- ISunSaverDatasource: lagrer og henter data
+    SolarArrayEntity "1" -- "1" SolarArrayWithRoofSections
+    
+    
     ManageSolarArrayViewModel -- ISunSaverRepository: lagrer og henter data
     HomeViewModel -- ISunSaverRepository: lagrer og henter data
 
