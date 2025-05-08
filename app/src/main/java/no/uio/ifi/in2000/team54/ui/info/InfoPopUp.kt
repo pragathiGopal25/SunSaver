@@ -1,10 +1,13 @@
 package no.uio.ifi.in2000.team54.ui.info
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -37,13 +41,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import no.uio.ifi.in2000.team54.R
-import no.uio.ifi.in2000.team54.ui.info.FactDialog
 import no.uio.ifi.in2000.team54.ui.theme.Butter
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
+import no.uio.ifi.in2000.team54.ui.theme.Light
+import no.uio.ifi.in2000.team54.ui.theme.LightGrey
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 
 @Composable
@@ -319,10 +324,206 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
 
 }
 
+@Composable
+fun TutorialDialog(onDismissRequest: () -> Unit) {
+    Dialog(onDismissRequest = onDismissRequest) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedCard(
+                modifier = Modifier
+                    .height(400.dp)
+                    .width(350.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.outlinedCardColors(containerColor = Butter)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = "Slik bruker du SunSaver!",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        OutlinedCard(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(130.dp)
+                                .padding(start = 1.dp, end = 1.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.outlinedCardColors(containerColor = LightGrey)
+                        ){
+
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(5.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Image (
+                                    painter = painterResource(R.drawable.addproperty),
+                                    contentDescription = "Knapp for å legge til eiendom",
+                                    modifier = Modifier.size(45.dp)
+                                )
+                                Spacer(Modifier.height(7.dp))
+                                Text(
+                                    text = "Lagre anlegg ved å trykke på pluss k" +
+                                            "nappen nederst i hjemskermen",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontSize = 13.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                        OutlinedCard(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(130.dp)
+                                .padding(start = 1.dp, end = 1.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.outlinedCardColors(containerColor = LightGrey)
+                        ){
+
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(5.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Image (
+                                    painter = painterResource(R.drawable.sok),
+                                    contentDescription = "Knapp for å søke opp en adresse.",
+                                    modifier = Modifier.size(45.dp)
+                                )
+                                Spacer(Modifier.height(7.dp))
+                                Text(
+                                    text = "Trykk på denne knappen for å " +
+                                            "søke opp en adresse.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontSize = 13.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(30.dp))
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(100.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        OutlinedCard(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(130.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.outlinedCardColors(containerColor = LightGrey)
+                        ){
+
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(5.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+
+                                Card(
+                                    colors = CardDefaults.cardColors(containerColor = Light),
+                                    border = BorderStroke(1.dp, DarkYellow),
+                                    modifier = Modifier.height(25.dp).width(70.dp)
+                                    ) {
+                                    Text(
+                                        text = "Lagre",
+                                        color = Color.Black,
+                                        modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                                Spacer(Modifier.height(7.dp))
+
+                                Text(
+                                    text = "Trykk på denne knappen " +
+                                            "for å lagre anlegget én eller flere takflater.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontSize = 13.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                        OutlinedCard(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(130.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.outlinedCardColors(containerColor = LightGrey)
+                        ){
+
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(5.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Image (
+                                    painter = painterResource(R.drawable.circle),
+                                    contentDescription = "Knapp for å redigere valgte takflater.",
+                                    modifier = Modifier.size(45.dp)
+                                )
+                                Spacer(Modifier.height(7.dp))
+                                Text(
+                                    text = "Du kan også redigere og endre de valgte takflatene.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontSize = 13.sp,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = Butter,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .border(
+                        width = 2.dp,
+                        color = YellowText,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+            ) {
+                TextButton(
+                    onClick = onDismissRequest,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Lukk",
+                        color = YellowText,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 21.sp
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
 fun DialogPreview() {
     var showDialog by remember { mutableStateOf(false) }
-    FactDialog(onDismissRequest = { showDialog = false })
+    TutorialDialog(onDismissRequest = { showDialog = false })
 }

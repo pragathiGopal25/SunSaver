@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.patrykandpatrick.vico.compose.common.shape.rounded
 import no.uio.ifi.in2000.team54.R
+import no.uio.ifi.in2000.team54.ui.info.TutorialDialog
 import no.uio.ifi.in2000.team54.ui.theme.Butter
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 
@@ -45,7 +46,7 @@ fun InfoScreen(navController: NavController) {
 
     var showFactDialog by remember { mutableStateOf(false) }
     var showSolarDialog by remember { mutableStateOf(false) }
-//  var showOnboardDialog by remember { mutableStateOf(false) }
+    var showTutorialDialog by remember { mutableStateOf(false) }
     Box (
         Modifier
             .fillMaxSize()
@@ -81,7 +82,6 @@ fun InfoScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(
-
                 modifier = Modifier.fillMaxWidth(). padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -90,12 +90,13 @@ fun InfoScreen(navController: NavController) {
                 SupplierInfo(modifier = Modifier.weight(1f), onClick = { navController.navigate("supplier")})
             }
             Spacer(modifier = Modifier.height(30.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth() .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 SolarInfo(modifier = Modifier.weight(1f), onClick = { showSolarDialog = true })
-                GetStarted(modifier = Modifier.weight(1f))
+                GetStarted(modifier = Modifier.weight(1f), onClick = { showTutorialDialog = true })
             }
         }
     }
@@ -105,6 +106,9 @@ fun InfoScreen(navController: NavController) {
 
     if (showSolarDialog) {
         SolarDialog(onDismissRequest = { showSolarDialog = false })
+    }
+    if (showTutorialDialog) {
+        TutorialDialog(onDismissRequest = { showTutorialDialog = false })
     }
 
 }
@@ -279,10 +283,11 @@ fun SolarInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
 }
 
 @Composable
-fun GetStarted(modifier: Modifier = Modifier) {
+fun GetStarted(modifier: Modifier = Modifier, onClick: () -> Unit) {
     OutlinedCard( modifier = modifier
         .height(200.dp)
-        .width(200.dp),
+        .width(200.dp)
+        .clickable (onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.outlinedCardColors(containerColor = Butter)
 
