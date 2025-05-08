@@ -42,9 +42,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -65,6 +64,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mapbox.geojson.Point
 import com.mapbox.maps.extension.compose.MapState
@@ -92,7 +92,8 @@ fun ManageSolarArrayScreen(
     snackbarState: SnackbarHostState,
     updateArray: Long? = -1L,
 ) {
-    val solarEntity by viewModel.currentSolarArray.collectAsState()
+
+    val solarEntity by viewModel.currentSolarArray.collectAsStateWithLifecycle()
     val roofSections = remember { mutableStateListOf<RoofSection>() }
     val solarPanelType = rememberSaveable {
         mutableStateOf(solarEntity?.panelType ?: SolarPanelType.ECONOMY)
@@ -261,30 +262,29 @@ private fun ArraySettingsContent(
             viewModel,
             solarPanelType.value,
             roofSections,
-            { selectedType ->
-                solarPanelType.value = selectedType
+        ) { selectedType ->
+            solarPanelType.value = selectedType
 
-                // we need to clamp each roof section's amount of panels to the max amount of panels
-                // the roof section has space for, this is necessary when changing solar panel type
-                // because the different types are different sizes
-                roofSections.forEach { roofSection ->
-                    val maxPanelAmount = (roofSection.area / solarPanelType.value.area()).toInt()
-                    if (roofSection.panels <= maxPanelAmount) {
-                        return@forEach
-                    }
-
-                    // we need to create a new RoofSection object to trigger a re-render by the state changing
-                    roofSections[roofSections.indexOf(roofSection)] = RoofSection(
-                        roofSection.id,
-                        roofSection.area,
-                        roofSection.incline,
-                        roofSection.direction,
-                        maxPanelAmount,
-                        roofSection.mapId
-                    )
+            // we need to clamp each roof section's amount of panels to the max amount of panels
+            // the roof section has space for, this is necessary when changing solar panel type
+            // because the different types are different sizes
+            roofSections.forEach { roofSection ->
+                val maxPanelAmount = (roofSection.area / solarPanelType.value.area()).toInt()
+                if (roofSection.panels <= maxPanelAmount) {
+                    return@forEach
                 }
-            },
-        )
+
+                // we need to create a new RoofSection object to trigger a re-render by the state changing
+                roofSections[roofSections.indexOf(roofSection)] = RoofSection(
+                    roofSection.id,
+                    roofSection.area,
+                    roofSection.incline,
+                    roofSection.direction,
+                    maxPanelAmount,
+                    roofSection.mapId
+                )
+            }
+        }
     }
 }
 
@@ -301,10 +301,10 @@ private fun ArraySettingsMainSection(
     roofSections: SnapshotStateList<RoofSection>,
     onSelectPanelType: (SolarPanelType) -> Unit,
 ) {
-    val addressState by viewModel.mapAddress.collectAsState()
+    val addressState by viewModel.mapAddress.collectAsStateWithLifecycle()
     var editingRoofSection by remember { mutableStateOf<Int?>(null) }
     var openSaveDialog by remember { mutableStateOf(false) }
-    val solarEntity by viewModel.currentSolarArray.collectAsState()
+    val solarEntity by viewModel.currentSolarArray.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
     val scroll = rememberScrollState()
@@ -314,7 +314,7 @@ private fun ArraySettingsMainSection(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         DragHandle(draggableState)
-        SearchField(mapState, mapViewportState, draggableState, viewModel)
+        SearchField(snackbarState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
         Column(
             verticalArrangement = Arrangement.spacedBy(15.dp),
@@ -326,7 +326,7 @@ private fun ArraySettingsMainSection(
                 )
         ) {
             RoofSectionsList(roofSections, { editingRoofSection = null }, { editingRoofSection = it })
-            ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection, { editingRoofSection = null })
+            ManageRoofSectionCard(roofSections, editingRoofSectionIndex = editingRoofSection) { editingRoofSection = null }
             SolarPanelTypeDropdown(solarPanelType, onSelectPanelType)
             PriceSummaryCard(solarPanelType, roofSections) //Inni denne ligger totalkosten
             SaveButton {

@@ -8,13 +8,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.compose.MapState
@@ -26,6 +27,7 @@ import com.mapbox.maps.extension.compose.annotation.generated.PolylineAnnotation
 import com.mapbox.maps.extension.compose.style.MapStyle
 import com.mapbox.maps.viewannotation.geometry
 import com.mapbox.maps.viewannotation.viewAnnotationOptions
+import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Pos
@@ -42,7 +44,9 @@ fun SolarArrayMap(
     solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>
 ) {
-    val mapRoofSectionsState by viewModel.mapRoofSections.collectAsState()
+    val mapRoofSectionsState by viewModel.mapRoofSections.collectAsStateWithLifecycle()
+    val coroutineScope = rememberCoroutineScope()
+
 
     MapboxMap(
         Modifier
@@ -58,9 +62,9 @@ fun SolarArrayMap(
                 it.geometry.contains(point)
             }
             // if there aren't any roof sections at this position, we wan't to try to find a new address
-            if (targetRoofSection == null) {
+            if (targetRoofSection == null && viewModel.currentSolarArray.value == null) {
                 viewModel.queryAddressAtPos(Pos.fromPoint(point))
-            } else {
+            } else if (targetRoofSection != null){
                 if (!roofSections.removeIf { it.mapId == targetRoofSection.id }) {
                     val area = targetRoofSection.width * targetRoofSection.length
 
@@ -74,6 +78,10 @@ fun SolarArrayMap(
                             targetRoofSection.id
                         )
                     )
+                }
+            } else {
+                coroutineScope.launch {// makes sure that user cannot move to address by clicking on the map when editing
+                    snackbarState.showSnackbar("Du kan ikke endre adressen når du redigerer et solcelleanlegg.")
                 }
             }
             false

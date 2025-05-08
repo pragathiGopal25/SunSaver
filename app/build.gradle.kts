@@ -48,8 +48,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("androidx.core:core-splashscreen:1.0.1")
-    implementation("com.airbnb.android:lottie:6.3.0")
+    implementation(libs.androidx.core.splashscreen)
+    implementation(libs.lottie)
     implementation(libs.lottie.compose)
 
 
@@ -90,7 +90,9 @@ dependencies {
 
     // hilt
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.activity.ktx)
 
     androidTestImplementation(libs.hilt.android.testing)
 }

@@ -13,7 +13,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
 import no.uio.ifi.in2000.team54.ui.composables.NumberInputField
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
@@ -42,7 +42,7 @@ fun SaveDialog(
     if (!open) {
         return
     }
-    val solarEntity = viewModel.currentSolarArray.collectAsState()
+    val solarEntity = viewModel.currentSolarArray.collectAsStateWithLifecycle()
     var validate by remember { mutableStateOf(false) }
 
     // shows the saved name and power values. If they dont exist, shows the default values.

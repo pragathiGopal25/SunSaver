@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team54.ui.managesolararray
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
@@ -16,15 +17,18 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.building.BuildingRepository
-import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
+import no.uio.ifi.in2000.team54.data.shared.ISunSaverRepository
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.model.building.Address
 import no.uio.ifi.in2000.team54.model.building.MapRoofSection
 import no.uio.ifi.in2000.team54.model.building.Pos
+import javax.inject.Inject
 
-class ManageSolarArrayViewModel() : ViewModel() {
-    private val repository: BuildingRepository = BuildingRepository()
-    private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
+@HiltViewModel
+class ManageSolarArrayViewModel @Inject constructor(
+    private val buildingRepository: BuildingRepository,
+    private val sunSaverRepository: ISunSaverRepository
+) : ViewModel() {
 
     // allows us to access the value of the current solar array object, and keep the viewmodel updated on any changes
     // used only when we update
@@ -47,7 +51,7 @@ class ManageSolarArrayViewModel() : ViewModel() {
         .mapLatest { state ->
             try {
                 // we know the address isn't null here because we filter out all null addresses above
-                MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
+                MapRoofSectionsState(buildingRepository.getRoofSections(state.address!!), false)
             } catch (e: Exception) {
                 delay(1000) // delayed so that the Building API gets time to respond
                 // if it fails to get the roof information, don't display any in the map
@@ -64,7 +68,7 @@ class ManageSolarArrayViewModel() : ViewModel() {
     val mapSearchAddressSuggestions = _mapSearchAddress
         .debounce(250)
         .mapLatest { state ->
-            val suggestions = repository.getAddressSuggestions(state.query)
+            val suggestions = buildingRepository.getAddressSuggestions(state.query)
             AddressSuggestionsState(suggestions)
         }
         .stateIn(
@@ -95,13 +99,13 @@ class ManageSolarArrayViewModel() : ViewModel() {
 
     fun addSolarArray(newSolarArray: SolarArray) {
         viewModelScope.launch {
-            _sunSaverRepository.addSolarArray(newSolarArray)
+            sunSaverRepository.addSolarArray(newSolarArray)
         }
     }
 
     fun queryAddressAtPos(pos: Pos) {
         viewModelScope.launch {
-            val address = repository.getNearestAddressToPos(pos) ?: return@launch
+            val address = buildingRepository.getNearestAddressToPos(pos) ?: return@launch
             setSearchAddress(address.toFormatted())
             setMapAddress(address)
         }
@@ -110,13 +114,13 @@ class ManageSolarArrayViewModel() : ViewModel() {
     // To Update the roof sections and other values when user edits
     fun updateSolarArray(newSolarArray: SolarArray) {
         viewModelScope.launch {
-            _sunSaverRepository.updateSolarArray(newSolarArray)
+            sunSaverRepository.updateSolarArray(newSolarArray)
         }
     }
 
     fun getSolarArray(id: Long) {
         viewModelScope.launch {
-            _currentSolarArray.value = _sunSaverRepository.getAllSolarArrays()
+            _currentSolarArray.value = sunSaverRepository.getAllSolarArrays()
                 .filter { it.isNotEmpty() }
                 .first()
                 .find { it.id == id }
