@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CardDefaults
@@ -27,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,15 +38,16 @@ import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.BarleyWhite
 import no.uio.ifi.in2000.team54.ui.theme.FjordkraftOrange
 import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
-import no.uio.ifi.in2000.team54.ui.theme.SolcelleCard
-import no.uio.ifi.in2000.team54.ui.theme.SupplierYellow
+import no.uio.ifi.in2000.team54.ui.theme.SolcellespesialistenGreen
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
 
 @Composable
 fun SupplierScreenTopBar() {
     Column(
         Modifier
             .fillMaxWidth()
-            .padding(top = 23.dp),
+            .padding(top = 23.dp)
+            .semantics(mergeDescendants = true) {  },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(Modifier.padding(top = 10.dp))
@@ -65,6 +69,8 @@ fun SupplierScreenTopBar() {
 
 @Composable
 fun SupplierScreen(navController: NavController) {
+    val scroll = rememberScrollState()
+
     Box(
         Modifier
             .fillMaxSize()
@@ -84,35 +90,37 @@ fun SupplierScreen(navController: NavController) {
         ) {
             SupplierScreenTopBar()
 
-            Column {
-                Otovo()
+            Column(
+                modifier = Modifier
+                    .verticalScroll(scroll)
+            ) {
+                ProviderCard("Otovo", VistaWhite, R.drawable.otovo)
                 Spacer(Modifier.height(30.dp))
 
-                Solcellespesialisten()
+                ProviderCard("Solcellespesialisten", SolcellespesialistenGreen, R.drawable.solcellespesialisten, true, Color.White)
                 Spacer(Modifier.height(30.dp))
 
-                Solcelleleverandoren()
+                ProviderCard("Solcelleleverandøren", VistaWhite, R.drawable.solcelleleverandoren, true)
                 Spacer(Modifier.height(30.dp))
 
-                Fjordkraft()
+                ProviderCard("Fjordkraft", FjordkraftOrange, R.drawable.fjordkraft)
                 Spacer(Modifier.height(30.dp))
 
-                Solcelle()
+                ProviderCard("Solcelle", VistaWhite, R.drawable.solcelle)
                 Spacer(Modifier.height(15.dp))
             }
         }
     }
 }
 
-
 @Composable
-fun Otovo() {
+fun ProviderCard(name: String, background: Color, imageId: Int, showName: Boolean = false, nameColor: Color = Color.Black) {
     OutlinedCard(
         modifier = Modifier
             .height(108.dp)
             .width(389.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = SupplierYellow)
+        colors = CardDefaults.outlinedCardColors(containerColor = background)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -120,140 +128,24 @@ fun Otovo() {
             horizontalArrangement = Arrangement.Center
         ) {
             Image(
-                painter = painterResource(R.drawable.otovo),
-                contentDescription = "Logo til Otovo - leverandør av solcellepanel.",
+                painter = painterResource(imageId),
+                contentDescription = "Logo til $name - leverandør av solcellepanel.",
                 modifier = Modifier
-                    .width(163.dp)
-                    .height(60.dp)
+                    .padding(horizontal = 15.dp)
+                    .height(50.dp)
             )
+            if (showName) {
+                Text(
+                    text = name,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontSize = 24.sp,
+                    color = nameColor
+                )
+            }
         }
     }
 }
-
-
-@Composable
-fun Solcellespesialisten() {
-
-    OutlinedCard(
-        modifier = Modifier
-            .height(108.dp)
-            .width(389.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = SolcelleCard)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = painterResource(R.drawable.solcellespesialisten),
-                contentDescription = "Logo til Solcellespesialisten - leverandør av solcellepanel.",
-                modifier = Modifier
-                    .width(80.dp)
-                    .height(60.dp)
-            )
-            Text(
-                text = "Solcellespesialisten",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge,
-                fontSize = 24.sp,
-                color = Color.White
-            )
-        }
-    }
-}
-
-
-@Composable
-fun Solcelleleverandoren() {
-
-    OutlinedCard(
-        modifier = Modifier
-            .height(108.dp)
-            .width(389.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = Color.White)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Image(
-                painter = painterResource(R.drawable.solcelleleverandoren),
-                contentDescription = "Logo til Solcelleleverandøren - leverandør av solcellepanel.",
-                modifier = Modifier
-                    .padding(start = 17.dp, end = 10.dp)
-                    .width(100.dp)
-                    .height(60.dp)
-            )
-            Text(
-                text = "Solcelleleverandøren",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge,
-                fontSize = 24.sp,
-                modifier = Modifier.padding(top = 5.dp)
-            )
-        }
-    }
-}
-
-
-@Composable
-fun Fjordkraft() {
-
-    OutlinedCard(
-        modifier = Modifier
-            .height(108.dp)
-            .width(389.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = FjordkraftOrange)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = painterResource(R.drawable.fjordkraft),
-                contentDescription = "Logo til Fjordkraft - leverandør av solcellepanel.",
-                modifier = Modifier
-                    .width(290.dp)
-                    .height(80.dp)
-            )
-        }
-    }
-}
-
-
-@Composable
-fun Solcelle() {
-
-    OutlinedCard(
-        modifier = Modifier
-            .height(108.dp)
-            .width(389.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = SupplierYellow)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = painterResource(R.drawable.solcelle),
-                contentDescription = "Logo til Solcelle - leverandør av solcellepanel.",
-                modifier = Modifier
-                    .width(290.dp)
-                    .height(80.dp)
-            )
-        }
-    }
-
-}
-
 
 @Composable
 private fun BackButton(navController: NavController) {
