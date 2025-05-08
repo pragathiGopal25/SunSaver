@@ -520,10 +520,3 @@ fun TutorialDialog(onDismissRequest: () -> Unit) {
         }
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun DialogPreview() {
-    var showDialog by remember { mutableStateOf(false) }
-    TutorialDialog(onDismissRequest = { showDialog = false })
-}
