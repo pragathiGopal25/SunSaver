@@ -9,8 +9,8 @@ fun getGreeting(): String {
     return when (currentTime) {
 
         in 5 .. 9 -> "God morgen!"
-        in 10 .. 13 -> "God formiddag!"
-        in 14 .. 16 -> "God ettermiddag!"
+        in 10 .. 11 -> "God formiddag!"
+        in 12 .. 17 -> "God ettermiddag!"
         else -> "God kveld!"
     }
 }
