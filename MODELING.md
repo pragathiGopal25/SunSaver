@@ -10,7 +10,7 @@ ser ut fra brukerens perspektiv
 
 
 ## Use case diagram 
-![Use case diagram ofr SunSaver](image.png)
+![Use case diagram for SunSaver](image.png)
 Diagrammet ble laget ved hjelp av [app.diagrams.net](https://app.diagrams.net/) 
 siden Mermaid ikke tilbyr Use case diagrammer. <br>
 TODO: babling om de ulike funksjonalitetene her 
@@ -37,18 +37,55 @@ classDiagram
         + panels: Int
         + mapId: String?
     }
-    RoofSection "1.." --* "1*" SolarArray : roofsections
+    RoofSection "1..*" --* "1" SolarArray : roofsections
     SolarArray -- HomeViewModel
     SolarArray -- ISunSaverRepository
     SolarArray -- ManageSolarArrayViewModel
  
+    %% HomeViewModel
     class NetworkObserver {
         + isConnected: Flow~Boolean~
         - connectivityManager: ConnectivityManager
         + isNetworkAvailable() Boolean
     }
+        class Elements {
+        <<Enumeration>>
+        +TEMP
+        + CLOUD
+        + SNOW
+        + IRRIDANCE
+        + SUNHOURS
+    }
+
+    class HomeUiState {
+        + solarArrays: List~SolarArray~ 
+        + selectedSolarArray: SolarArray? 
+        + priceData: PriceData 
+        + electricityProductionData: Map~String, list of Double~
+        + timeScope: TimeScope
+        + timeUntilRecoup: Double 
+    }
+
+    class LoadingState {
+        + isLoading: Boolean 
+        + statusMessage: String
+    }
+
+    class TimeScope {
+        <<Enumeration>>
+            + DAY 
+            + MONTH
+            + YEAR
+    }
     
     NetworkObserver -- HomeViewModel
+    TimeScope -- HomeUiState
+    HomeUiState -- HomeViewModel
+    TimeScope -- HomeViewModel
+    LoadingState -- HomeViewModel
+    Elements -- HomeViewModel
+
+ 
     %% LOTS of data classes??? TODO
     class HomeViewModel {
         - networkObserver: NetworkObserver
@@ -97,7 +134,7 @@ classDiagram
         - getMonthlyAverageValues(List~ObservationData~) Map~String, Double~
     }
 
-    class FrostDataSource {
+    class FrostDatasource {
         - client: HttpClient
         - raw: String
         - encoded: String
@@ -107,12 +144,31 @@ classDiagram
         - referenceTome: String
         - fetchNearestSource(Coordinates, Elements) MutableMap~Elements, list of String~
         + fetchObservationDataFromFrost(Coordinates, Elements) List~ObservationData~
+    } 
+
+    class ObservationData {
+        + sourceId: String
+        + referenceTime: String
+        + observations: List~Observation~
     }
 
-    FrostRepository --> FrostDataSource: fetcher værdata (snø, skydekke, temperatur, flux, soltimer)
+    class Observation {
+        + elementId: String
+        + value: Double
+        + unit: String
+        + qualityCode: Double
+    }
+    
+    ObservationData -- Observation
+    FrostRepository --> FrostDatasource: fetcher værdata (snø, skydekke, temperatur, flux, soltimer)
     HomeViewModel --> FrostRepository: fetcher gjennomsnittlige verdier av værdata
 
-
+    Elements -- FrostRepository
+   
+    
+    ObservationData -- FrostRepository
+    ObservationData -- FrostDatasource 
+    Elements -- FrostDatasource
     %% ElectricityPrice
     class ElectricityPriceRepository {
         - datasource: ElectricityPriceDataSource
@@ -127,9 +183,9 @@ classDiagram
         - client: HttpClient
         + getElectricityPrices(String, String): List~ElectricityPriceInfo~
     }
-    
-    ElectricityPriceRepository --> ElectricityPriceDataSource: fetcher NOK per kWn per dag
     HomeViewModel --> ElectricityPriceRepository: gjennomsnittlig strømpris gitt tidsintervall
+    ElectricityPriceRepository --> ElectricityPriceDataSource: fetcher NOK per kWn per dag
+    
 
     %% ViewModel TODO: Data classes here too
     class ManageSolarArrayViewModel {
