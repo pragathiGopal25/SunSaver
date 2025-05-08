@@ -186,9 +186,9 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                 Text(
                                     text = buildAnnotatedString {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                            append("Lavt vedlikehold: ")
+                                            append("Levetid: ")
                                         }
-                                        append("De fleste solceller har levetid på  25–30 år og krever lite vedlikehold.")
+                                        append("De fleste solceller har levetid på  25–30 år.")
                                     }
                                 )
                             }
