@@ -19,6 +19,31 @@ TODO: babling om de ulike funksjonalitetene her
 Formålet med klassediagrammet er å vise strukturen i prosjektet vårt.
 ```mermaid
 classDiagram
+
+    class SolarArray {
+        + id: Long
+        + name: String
+        + panelType: SolarPanelType
+        + roofSections: RoofSection
+        + coordinates: Coordinates
+        + powerConsumption: Double
+        + address: String
+    }
+
+    class RoofSection {
+        + id: Long?
+        + area: Double
+        + incline: Double
+        + direction: Double
+        + panels: Int
+        + mapId: String?
+    }
+    RoofSection "1.." --* "1*" SolarArray : roofsections
+    SolarArray -- HomeViewModel
+    SolarArray -- ISunSaverRepository
+    SolarArray -- ManageSolarArrayViewModel
+ 
+
     %% LOTS of data classes??? TODO
     class HomeViewModel {
         - networkObserver: NetworkObserver
@@ -122,23 +147,8 @@ classDiagram
         + getSolarArray(Long)
         + resetUpdSolarArray()
     }
-    
-    %% SunSaver
-    class SunSaverRepository {
-        - datasource: ISunSaverDatasource
-        + getAllSolarArrays() Flow~list of SolarArray~
-        + addSolarArray(SolarArray)
-        + deleteSolarArray(SolarArray)
-        + updateSolarArray(SolarArray)
-    }
-    class SunSaverDatasource {
-        - sunSaverDao: SunSaverDao 
-        + insert(SolarArrayWithRoofSections) Long
-        + getAllSolarArrays(): Flow~list of SolarArrayWithRoofSections~
-        + delete(SolarArrayWithRoofSections)
-        + update(SolarArrayWithRoofSections)
-    }
-    
+
+    %% Database part
     class SunSaverDatabase {
         <<Abstract>>
         + sunSaverDao() SunSaverDao
@@ -158,15 +168,39 @@ classDiagram
 
     class RoomDatabase {
     }
-
     SunSaverDatabase --|> RoomDatabase
     SunSaverDatabase -- SunSaverDao
-    SunSaverDatasource -- SunSaverDao
-    SunSaverRepository -- ISunSaverDatasource: lagrer og henter data
-    ManageSolarArrayViewModel -- ISunSaverRepository: lagrer og henter data
-    HomeViewModel -- ISunSaverRepository: lagrer og henter data
 
-    class ISunSaverRepository {
+    class RoofSectionEntity {
+        + roofSectionId: Long
+        + solarArrayId: Long
+        + area: Double
+        + incline: Double
+        + direction: Double
+        + panels: Int
+        + mapId: String
+    }
+
+    RoofSectionEntity -- SunSaverDatabase
+    SolarArrayEntity -- SunSaverDatabase
+    RoofSectionEntity "1..*" --* "1" SolarArrayEntity
+
+    %% SunSaver
+    class SunSaverRepository {
+        - datasource: ISunSaverDatasource
+        + getAllSolarArrays() Flow~list of SolarArray~
+        + addSolarArray(SolarArray)
+        + deleteSolarArray(SolarArray)
+        + updateSolarArray(SolarArray)
+    }
+    class SunSaverDatasource {
+        - sunSaverDao: SunSaverDao 
+        + insert(SolarArrayWithRoofSections) Long
+        + getAllSolarArrays(): Flow~list of SolarArrayWithRoofSections~
+        + delete(SolarArrayWithRoofSections)
+        + update(SolarArrayWithRoofSections)
+    }
+        class ISunSaverRepository {
         <<Interface>>
         + getAllSolarArrays() Flow~list of SolarArray~
         + addSolarArray(SolarArray)
@@ -183,8 +217,20 @@ classDiagram
         + update(SolarArrayWithRoofSections)
     }
     ISunSaverDatasource <|.. SunSaverDatasource
-
+        class SolarArrayEntity {
+        + id: Long
+        + name: String
+        + panelType: String
+        + latitude: Double
+        + longitude: Double
+        + powerConsumption: Double
+        + address: String
+    }
    
+    SunSaverDatasource -- SunSaverDao
+    SunSaverRepository -- ISunSaverDatasource: lagrer og henter data
+    ManageSolarArrayViewModel -- ISunSaverRepository: lagrer og henter data
+    HomeViewModel -- ISunSaverRepository: lagrer og henter data
 
     %% Building 
     class BuildingRepository {
@@ -214,111 +260,5 @@ Kommentarer:
 - Siden Mermaid og markdown ikke støttet to <> inni hverandre, har jeg brukt "of" i disse tilfellene. For eksempel Flow&lt;list of SolarArray&gt;. 
 - HomeViewModel ble veldig stor. Det er fordi den håndterer mye data, og har StateFlows (som i god praksis krever en privat mutable versjon og offentlig immutable)
 - Om databasen: Vi lager en abstrakt klasse SunSaverDatabase som arver fra RoomDatabase, og Room-biblioteket fikser implementasjonen for oss. Vi inkluderte RoomDatabase for å vise arv, men den er tom siden den kommer fra Room-biblioteket. 
-
-Lekeplass: 
-```mermaid
-classDiagram
-    class SunSaverDatasource {
-    }
-    class SunSaverDatasourceI {
-        <<Interface>>
-    }
-    class SunSaverRepository {
-    }
-    class SunSaverRepositoryI {
-        <<Interface>>
-    }
-    SunSaverRepositoryI <|.. SunSaverRepository
-
-    class SunSaverDatasourceI {
-        <<Interface>>
-    }
-    SunSaverDatasourceI <|.. SunSaverDatasource
-
-
-
-    class SunSaverDatabase {
-        <<Abstract>>
-        + sunSaverDao() SunSaverDao
-    }
-
-    class SunSaverDao {
-        <<Interface>>
-        + insertSolarArray(SolarArrayEntity) Long
-        + insertRoofSections(List~RoofSectionEntity~)
-        + getAllSolarArrays() Flow~ list of SolarArrayWithRoofSections~
-        + delete(SolarArrayEntity)
-        + updateSolarArray(SolarArrayEntity)
-        + updateRoofSections(List~RoofSectionEntity~)
-        + deleteRoofSections(List~RoofSectionEntity~)
-        + getRoofSectionBySolarArrayId(Long) List~RoofSectionEntity~
-    }
-
-    class RoomDatabase {
-    }
-
-    SunSaverDatabase --|> RoomDatabase
-    SunSaverDatabase -- SunSaverDao
-    SunSaverDatasource -- SunSaverDao
-```
-Homeviewmodel data classes
-- HomeUiState
-- LoadingState
-- PriceData
-- WeatherData
-- Enum TimeScope
-Oversikt over ulike valg som ble tatt i diagrammet: 
-- Forholdet mellom RoofSection og SolarArray er composition fordi RoofSection kan ikke eksistere uten SolarArray. 
-- Hilt ting ikke inkludert
-- Serialiseringsklasser ikke inkludert
-- Composables ikke inkludert siden de er strengt tatt funksjoner
-
-```mermaid
-classDiagram
-    class Elements {
-    <<Enumeration>>
-    +IRRADIATION
-    }
-    class SolarArray {
-        + id: Long
-        + name: String
-        + panelType: SolarPanelType
-        + roofSections: RoofSection
-        + coordinates: Coordinates
-        + powerConsumption: Double
-        + address: String
-    }
-
-    class RoofSection {
-        + id: Long?
-        + area: Double
-        + incline: Double
-        + direction: Double
-        + panels: Int
-        + mapId: String?
-    }
-
-    class Coordinates {
-        + latitude: Double
-        + longitude: Double
-        + toPoint() Point
-    }
-
-    class SolarPanelType {
-    <<Enumeration>>
-    + ECONOMY
-    + PERFORMANCE
-    + PREMIUM
-    --
-    + displayName: String
-    + watt: Int
-    + price: Double 
-    + installationPrice: Double
-    + length: Double
-    + width: Double
-    + totalPrice(amount Int) Double
-    + nameWithWatt() String
-    + area() Double
-  }
-    SolarArray "1" *-- "1..*" RoofSection : roofsections
-```
+- SSolarArray og SunSaverRepository: Siden det allerede er en assosiasjon mellom SolarArray og ISunSaverRepository, og SunSaverRepository implementerer dette interfacet, lager vi ikke en egen assosiasjon mellom SolarArray og SunSaverRepository, da dette er underforstått gjennom arv.
+Det samme gjelder for SolarArrayWithRoofSections og SunSaverDatasource.
