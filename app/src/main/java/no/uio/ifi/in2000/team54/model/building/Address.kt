@@ -28,6 +28,6 @@ class Address(
 ) {
 
     fun toFormatted(): String {
-        return "${address}, ${areaCode} ${area}"
+        return "$address, $areaCode $area"
     }
 }

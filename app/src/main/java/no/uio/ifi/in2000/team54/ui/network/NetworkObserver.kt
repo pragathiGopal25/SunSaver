@@ -8,8 +8,9 @@ import androidx.core.content.getSystemService
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import javax.inject.Inject
 
-class NetworkObserver(context: Context) : ConnectivityObserver {
+class NetworkObserver @Inject constructor(context: Context) : ConnectivityObserver {
 
     private val connectivityManager = context.getSystemService<ConnectivityManager>()!!
 

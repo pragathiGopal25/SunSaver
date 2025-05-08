@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.compose.MapState
@@ -44,7 +45,7 @@ fun SolarArrayMap(
     solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>
 ) {
-    val mapRoofSectionsState by viewModel.mapRoofSections.collectAsState()
+    val mapRoofSectionsState by viewModel.mapRoofSections.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
 
 

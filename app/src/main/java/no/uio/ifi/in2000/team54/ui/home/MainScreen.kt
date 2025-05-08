@@ -11,7 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -22,17 +22,13 @@ import no.uio.ifi.in2000.team54.ui.composables.Snackbar
 import no.uio.ifi.in2000.team54.ui.info.InfoScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayViewModel
-import no.uio.ifi.in2000.team54.ui.network.NetworkObserver
 
 @Composable
 fun MainScreen() {
-    val context = LocalContext.current
-    val networkObserver = remember { NetworkObserver(context) }
-
     val navController = rememberNavController()
 
-    val manageSolarArrayViewModel = remember { ManageSolarArrayViewModel() }
-    val homeViewModel = remember { HomeViewModel(networkObserver) }
+    val homeViewModel = hiltViewModel<HomeViewModel>()
+    val manageSolarArrayViewModel = hiltViewModel<ManageSolarArrayViewModel>()
 
     val snackbarState = remember { SnackbarHostState() }
     val isOnline by homeViewModel.isOnline.collectAsState(initial = true)
@@ -62,20 +58,33 @@ fun MainScreen() {
             startDestination = "home",
             modifier = Modifier.padding(innerpadding)
         ) {
-            composable("home") { HomeScreen(
-                homeViewModel = homeViewModel,
-                navController = navController,
-                snackbarHostState = snackbarState
-            )}
+            composable("home") {
+                HomeScreen(
+                    homeViewModel,
+                    navController,
+                    snackbarState
+                )
+            }
             composable("info") { InfoScreen() }
-            composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState) }
+            composable("managesolararray") {
+                ManageSolarArrayScreen(
+                    manageSolarArrayViewModel,
+                    navController,
+                    snackbarState
+                )
+            }
 
             composable(
                 "editsolararrays/{arrayId}",
                 arguments = listOf(navArgument("arrayId") { type = NavType.LongType })
             ) { backStackEntry ->
                 val arrayId = backStackEntry.arguments?.getLong("arrayId") ?: -1L
-                ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState, arrayId)
+                ManageSolarArrayScreen(
+                    manageSolarArrayViewModel,
+                    navController,
+                    snackbarState,
+                    arrayId
+                )
             }
         }
 

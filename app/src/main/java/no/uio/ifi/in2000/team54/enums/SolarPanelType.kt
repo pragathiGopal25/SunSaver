@@ -4,8 +4,8 @@ package no.uio.ifi.in2000.team54.enums
 enum class SolarPanelType(
     val displayName: String,
     val watt: Int,
-    val price: Double,
-    val installationPrice: Double,
+    private val price: Double,
+    private val installationPrice: Double,
     val length: Double, // values found on the internet for similar wattage panels
     val width: Double
 ) {

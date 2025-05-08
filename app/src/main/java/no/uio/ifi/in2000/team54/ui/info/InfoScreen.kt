@@ -29,7 +29,7 @@ fun InfoScreen() {
             .fillMaxSize()
     ) {
         Image(
-            painter = painterResource(R.drawable.sunny),
+            painter = painterResource(R.drawable.sun),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()

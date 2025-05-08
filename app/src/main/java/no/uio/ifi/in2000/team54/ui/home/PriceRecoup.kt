@@ -21,13 +21,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.YellowText
 
 @Composable
 fun TimeUntilRecouped(viewModel: HomeViewModel) {
-    val uiState by viewModel.homeUiState.collectAsState()
-    val loadingState by viewModel.priceLoadingState.collectAsState()
+    val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
+    val loadingState by viewModel.priceLoadingState.collectAsStateWithLifecycle()
 
     if (loadingState.isLoading) {
         Box(

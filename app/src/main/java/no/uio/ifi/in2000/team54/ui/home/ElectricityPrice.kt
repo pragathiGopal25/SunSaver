@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
@@ -50,8 +51,8 @@ import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
 
 @Composable
 fun PriceContainer(viewModel: HomeViewModel) {
-    val uiState by viewModel.homeUiState.collectAsState()
-    val loadingState by viewModel.priceLoadingState.collectAsState()
+    val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
+    val loadingState by viewModel.priceLoadingState.collectAsStateWithLifecycle()
     var expanded by remember { mutableStateOf(false) }
 
     if (loadingState.isLoading) {
@@ -99,11 +100,11 @@ fun PriceContainer(viewModel: HomeViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                ExpensesStatBox(false, "${uiState.priceData.realPrice}", R.drawable.withoutsolar)
+                ExpensesStatBox(false, "${uiState.priceData.realPrice}", R.drawable.no_solararray)
                 Spacer(Modifier.padding(7.dp))
                 ExpensesStatBox(true, "${uiState.priceData.saved}", R.drawable.coin)
                 Spacer(Modifier.padding(7.dp))
-                ExpensesStatBox(false, "${uiState.priceData.solarPrice}", R.drawable.solar)
+                ExpensesStatBox(false, "${uiState.priceData.solarPrice}", R.drawable.solararray)
             }
             Spacer(Modifier.padding(8.dp))
             val timePerspective = mapOf(

@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team54.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -11,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
 import no.uio.ifi.in2000.team54.data.frost.FrostRepository
 import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
@@ -19,6 +19,7 @@ import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.ui.network.NetworkObserver
 import no.uio.ifi.in2000.team54.util.calculateMonthlyElectricityProduction
+import javax.inject.Inject
 import kotlin.math.round
 
 data class HomeUiState(
@@ -54,13 +55,13 @@ enum class TimeScope {
     DAY, MONTH, YEAR
 }
 
-class HomeViewModel(
-    private val networkObserver: NetworkObserver
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val networkObserver: NetworkObserver,
+    private val _repository: FrostRepository,
+    private val electricityPriceRepository: ElectricityPriceRepository
 ) : ViewModel() {
-    private val _repository = FrostRepository()
     private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
-    private val electricityPriceRepository =
-        ElectricityPriceRepository(ElectricityPriceDatasource())
 
     // loading states
     private val _graphLoadingState = MutableStateFlow(LoadingState())
@@ -348,8 +349,8 @@ class HomeViewModel(
                     )
 
                     electricityPriceMap.computeIfAbsent(
-                        solarArray,
-                        { mutableMapOf() })[scope] = priceData
+                        solarArray
+                    ) { mutableMapOf() }[scope] = priceData
                 }
             }
 

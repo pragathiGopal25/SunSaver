@@ -4,10 +4,9 @@ import android.util.Log
 import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.model.frost.ObservationData
+import javax.inject.Inject
 
-class FrostRepository() {
-    private val datasource: FrostDatasource = FrostDatasource()
-
+class FrostRepository @Inject constructor(private val datasource: FrostDatasource) {
 
     // store fetched data from data source in separate objects
     // create an object of the data class, ex tempData
@@ -17,7 +16,6 @@ class FrostRepository() {
 
         return getMonthlyAverageValues(datasource.fetchObservationDataFromFrost(coordinates, elementName))
     }
-
 
     // function that calculates and returns monthly average values for the data
     private fun getMonthlyAverageValues (observationList: List<ObservationData>): Map<String, Double> {
