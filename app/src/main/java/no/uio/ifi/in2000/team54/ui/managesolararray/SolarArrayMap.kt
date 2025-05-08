@@ -8,7 +8,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -66,8 +65,8 @@ fun SolarArrayMap(
             if (targetRoofSection == null && viewModel.currentSolarArray.value == null) {
                 viewModel.queryAddressAtPos(Pos.fromPoint(point))
             } else if (targetRoofSection != null){
-                if (!roofSections.removeIf { it.mapId == targetRoofSection!!.id }) {
-                    val area = targetRoofSection!!.width * targetRoofSection.length
+                if (!roofSections.removeIf { it.mapId == targetRoofSection.id }) {
+                    val area = targetRoofSection.width * targetRoofSection.length
 
                     roofSections.add(
                         RoofSection(

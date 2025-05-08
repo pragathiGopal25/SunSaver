@@ -2,7 +2,6 @@ package no.uio.ifi.in2000.team54.data.electricity
 
 import android.annotation.SuppressLint
 import no.uio.ifi.in2000.team54.domain.Coordinates
-import no.uio.ifi.in2000.team54.domain.SolarArray
 import java.text.SimpleDateFormat
 import java.util.Date
 import javax.inject.Inject
