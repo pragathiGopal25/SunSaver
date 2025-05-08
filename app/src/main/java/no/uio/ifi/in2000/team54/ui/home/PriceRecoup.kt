@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -59,7 +60,8 @@ fun TimeUntilRecouped(viewModel: HomeViewModel) {
     ) {
         Column(
             modifier = Modifier
-                .padding(bottom = 8.dp, top = 3.dp, start = 4.dp, end = 4.dp),
+                .padding(bottom = 8.dp, top = 3.dp, start = 4.dp, end = 4.dp)
+                .semantics(mergeDescendants = true) {},
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {

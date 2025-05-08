@@ -204,7 +204,7 @@ private fun SearchTextField(
                 }
                 Icon(
                     Icons.Rounded.Search,
-                    contentDescription = "Søk adresser",
+                    contentDescription = "Søkeikon",
                     tint = Color.White,
                     modifier = Modifier
                         .width(40.dp)

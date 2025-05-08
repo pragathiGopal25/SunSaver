@@ -24,7 +24,6 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -100,11 +99,26 @@ fun PriceContainer(viewModel: HomeViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                ExpensesStatBox(false, "${uiState.priceData.realPrice}", R.drawable.no_solararray)
+                ExpensesStatBox(
+                    false,
+                    "${uiState.priceData.realPrice}",
+                    R.drawable.no_solararray,
+                    "Uten solcellepaneler"
+                )
                 Spacer(Modifier.padding(7.dp))
-                ExpensesStatBox(true, "${uiState.priceData.saved}", R.drawable.coin)
+                ExpensesStatBox(
+                    true,
+                    "${uiState.priceData.saved}",
+                    R.drawable.coin,
+                    "Total spart"
+                )
                 Spacer(Modifier.padding(7.dp))
-                ExpensesStatBox(false, "${uiState.priceData.solarPrice}", R.drawable.solararray)
+                ExpensesStatBox(
+                    false,
+                    "${uiState.priceData.solarPrice}",
+                    R.drawable.solararray,
+                    "Med solcellepaneler"
+                )
             }
             Spacer(Modifier.padding(8.dp))
             val timePerspective = mapOf(
@@ -172,6 +186,7 @@ fun ExpensesStatBox(
     mainBox: Boolean,
     priceAmount: String,
     image: Int,
+    description: String,
 ) {
     Box(
         modifier = Modifier
@@ -195,7 +210,6 @@ fun ExpensesStatBox(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (mainBox) Text("Spart", fontWeight = FontWeight.Bold)
-            val img = painterResource(image)
             val size = if (mainBox) 60.dp else 50.dp
             Image(
                 modifier = Modifier
@@ -205,8 +219,8 @@ fun ExpensesStatBox(
                     )
                     .size(size)
                     .clip(CircleShape),
-                painter = img,
-                contentDescription = null,
+                painter = painterResource(image),
+                contentDescription = description,
                 contentScale = ContentScale.FillBounds
             )
             Text(priceAmount)

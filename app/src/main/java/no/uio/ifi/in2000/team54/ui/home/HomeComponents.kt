@@ -148,7 +148,7 @@ fun HomeScreenTopBar() {
 
             Image(
                 painter = painterResource(R.drawable.logo_medium),
-                contentDescription = null,
+                contentDescription = "Sol som logo",
                 modifier = Modifier
                     .size(120.dp)
                     .align(Alignment.TopEnd)
@@ -213,7 +213,6 @@ fun SolarArrayCard(
             ) {
                 IconButton(
                     onClick = {
-                        //TOdo: add deleting option
                         viewModel.removeSolarArray(solarArray)
                     },
                     modifier = Modifier
@@ -226,7 +225,7 @@ fun SolarArrayCard(
                         modifier = Modifier
                             .padding(top = 2.dp, end = 7.dp, start = 5.dp)
                             .size(30.dp),
-                        contentDescription = "Slett Anlegg",
+                        contentDescription = "Slett anlegg ${solarArray.name}",
                         tint = Red,// if you don't want to tint it
 
                     )
@@ -243,14 +242,14 @@ fun SolarArrayCard(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.edit_icon),
-                        contentDescription = "Redigere Anlegg",
+                        contentDescription = "Rediger anlegg ${solarArray.name}",
                         tint = Color.Unspecified // if you don't want to tint it
                     )
                 }
             }
             Image(
                 painter = painterResource(R.drawable.house),
-                contentDescription = "Hus med solcelleplaneter",
+                contentDescription = "Solecelleanlegg",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
