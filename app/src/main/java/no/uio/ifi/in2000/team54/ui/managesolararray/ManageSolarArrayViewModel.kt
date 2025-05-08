@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ManageSolarArrayViewModel @Inject constructor(
-    private val repository: BuildingRepository,
+    private val buildingRepository: BuildingRepository,
     private val sunSaverRepository: SunSaverRepository
 ) : ViewModel() {
 
@@ -51,7 +51,7 @@ class ManageSolarArrayViewModel @Inject constructor(
         .mapLatest { state ->
             try {
                 // we know the address isn't null here because we filter out all null addresses above
-                MapRoofSectionsState(repository.getRoofSections(state.address!!), false)
+                MapRoofSectionsState(buildingRepository.getRoofSections(state.address!!), false)
             } catch (e: Exception) {
                 delay(1000) // delayed so that the Building API gets time to respond
                 // if it fails to get the roof information, don't display any in the map
@@ -68,7 +68,7 @@ class ManageSolarArrayViewModel @Inject constructor(
     val mapSearchAddressSuggestions = _mapSearchAddress
         .debounce(250)
         .mapLatest { state ->
-            val suggestions = repository.getAddressSuggestions(state.query)
+            val suggestions = buildingRepository.getAddressSuggestions(state.query)
             AddressSuggestionsState(suggestions)
         }
         .stateIn(
@@ -105,7 +105,7 @@ class ManageSolarArrayViewModel @Inject constructor(
 
     fun queryAddressAtPos(pos: Pos) {
         viewModelScope.launch {
-            val address = repository.getNearestAddressToPos(pos) ?: return@launch
+            val address = buildingRepository.getNearestAddressToPos(pos) ?: return@launch
             setSearchAddress(address.toFormatted())
             setMapAddress(address)
         }
