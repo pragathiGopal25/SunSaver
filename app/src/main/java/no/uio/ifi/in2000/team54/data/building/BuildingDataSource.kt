@@ -37,7 +37,7 @@ class BuildingDataSource() {
                 parameter("sok", address)
                 parameter("fuzzy", true)
                 parameter("utkoordsys", 4258)
-                parameter("treffPerSide", 10)
+                parameter("treffPerSide", 6)
                 parameter("side", 0)
                 parameter("asciiKompatibel", true)
             }
