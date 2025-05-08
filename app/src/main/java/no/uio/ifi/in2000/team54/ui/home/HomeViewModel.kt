@@ -232,6 +232,12 @@ class HomeViewModel(
 
                 weatherDataMap[solarArray] = weatherData
 
+                _priceLoadingState.update { currentState ->
+                    currentState.copy(
+                        statusMessage = ""
+                    )
+                }
+
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
@@ -260,12 +266,6 @@ class HomeViewModel(
                 priceDataMap.computeIfAbsent(
                     solarArray
                 ) { mutableMapOf() }[scope] = avgDailyElectricityPrice
-            }
-
-            _priceLoadingState.update { currentState ->
-                currentState.copy(
-                    statusMessage = ""
-                )
             }
         } catch (e: Exception) {
             _priceLoadingState.update {
