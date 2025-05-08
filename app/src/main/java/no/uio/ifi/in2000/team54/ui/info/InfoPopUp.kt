@@ -221,7 +221,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Lavere strømregninger: ")
                                         }
-                                        append("Spar penger ved å produsere din egen strøm og redusere behovet for å kjøpe fra strømleverandører.")
+                                        append("Spar penger ved å produsere din egen strøm.")
                                     }
                                 )
                                 Spacer(Modifier.height(9.dp))
@@ -231,7 +231,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Økt selvforsyning: ")
                                         }
-                                        append("Reduserer avhengigheten av strømleverandører og gir rom for investering i eget batterilagringssystem")
+                                        append("Gir økt uavhengighet fra strømleverandører og åpner for investering i eget batterilagringssystem.")
                                     }
                                 )
                                 Spacer(Modifier.height(9.dp))
