@@ -19,15 +19,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import no.uio.ifi.in2000.team54.ui.theme.Beige
-import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
-import no.uio.ifi.in2000.team54.ui.theme.Red
+import no.uio.ifi.in2000.team54.ui.theme.Caramel
+import no.uio.ifi.in2000.team54.ui.theme.Rajah
+import no.uio.ifi.in2000.team54.ui.theme.Tamarillo
 
 @Composable
 fun CustomTextField(
@@ -63,22 +64,22 @@ fun CustomTextField(
                     "Må fylles ut",
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
-                    color = Red
+                    color = Tamarillo
                 )
             }
         }
         BasicTextField(
             modifier = modifier
                 .clip(RoundedCornerShape(15))
-                .background(Beige)
-                .border(1.dp, if (isInvalid) Red else DarkBeige, RoundedCornerShape(15))
+                .background(Caramel)
+                .border(1.dp, if (isInvalid) Tamarillo else Rajah, RoundedCornerShape(15))
                 .padding(vertical = 5.dp, horizontal = 10.dp),
             value = value,
             onValueChange = onValueChange,
             singleLine = true,
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
+            cursorBrush = SolidColor(Color.Black),
             textStyle = LocalTextStyle.current.copy(
-                color = MaterialTheme.colorScheme.onSurface,
+                color = Color.Black,
                 fontSize = fontSize
             ),
             keyboardOptions = keyboardOptions,
@@ -97,7 +98,7 @@ fun CustomTextField(
                             Text(
                                 text = placeholder,
                                 style = LocalTextStyle.current.copy(
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                    color = Color.Black.copy(alpha = 0.6f),
                                     fontSize = fontSize
                                 )
                             )

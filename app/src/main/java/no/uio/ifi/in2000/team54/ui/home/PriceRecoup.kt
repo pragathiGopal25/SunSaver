@@ -16,13 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.YellowText
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
 
 @Composable
 fun TimeUntilRecouped(viewModel: HomeViewModel) {
@@ -36,7 +36,7 @@ fun TimeUntilRecouped(viewModel: HomeViewModel) {
                 .height(302.dp), contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                color = DarkYellow,
+                color = RipeLemon,
                 modifier = Modifier
                     .width(70.dp)
             )
@@ -58,7 +58,8 @@ fun TimeUntilRecouped(viewModel: HomeViewModel) {
     ) {
         Column(
             modifier = Modifier
-                .padding(bottom = 8.dp, top = 3.dp, start = 4.dp, end = 4.dp),
+                .padding(bottom = 8.dp, top = 3.dp, start = 4.dp, end = 4.dp)
+                .semantics(mergeDescendants = true) {},
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -77,14 +78,14 @@ private fun RecoupText(time: Double) {
     ) {
         Text(
             text = time.toString(),
-            color = YellowText,
+            color = RipeLemon,
             fontSize = 40.sp,
             fontWeight = FontWeight.Bold
         )
 
         Text(
             text = "år",
-            color = YellowText,
+            color = RipeLemon,
             fontSize = 36.sp,
             fontWeight = FontWeight.Medium
         )
