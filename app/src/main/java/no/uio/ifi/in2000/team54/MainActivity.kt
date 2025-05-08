@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
-            Team54Theme {
+            Team54Theme(darkTheme = false) {
                 SunSplashScreen()
             }
         }
