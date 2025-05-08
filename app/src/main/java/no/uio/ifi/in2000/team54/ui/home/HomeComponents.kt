@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -123,7 +124,10 @@ fun HomeScreenTopBar() {
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .semantics(mergeDescendants = true) {  }
+            ) {
                 GreetingMessage()
                 Row(Modifier.padding(top = 13.dp)) {
                     Text(
@@ -139,7 +143,7 @@ fun HomeScreenTopBar() {
                     )
                 }
                 Text(
-                    text = "Status ",
+                    text = "Status",
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     color = YellowText
