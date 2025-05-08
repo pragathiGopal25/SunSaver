@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,6 +53,7 @@ import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 
 val monthFormatter =
     CartesianValueFormatter { _, value, _ -> // overriding "format" method in CastertianValueFormatter
@@ -69,9 +72,17 @@ fun GraphContainer(
 ) {
     val homeUiState by viewModel.homeUiState.collectAsStateWithLifecycle()
     val graphLoadingState by viewModel.graphLoadingState.collectAsStateWithLifecycle()
-    if (graphLoadingState.loadingMessage != "") {
+    if (graphLoadingState.isLoading) {
         Box(modifier.fillMaxSize(), Alignment.Center) {
-            Text(text = graphLoadingState.loadingMessage)
+            CircularProgressIndicator(
+                color = DarkYellow,
+                modifier = Modifier
+                    .width(70.dp)
+            )
+        }
+    } else if (graphLoadingState.statusMessage != "") {
+        Box(modifier.fillMaxSize(), Alignment.Center) {
+            Text(text = graphLoadingState.statusMessage)
         }
     } else {
         ElectricityGraph(homeUiState = homeUiState)
@@ -79,7 +90,6 @@ fun GraphContainer(
 }
 
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
-
 
 @Composable
 fun ElectricityGraph(

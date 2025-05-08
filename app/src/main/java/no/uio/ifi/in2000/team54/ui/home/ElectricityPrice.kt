@@ -17,8 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonColors
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -42,28 +41,43 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.R
-import no.uio.ifi.in2000.team54.ui.theme.Beige
 import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
+import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
 import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
-
 
 @Composable
 fun PriceContainer(viewModel: HomeViewModel) {
     val uiState by viewModel.homeUiState.collectAsState()
     val loadingState by viewModel.priceLoadingState.collectAsState()
     var expanded by remember { mutableStateOf(false) }
-    if (loadingState.loadingMessage != "") {
+
+    if (loadingState.isLoading) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .height(302.dp), contentAlignment = Alignment.Center
         ) {
-            Text(loadingState.loadingMessage)
+            CircularProgressIndicator(
+                color = DarkYellow,
+                modifier = Modifier
+                    .width(70.dp)
+            )
+        }
+        return
+    } else if (loadingState.statusMessage != "") {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .height(302.dp), contentAlignment = Alignment.Center
+        ) {
+            Text(text = loadingState.statusMessage)
         }
         return
     }
+
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.BottomCenter,
@@ -99,62 +113,51 @@ fun PriceContainer(viewModel: HomeViewModel) {
             )
             Box(
                 Modifier
-                    .clickable(onClick = { expanded = !expanded })
-                    .padding(5.dp),
-                contentAlignment = Alignment.Center
+                    .clickable(onClick = {
+                        expanded = !expanded
+                    })
+                    .padding(vertical = 2.dp, horizontal = 15.dp)
+                    .shadow(elevation = 1.dp, shape = RoundedCornerShape(10.dp))
+                    .background(RandomBeige)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.CenterStart
             ) {
                 Column(horizontalAlignment = AbsoluteAlignment.Left, modifier = Modifier.padding(2.dp)) {
                     if (!expanded) {
-                        Card(
+                        Text(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(1.dp, shape = RoundedCornerShape(12.dp)),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Beige),
-                        ) {
-                            Column (modifier = Modifier.padding(12.dp)) {
-                                Text(
-                                    text = "Hva betyr dette? Trykk her for mer informasjon",
-                                    fontWeight = FontWeight.Light,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
+                                .fillMaxWidth(),
+                            text = "Hva betyr dette? Trykk her for mer informasjon",
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center
+                        )
                     }
                     Spacer(Modifier.height(3.dp))
                     if (expanded) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Beige)
-                        ) {
-                            Column(modifier = Modifier.padding(12.dp)) {
-                                val explanationText = if (uiState.priceData.solarPrice < 0) {
-                                    """
-                                    Du har produsert et overskudd med strøm, og kan derfor selge tilbake til markedet. 
-                                    
-                                    Overskuddet du kan selge er markert i den høyre boksen med et negativt tall.
-                                    
-                                    Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
-                                    
-                                    Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
-                                    
-                                    Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
-                                    """.trimIndent()
-                                } else {
-                                    """
-                                    Du vil spare ${uiState.priceData.saved} NOK ${timePerspective[uiState.timeScope]}, fordi strømmen i utgangspunktet koster ${uiState.priceData.realPrice} NOK uten solcelleanlegget ditt, mens du vil betale ${uiState.priceData.solarPrice} NOK.
-                                    
-                                    Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
-                                    
-                                    Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
-                                    
-                                    Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
-                                    """.trimIndent()
-                                }
-                                Text(text = explanationText)
-                            }
+                        if (uiState.priceData.solarPrice < 0) {
+                            Text(
+                                """
+                                    >Du har produsert et overskudd med strøm, og kan derfor selge tilbake til markedet. Overskuddet du kan selge er markert i den høyre boksen med et negativt tall.
+                                    >• Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
+                                    >• Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
+                                    >• Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
+                                    """.trimMargin(">"),
+                                fontSize = 12.sp,
+                                modifier = Modifier
+                                    .padding(horizontal = 10.dp, vertical = 2.dp)
+                            )
+                        } else {
+                            Text(
+                                """
+                                     >Du vil spare ${uiState.priceData.saved} NOK ${timePerspective[uiState.timeScope]}, fordi strømmen i utgangspunktet koster ${uiState.priceData.realPrice} NOK uten solcelleanlegget ditt, mens du vil betale ${uiState.priceData.solarPrice} NOK.
+                                    >• Den venstre boksen viser hva du hadde betalt i strømutgifter uten solcellepanel.
+                                    >• Boksen i midten forteller deg hva du sparer ved å vise differansen mellom utgiftene. 
+                                    >• Den høyre boksen viser hva du hadde betalt i strømutgifter med solcellepanel.
+                                    """.trimMargin(">"),
+                                fontSize = 12.sp,
+                                modifier = Modifier
+                                    .padding(horizontal = 10.dp, vertical = 2.dp)
+                            )
                         }
                     }
                 }

@@ -65,6 +65,12 @@ fun MainScreen() {
         ) {
             composable("home") { HomeScreen(homeViewModel = homeViewModel, navController = navController) }
             composable("info") { InfoScreen(navController) }
+            composable("home") { HomeScreen(
+                homeViewModel = homeViewModel,
+                navController = navController,
+                snackbarHostState = snackbarState
+            )}
+            composable("info") { InfoScreen(navController) }
             composable("managesolararray") { ManageSolarArrayScreen(manageSolarArrayViewModel, navController, snackbarState) }
             composable("supplier") { SupplierScreen(navController) }
 
