@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import no.uio.ifi.in2000.team54.ui.composables.Snackbar
 import no.uio.ifi.in2000.team54.ui.info.InfoScreen
+import no.uio.ifi.in2000.team54.ui.info.SupplierScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayScreen
 import no.uio.ifi.in2000.team54.ui.managesolararray.ManageSolarArrayViewModel
 
@@ -65,7 +66,7 @@ fun MainScreen() {
                     snackbarState
                 )
             }
-            composable("info") { InfoScreen() }
+            composable("info") { InfoScreen(navController) }
             composable("managesolararray") {
                 ManageSolarArrayScreen(
                     manageSolarArrayViewModel,
@@ -73,7 +74,6 @@ fun MainScreen() {
                     snackbarState
                 )
             }
-
             composable(
                 "editsolararrays/{arrayId}",
                 arguments = listOf(navArgument("arrayId") { type = NavType.LongType })
@@ -86,6 +86,7 @@ fun MainScreen() {
                     arrayId
                 )
             }
+            composable("supplier") { SupplierScreen(navController) }
         }
 
         Snackbar(snackbarState)

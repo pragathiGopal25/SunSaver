@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
 import no.uio.ifi.in2000.team54.data.frost.FrostRepository
-import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
+import no.uio.ifi.in2000.team54.data.shared.ISunSaverRepository
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.ui.network.NetworkObserver
@@ -58,10 +58,10 @@ enum class TimeScope {
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val networkObserver: NetworkObserver,
-    private val _repository: FrostRepository,
-    private val electricityPriceRepository: ElectricityPriceRepository
+    private val frostRepository: FrostRepository,
+    private val electricityPriceRepository: ElectricityPriceRepository,
+    private val sunSaverRepository: ISunSaverRepository
 ) : ViewModel() {
-    private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
 
     // loading states
     private val _graphLoadingState = MutableStateFlow(LoadingState())
@@ -95,7 +95,7 @@ class HomeViewModel @Inject constructor(
         observeNetwork()
 
         viewModelScope.launch {
-            _sunSaverRepository.getAllSolarArrays()
+            sunSaverRepository.getAllSolarArrays()
                 .collect { solarArraysList ->
                     if (solarArraysList.isEmpty()) {
                         _homeUiState.value = HomeUiState()
@@ -167,7 +167,7 @@ class HomeViewModel @Inject constructor(
                     useWeatherData(solarArray)
                 } else {
                     // in case the previous selected was failing, clear the error message
-                    _graphLoadingState.update { it.copy( statusMessage = "") }
+                    _graphLoadingState.update { it.copy(statusMessage = "") }
                 }
 
                 _homeUiState.update { currentState ->
@@ -212,11 +212,11 @@ class HomeViewModel @Inject constructor(
                 }
 
                 val coordinates = solarArray.coordinates
-                val asyncTemp = async { _repository.getData(coordinates, Elements.TEMP) }
-                val asyncCloud = async { _repository.getData(coordinates, Elements.CLOUD) }
-                val asyncSnow = async { _repository.getData(coordinates, Elements.SNOW) }
-                val asyncIrradiance = async { _repository.getData(coordinates, Elements.IRRIDANCE) }
-                val asyncSunhours = async { _repository.getData(coordinates, Elements.SUNHOURS) }
+                val asyncTemp = async { frostRepository.getData(coordinates, Elements.TEMP) }
+                val asyncCloud = async { frostRepository.getData(coordinates, Elements.CLOUD) }
+                val asyncSnow = async { frostRepository.getData(coordinates, Elements.SNOW) }
+                val asyncIrradiance = async { frostRepository.getData(coordinates, Elements.IRRIDANCE) }
+                val asyncSunhours = async { frostRepository.getData(coordinates, Elements.SUNHOURS) }
 
                 val tempData = asyncTemp.await()
                 val cloudData = asyncCloud.await()
@@ -232,6 +232,12 @@ class HomeViewModel @Inject constructor(
                 weatherData.sunhours = sunhoursData
 
                 weatherDataMap[solarArray] = weatherData
+
+                _priceLoadingState.update { currentState ->
+                    currentState.copy(
+                        statusMessage = ""
+                    )
+                }
 
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
@@ -261,12 +267,6 @@ class HomeViewModel @Inject constructor(
                 priceDataMap.computeIfAbsent(
                     solarArray
                 ) { mutableMapOf() }[scope] = avgDailyElectricityPrice
-            }
-
-            _priceLoadingState.update { currentState ->
-                currentState.copy(
-                    statusMessage = ""
-                )
             }
         } catch (e: Exception) {
             _priceLoadingState.update {
@@ -320,7 +320,7 @@ class HomeViewModel @Inject constructor(
                 return@launch
             }
             try {
-                _sunSaverRepository.deleteSolarArray(solarArray)
+                sunSaverRepository.deleteSolarArray(solarArray)
             } catch (ex: Exception) {
                 _snackbarMessage.emit("Klarte ikke å slette solcelleanlegg")
             }
