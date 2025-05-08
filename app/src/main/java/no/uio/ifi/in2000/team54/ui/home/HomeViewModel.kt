@@ -233,6 +233,12 @@ class HomeViewModel @Inject constructor(
 
                 weatherDataMap[solarArray] = weatherData
 
+                _priceLoadingState.update { currentState ->
+                    currentState.copy(
+                        statusMessage = ""
+                    )
+                }
+
             } catch (e: Exception) {
                 _graphLoadingState.update { currentState ->
                     currentState.copy(
@@ -253,7 +259,7 @@ class HomeViewModel @Inject constructor(
     // get price data in a way that can be done async
     private suspend fun getPriceData(solarArray: SolarArray) {
         try {
-            val area = electricityPriceRepository.getPriceArea(solarArray)
+            val area = electricityPriceRepository.getPriceArea(solarArray.coordinates)
             timeScopeToDays.forEach { (scope, days) ->
                 val avgDailyElectricityPrice =
                     electricityPriceRepository.getPriceDataInterval(days, area).average()
@@ -261,12 +267,6 @@ class HomeViewModel @Inject constructor(
                 priceDataMap.computeIfAbsent(
                     solarArray
                 ) { mutableMapOf() }[scope] = avgDailyElectricityPrice
-            }
-
-            _priceLoadingState.update { currentState ->
-                currentState.copy(
-                    statusMessage = ""
-                )
             }
         } catch (e: Exception) {
             _priceLoadingState.update {

@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team54.data.electricity
 
 import android.annotation.SuppressLint
+import no.uio.ifi.in2000.team54.domain.Coordinates
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -105,13 +106,12 @@ class ElectricityPriceRepository @Inject constructor(private val datasource: Ele
 
     //Definerer de 5 sonene for strømpriser (strøm har forskjellig pris forskjellige deler av landet)
     //Dette er en rough estimat fordi de sonene har ganske kompliserte grenser
-    fun getPriceArea(solarArray: SolarArray): String {
-        val coords = solarArray.coordinates
+    fun getPriceArea(coordinates: Coordinates): String {
         return when {
-            coords.latitude > 64.5 -> "NO4"
-            coords.latitude < 59.45 && coords.longitude < 10.5 -> "NO2"
-            coords.latitude in 59.3..61.8 && coords.longitude < 8.2 -> "NO5"
-            coords.latitude in 61.9..64.5 && coords.longitude < 8.6 -> "NO3"
+            coordinates.latitude > 64.5 -> "NO4"
+            coordinates.latitude < 59.45 && coordinates.longitude < 10.5 -> "NO2"
+            coordinates.latitude in 59.3..61.8 && coordinates.longitude < 8.2 -> "NO5"
+            coordinates.latitude in 61.9..64.5 && coordinates.longitude < 8.6 -> "NO3"
             else -> "NO1"
         }
     }
