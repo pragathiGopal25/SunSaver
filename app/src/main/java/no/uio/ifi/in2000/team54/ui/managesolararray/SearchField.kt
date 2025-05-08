@@ -81,8 +81,6 @@ fun SearchField(
                     .zoom(19.0)
                     .build()
             )
-        } else {
-            viewModel.setSearchAddress("")
         }
     }
     val selectSuggestion: (Address) -> Unit = remember {

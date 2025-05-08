@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team54.ui.managesolararray
 
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
@@ -45,7 +46,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -79,6 +79,7 @@ import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
 import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
 import no.uio.ifi.in2000.team54.ui.theme.Light
 import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
+import no.uio.ifi.in2000.team54.util.rememberSaveableMutableStateListOf
 import kotlin.math.roundToInt
 
 private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
@@ -94,7 +95,7 @@ fun ManageSolarArrayScreen(
 ) {
 
     val solarEntity by viewModel.currentSolarArray.collectAsStateWithLifecycle()
-    val roofSections = remember { mutableStateListOf<RoofSection>() }
+    val roofSections = rememberSaveableMutableStateListOf<RoofSection>()
     val solarPanelType = rememberSaveable {
         mutableStateOf(solarEntity?.panelType ?: SolarPanelType.ECONOMY)
     }
@@ -173,9 +174,12 @@ private fun ArraySettingsMenu(
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
 
+    val orientation = LocalConfiguration.current.orientation
+    val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+
     val anchors = DraggableAnchors {
-        ArraySettingsMenuAnchors.Bottom at screenSizePx - 700f
-        ArraySettingsMenuAnchors.Top at 150f
+        ArraySettingsMenuAnchors.Bottom at if (isLandscape) 0f else screenSizePx - 700f
+        ArraySettingsMenuAnchors.Top at if (isLandscape) 0f else 150f
     }
 
     val decayAnimation = rememberSplineBasedDecay<Float>()
@@ -189,7 +193,11 @@ private fun ArraySettingsMenu(
             decayAnimationSpec = decayAnimation,
         )
     }
-    Column {
+    Column(
+        horizontalAlignment = Alignment.End,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
         DraggableBox(
             screenSizeDp = screenSizeDp,
             draggableState = draggableState
@@ -309,11 +317,16 @@ private fun ArraySettingsMainSection(
     val scope = rememberCoroutineScope()
     val scroll = rememberScrollState()
 
+    val orientation = LocalConfiguration.current.orientation
+    val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        DragHandle(draggableState)
+        if (!isLandscape) {
+            DragHandle(draggableState)
+        }
         SearchField(snackbarState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
         Column(

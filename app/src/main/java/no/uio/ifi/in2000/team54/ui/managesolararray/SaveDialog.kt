@@ -17,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,11 +45,11 @@ fun SaveDialog(
         return
     }
     val solarEntity = viewModel.currentSolarArray.collectAsStateWithLifecycle()
-    var validate by remember { mutableStateOf(false) }
+    var validate by rememberSaveable { mutableStateOf(false) }
 
     // shows the saved name and power values. If they dont exist, shows the default values.
-    var name by remember { mutableStateOf(solarEntity.value?.name ?: "")}
-    var power by remember { mutableStateOf(solarEntity.value?.powerConsumption?.toString() ?: "1574.5") }
+    var name by rememberSaveable { mutableStateOf(solarEntity.value?.name ?: "")}
+    var power by rememberSaveable { mutableStateOf(solarEntity.value?.powerConsumption?.toString() ?: "1574.5") }
     val isValid = !validate || (name.isNotEmpty() && power.isNotEmpty())
 
     Dialog({

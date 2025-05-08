@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
@@ -43,13 +44,13 @@ fun ManageRoofSectionCard(
 
     val isEditing = editingRoofSectionIndex != null
     val editingRoofSection = if (isEditing) roofSections[editingRoofSectionIndex!!] else null
-    var isEditingInitialized by remember(editingRoofSectionIndex) { mutableStateOf(false) }
+    var isEditingInitialized by rememberSaveable(editingRoofSectionIndex) { mutableStateOf(false) }
 
-    var area by remember(isEditing) { mutableStateOf("") }
-    var incline by remember(isEditing) { mutableStateOf("") }
-    var direction by remember(isEditing) { mutableStateOf("") }
-    var panels by remember(isEditing) { mutableStateOf("") }
-    var validate by remember(isEditing) { mutableStateOf(false) }
+    var area by rememberSaveable(isEditing) { mutableStateOf("") }
+    var incline by rememberSaveable(isEditing) { mutableStateOf("") }
+    var direction by rememberSaveable(isEditing) { mutableStateOf("") }
+    var panels by rememberSaveable(isEditing) { mutableStateOf("") }
+    var validate by rememberSaveable(isEditing) { mutableStateOf(false) }
     val isValid = !validate || (area.isNotEmpty() && incline.isNotEmpty() && direction.isNotEmpty() && panels.isNotEmpty())
 
     if (isEditing && !isEditingInitialized) {
