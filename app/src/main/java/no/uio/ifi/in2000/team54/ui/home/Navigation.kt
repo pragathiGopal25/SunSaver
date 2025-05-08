@@ -37,8 +37,8 @@ fun NavBar(navController: NavController) {
     var selectedIndex by remember { mutableIntStateOf(0) }
 
     val navIconList = listOf(
-        NavItem(R.drawable.homeclicked, R.drawable.homeunclicked, "home"),
-        NavItem(R.drawable.info_clicked, R.drawable.info_unclicked, "info")
+        NavItem(R.drawable.home_icon_clicked, R.drawable.home_icon_unclicked, "home"),
+        NavItem(R.drawable.info_icon_clicked, R.drawable.info_icon_unclicked, "info")
     )
 
     Box(
@@ -47,7 +47,7 @@ fun NavBar(navController: NavController) {
             .height(50.dp)
     ) {
         Icon(
-            painter = painterResource(R.drawable.addproperty),
+            painter = painterResource(R.drawable.add_button),
             contentDescription = "Add solar array",
             tint = Color.Unspecified,
             modifier = Modifier

@@ -8,7 +8,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -16,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mapbox.geojson.Polygon
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.compose.MapState
@@ -44,7 +44,7 @@ fun SolarArrayMap(
     solarPanelType: SolarPanelType,
     roofSections: SnapshotStateList<RoofSection>
 ) {
-    val mapRoofSectionsState by viewModel.mapRoofSections.collectAsState()
+    val mapRoofSectionsState by viewModel.mapRoofSections.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
 
 
@@ -65,8 +65,8 @@ fun SolarArrayMap(
             if (targetRoofSection == null && viewModel.currentSolarArray.value == null) {
                 viewModel.queryAddressAtPos(Pos.fromPoint(point))
             } else if (targetRoofSection != null){
-                if (!roofSections.removeIf { it.mapId == targetRoofSection!!.id }) {
-                    val area = targetRoofSection!!.width * targetRoofSection.length
+                if (!roofSections.removeIf { it.mapId == targetRoofSection.id }) {
+                    val area = targetRoofSection.width * targetRoofSection.length
 
                     roofSections.add(
                         RoofSection(

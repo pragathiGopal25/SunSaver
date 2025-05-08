@@ -2,6 +2,7 @@ package no.uio.ifi.in2000.team54.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -11,14 +12,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceDatasource
 import no.uio.ifi.in2000.team54.data.electricity.ElectricityPriceRepository
 import no.uio.ifi.in2000.team54.data.frost.FrostRepository
-import no.uio.ifi.in2000.team54.data.shared.RepositoryProvider
+import no.uio.ifi.in2000.team54.data.shared.ISunSaverRepository
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.Elements
 import no.uio.ifi.in2000.team54.ui.network.NetworkObserver
 import no.uio.ifi.in2000.team54.util.calculateMonthlyElectricityProduction
+import javax.inject.Inject
 import kotlin.math.round
 
 data class HomeUiState(
@@ -54,13 +55,13 @@ enum class TimeScope {
     DAY, MONTH, YEAR
 }
 
-class HomeViewModel(
-    private val networkObserver: NetworkObserver
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val networkObserver: NetworkObserver,
+    private val frostRepository: FrostRepository,
+    private val electricityPriceRepository: ElectricityPriceRepository,
+    private val sunSaverRepository: ISunSaverRepository
 ) : ViewModel() {
-    private val _repository = FrostRepository()
-    private val _sunSaverRepository = RepositoryProvider.sunSaverRepository
-    private val electricityPriceRepository =
-        ElectricityPriceRepository(ElectricityPriceDatasource())
 
     // loading states
     private val _graphLoadingState = MutableStateFlow(LoadingState())
@@ -94,7 +95,7 @@ class HomeViewModel(
         observeNetwork()
 
         viewModelScope.launch {
-            _sunSaverRepository.getAllSolarArrays()
+            sunSaverRepository.getAllSolarArrays()
                 .collect { solarArraysList ->
                     if (solarArraysList.isEmpty()) {
                         _homeUiState.value = HomeUiState()
@@ -166,7 +167,7 @@ class HomeViewModel(
                     useWeatherData(solarArray)
                 } else {
                     // in case the previous selected was failing, clear the error message
-                    _graphLoadingState.update { it.copy( statusMessage = "") }
+                    _graphLoadingState.update { it.copy(statusMessage = "") }
                 }
 
                 _homeUiState.update { currentState ->
@@ -211,11 +212,11 @@ class HomeViewModel(
                 }
 
                 val coordinates = solarArray.coordinates
-                val asyncTemp = async { _repository.getData(coordinates, Elements.TEMP) }
-                val asyncCloud = async { _repository.getData(coordinates, Elements.CLOUD) }
-                val asyncSnow = async { _repository.getData(coordinates, Elements.SNOW) }
-                val asyncIrradiance = async { _repository.getData(coordinates, Elements.IRRIDANCE) }
-                val asyncSunhours = async { _repository.getData(coordinates, Elements.SUNHOURS) }
+                val asyncTemp = async { frostRepository.getData(coordinates, Elements.TEMP) }
+                val asyncCloud = async { frostRepository.getData(coordinates, Elements.CLOUD) }
+                val asyncSnow = async { frostRepository.getData(coordinates, Elements.SNOW) }
+                val asyncIrradiance = async { frostRepository.getData(coordinates, Elements.IRRIDANCE) }
+                val asyncSunhours = async { frostRepository.getData(coordinates, Elements.SUNHOURS) }
 
                 val tempData = asyncTemp.await()
                 val cloudData = asyncCloud.await()
@@ -319,7 +320,7 @@ class HomeViewModel(
                 return@launch
             }
             try {
-                _sunSaverRepository.deleteSolarArray(solarArray)
+                sunSaverRepository.deleteSolarArray(solarArray)
             } catch (ex: Exception) {
                 _snackbarMessage.emit("Klarte ikke å slette solcelleanlegg")
             }
@@ -348,8 +349,8 @@ class HomeViewModel(
                     )
 
                     electricityPriceMap.computeIfAbsent(
-                        solarArray,
-                        { mutableMapOf() })[scope] = priceData
+                        solarArray
+                    ) { mutableMapOf() }[scope] = priceData
                 }
             }
 

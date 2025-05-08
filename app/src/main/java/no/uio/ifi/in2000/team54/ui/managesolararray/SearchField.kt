@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,7 +27,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,8 +44,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mapbox.maps.CameraOptions
-import com.mapbox.maps.extension.compose.MapState
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.model.building.Address
@@ -58,7 +56,6 @@ import no.uio.ifi.in2000.team54.ui.theme.Light
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SearchField(
-    mapState: MapState,
     snackbarState: SnackbarHostState,
     mapViewportState: MapViewportState,
     draggableState: AnchoredDraggableState<ArraySettingsMenuAnchors>,
@@ -67,13 +64,12 @@ fun SearchField(
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
-    val addressState = viewModel.mapSearchAddress.collectAsState()
-    val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsState()
+    val addressState = viewModel.mapSearchAddress.collectAsStateWithLifecycle()
+    val addressSuggestions = viewModel.mapSearchAddressSuggestions.collectAsStateWithLifecycle()
     var showSuggestions by remember { mutableStateOf(false) }
     // Use the address from the selected solar array or the search address
-    val solarEntity by viewModel.currentSolarArray.collectAsState()
+    val solarEntity by viewModel.currentSolarArray.collectAsStateWithLifecycle()
     val snackbarShown = remember { mutableStateOf(false) } // to prevent showing snackbar everytime the cursor moves on the search field
-
 
     // recomposes everytime there is a change in the solar entity
     LaunchedEffect(solarEntity) {

@@ -73,7 +73,7 @@ fun SupplierScreen(navController: NavController) {
     ) {
         BackButton(navController)
         Image(
-            painter = painterResource(R.drawable.sunny),
+            painter = painterResource(R.drawable.sun),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()

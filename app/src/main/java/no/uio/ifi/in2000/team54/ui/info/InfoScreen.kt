@@ -47,7 +47,7 @@ fun InfoScreen(navController: NavController) {
             .fillMaxSize()
     ) {
         Image(
-            painter = painterResource(R.drawable.sunny),
+            painter = painterResource(R.drawable.sun),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
@@ -165,7 +165,7 @@ fun SolarFacts(modifier: Modifier = Modifier, onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Image(
-                painter = painterResource(R.drawable.solarpanel),
+                painter = painterResource(R.drawable.solar_panel),
                 contentDescription = null,
                 modifier = Modifier.size(75.dp)
             )
@@ -211,7 +211,7 @@ fun SupplierInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Image(
-                painter = painterResource(R.drawable.handsshaking),
+                painter = painterResource(R.drawable.handshake),
                 contentDescription = "Solcellepanel",
                 modifier = Modifier
                     .size(75.dp)
@@ -256,7 +256,7 @@ fun SolarInfo(modifier: Modifier = Modifier, onClick: () -> Unit) {
                 modifier = Modifier.fillMaxWidth()
             )
             Image(
-                painter = painterResource(R.drawable.boardgraph),
+                painter = painterResource(R.drawable.graph),
                 contentDescription = "Fordeler med \nsolenergi ",
                 modifier = Modifier
                     .size(80.dp)
@@ -302,7 +302,7 @@ fun GetStarted(modifier: Modifier = Modifier, onClick: () -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Image(
-                painter = painterResource(R.drawable.todolist),
+                painter = painterResource(R.drawable.todo_list),
                 contentDescription = "Fordeler med \nsolenergi ",
                 modifier = Modifier
                     .size(75.dp)

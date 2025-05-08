@@ -13,9 +13,10 @@ interface ISunSaverRepository {
     suspend fun deleteSolarArray(solarArray: SolarArray)
     suspend fun updateSolarArray(solarArray: SolarArray)
 }
+
 class SunSaverRepository @Inject constructor(
     private val datasource: ISunSaverDatasource
-): ISunSaverRepository {
+) : ISunSaverRepository {
     override fun getAllSolarArrays(): Flow<List<SolarArray>> {
         // transforming the flow of SolarArrayWithRoofSections to a flow of SolarArray
         return datasource.getAllSolarArrays().map { list ->
@@ -35,8 +36,4 @@ class SunSaverRepository @Inject constructor(
     override suspend fun updateSolarArray(solarArray: SolarArray) {
         datasource.update(toEntity(solarArray))
     }
-}
-
-object RepositoryProvider {
-    lateinit var sunSaverRepository: SunSaverRepository
 }
