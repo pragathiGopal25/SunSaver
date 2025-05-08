@@ -64,11 +64,7 @@ fun SolarArrayMap(
             // if there aren't any roof sections at this position, we wan't to try to find a new address
             if (targetRoofSection == null && viewModel.currentSolarArray.value == null) {
                 viewModel.queryAddressAtPos(Pos.fromPoint(point))
-            } else if(viewModel.currentSolarArray.value != null) { // makes sure that user cannot move to address by clicking on the map when editing
-                coroutineScope.launch {
-                    snackbarState.showSnackbar("Du kan ikke endre adressen når du redigerer et solcelleanlegg.")
-                }
-            } else {
+            } else if (targetRoofSection != null){
                 if (!roofSections.removeIf { it.mapId == targetRoofSection!!.id }) {
                     val area = targetRoofSection!!.width * targetRoofSection.length
 
@@ -82,6 +78,10 @@ fun SolarArrayMap(
                             targetRoofSection.id
                         )
                     )
+                }
+            } else {
+                coroutineScope.launch {// makes sure that user cannot move to address by clicking on the map when editing
+                    snackbarState.showSnackbar("Du kan ikke endre adressen når du redigerer et solcelleanlegg.")
                 }
             }
             false
