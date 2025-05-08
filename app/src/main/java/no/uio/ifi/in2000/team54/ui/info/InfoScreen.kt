@@ -16,15 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-
 import no.uio.ifi.in2000.team54.R
-import no.uio.ifi.in2000.team54.ui.theme.YellowText
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
 
 
 @Composable
 fun InfoScreen() {
 
-    Box (
+    Box(
         Modifier
             .fillMaxSize()
     ) {
@@ -47,12 +46,12 @@ fun InfoScreen() {
 @Composable
 fun InfoScreenTopBar() {
 
-    Column (
+    Column(
         Modifier
             .fillMaxWidth()
             .padding(top = 23.dp),
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         Spacer(Modifier.padding(top = 23.dp))
         Text(
             text = "Velkommen til",
@@ -63,7 +62,7 @@ fun InfoScreenTopBar() {
             text = "SunSavers",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
-            color = YellowText
+            color = RipeLemon
         )
         Text(
             text = "Informasjonsside",

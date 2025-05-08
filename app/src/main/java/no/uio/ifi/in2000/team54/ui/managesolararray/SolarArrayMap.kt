@@ -31,9 +31,9 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
 import no.uio.ifi.in2000.team54.model.building.Pos
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.Light
-import no.uio.ifi.in2000.team54.ui.theme.LightYellow
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
+import no.uio.ifi.in2000.team54.ui.theme.Marzipan
 
 @Composable
 fun SolarArrayMap(
@@ -97,7 +97,7 @@ fun SolarArrayMap(
             val localRoofSection = roofSections.find { it.mapId == roofSection.id }
 
             PolygonAnnotation(listOf(points)) {
-                fillColor = if (localRoofSection == null) LightYellow else DarkYellow
+                fillColor = if (localRoofSection == null) Marzipan else RipeLemon
                 fillOpacity = 0.9
             }
             PolylineAnnotation(points) {
@@ -118,7 +118,7 @@ fun SolarArrayMap(
                         modifier =
                         Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(Light)
+                            .background(VistaWhite)
                             .padding(horizontal = 3.dp, vertical = 2.dp)
                     )
                 }

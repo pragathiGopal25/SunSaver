@@ -11,17 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFFFAE9B3),
-    secondary = Color(0xFFE0C529),
-    tertiary = Color(0xFFFCF7F7)
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFFFAE9B3),
-    secondary = Color(0xFFE0C529),
-    tertiary = Color(0xFFFCF7F7)
-)
+private val DarkColorScheme = darkColorScheme()
+private val LightColorScheme = lightColorScheme()
 
 @Composable
 fun Team54Theme(

@@ -75,10 +75,10 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
-import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.Light
-import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
+import no.uio.ifi.in2000.team54.ui.theme.Mustard
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
+import no.uio.ifi.in2000.team54.ui.theme.Astra
 import no.uio.ifi.in2000.team54.util.rememberSaveableMutableStateListOf
 import kotlin.math.roundToInt
 
@@ -144,13 +144,13 @@ private fun BackButton(viewModel: ManageSolarArrayViewModel, navController: NavC
     Icon(
         Icons.AutoMirrored.Default.ArrowBack,
         contentDescription = "Gå tilbake",
-        tint = DarkYellow,
+        tint = RipeLemon,
         modifier = Modifier
             .padding(10.dp)
             .width(35.dp)
             .height(35.dp)
             .clip(RoundedCornerShape(100.dp))
-            .background(LightestYellow)
+            .background(Astra)
             .padding(7.dp)
             .clickable {
                 viewModel.setSearchAddress("")
@@ -235,7 +235,7 @@ private fun DraggableBox(
             }
             .size(screenSizeDp)
             .clip(shape = RoundedCornerShape(25.dp, 25.dp, 0.dp, 0.dp))
-            .background(LightestYellow)
+            .background(Astra)
             .anchoredDraggable(draggableState, Orientation.Vertical)
     ) {
         content()
@@ -399,7 +399,7 @@ private fun DragHandle(draggableState: AnchoredDraggableState<ArraySettingsMenuA
                 .height(7.dp)
                 .rotate(20f * direction)
                 .clip(shape = RoundedCornerShape(100.dp))
-                .background(BrightYellow)
+                .background(Mustard)
         )
         Box(
             modifier = Modifier
@@ -408,7 +408,7 @@ private fun DragHandle(draggableState: AnchoredDraggableState<ArraySettingsMenuA
                 .height(7.dp)
                 .rotate(20f * direction * -1)
                 .clip(shape = RoundedCornerShape(100.dp))
-                .background(BrightYellow)
+                .background(Mustard)
         )
     }
 }
@@ -420,9 +420,9 @@ private fun SaveButton(
     OutlinedButton(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = Light
+            containerColor = VistaWhite
         ),
-        border = BorderStroke(1.dp, DarkYellow),
+        border = BorderStroke(1.dp, RipeLemon),
         modifier = Modifier
             .width(250.dp)
             .padding(top = 5.dp)
@@ -461,14 +461,14 @@ private fun SolarPanelTypeDropdown(
                 readOnly = true,
                 onValueChange = {},
                 textStyle = LocalTextStyle.current.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color.Black,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 ),
                 modifier = Modifier
                     .menuAnchor(MenuAnchorType.PrimaryEditable, true)
                     .clip(RoundedCornerShape(15))
-                    .background(Light)
-                    .border(1.dp, DarkYellow, RoundedCornerShape(15))
+                    .background(VistaWhite)
+                    .border(1.dp, RipeLemon, RoundedCornerShape(15))
                     .fillMaxWidth()
                     .padding(10.dp)
             )

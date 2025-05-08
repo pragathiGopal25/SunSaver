@@ -43,10 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.uio.ifi.in2000.team54.R
-import no.uio.ifi.in2000.team54.ui.theme.DarkBeige
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
-import no.uio.ifi.in2000.team54.ui.theme.RandomBeige
+import no.uio.ifi.in2000.team54.ui.theme.Rajah
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.Emperor
+import no.uio.ifi.in2000.team54.ui.theme.Astra
+import no.uio.ifi.in2000.team54.ui.theme.RobRoy
 
 @Composable
 fun PriceContainer(viewModel: HomeViewModel) {
@@ -61,7 +62,7 @@ fun PriceContainer(viewModel: HomeViewModel) {
                 .height(302.dp), contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                color = DarkYellow,
+                color = RipeLemon,
                 modifier = Modifier
                     .width(70.dp)
             )
@@ -133,7 +134,7 @@ fun PriceContainer(viewModel: HomeViewModel) {
                     })
                     .padding(vertical = 2.dp, horizontal = 15.dp)
                     .shadow(elevation = 1.dp, shape = RoundedCornerShape(10.dp))
-                    .background(RandomBeige)
+                    .background(RobRoy)
                     .fillMaxWidth(),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -196,9 +197,9 @@ fun ExpensesStatBox(
             )
             .height(if (mainBox) 155.dp else 110.dp)
             .width(if (mainBox) 126.dp else 99.dp)
-            .background(if (mainBox) RandomBeige else LightestYellow)
+            .background(if (mainBox) RobRoy else Astra)
             .border(
-                color = DarkBeige,
+                color = Rajah,
                 width = 1.dp,
                 shape = RoundedCornerShape(20.dp)
             ),
@@ -259,12 +260,12 @@ fun TimeScopeSegmentedButton(
                 selected = index == selectedIndex,
                 icon = {},
                 colors = SegmentedButtonColors(
-                    activeContainerColor = LightestYellow,
+                    activeContainerColor = Astra,
                     activeContentColor = Color.Black,
-                    activeBorderColor = LightestYellow,
-                    inactiveContainerColor = RandomBeige,
-                    inactiveContentColor = Color.Gray,
-                    inactiveBorderColor = RandomBeige,
+                    activeBorderColor = Astra,
+                    inactiveContainerColor = RobRoy,
+                    inactiveContentColor = Emperor,
+                    inactiveBorderColor = RobRoy,
                     disabledActiveContainerColor = Color.Red,
                     disabledActiveContentColor = Color.Red,
                     disabledActiveBorderColor = Color.Red,

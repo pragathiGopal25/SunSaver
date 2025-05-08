@@ -32,9 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.domain.RoofSection
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.Light
-import no.uio.ifi.in2000.team54.ui.theme.Red
+import no.uio.ifi.in2000.team54.ui.theme.Emperor
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
+import no.uio.ifi.in2000.team54.ui.theme.Tamarillo
 
 @Composable
 fun RoofSectionsList(
@@ -75,8 +76,8 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
             .width(180.dp)
             .height(135.dp)
             .clip(RoundedCornerShape(15.dp))
-            .background(Light)
-            .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
+            .background(VistaWhite)
+            .border(1.dp, RipeLemon, RoundedCornerShape(15.dp))
             .padding(10.dp)
             .clickable { onEdit() }
     ) {
@@ -94,12 +95,12 @@ private fun RoofSectionCard(section: RoofSection, index: Int, onRemove: () -> Un
                     text = "Takflate ${index + 1}",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = DarkYellow
+                    color = RipeLemon
                 )
                 Icon(
                     Icons.Rounded.Delete,
                     contentDescription = "Slett takflate",
-                    tint = Red,
+                    tint = Tamarillo,
                     modifier = Modifier
                         .size(20.dp)
                         .clickable {
@@ -128,7 +129,7 @@ private fun NoRoofSectionCard() {
             .height(135.dp)
             .drawBehind {
                 drawRoundRect(
-                    color = DarkYellow,
+                    color = RipeLemon,
                     cornerRadius = CornerRadius(15.dp.toPx()),
                     style = Stroke(width = 3f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f))
                 )
@@ -138,7 +139,7 @@ private fun NoRoofSectionCard() {
         Text(
             "Søk på en adresse og velg en takflate i kartet, eller legg inn en manuelt i boksen under.",
             fontSize = 12.sp,
-            color = Color.Gray,
+            color = Emperor,
         )
     }
 }

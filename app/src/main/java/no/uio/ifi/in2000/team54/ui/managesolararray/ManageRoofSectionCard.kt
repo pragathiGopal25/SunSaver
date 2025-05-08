@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -30,9 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.ui.composables.NumberInputField
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.Light
-import no.uio.ifi.in2000.team54.ui.theme.Red
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
+import no.uio.ifi.in2000.team54.ui.theme.Tamarillo
 
 @Composable
 fun ManageRoofSectionCard(
@@ -66,15 +65,15 @@ fun ManageRoofSectionCard(
         verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier
             .clip(shape = RoundedCornerShape(15.dp))
-            .background(Light)
-            .border(1.dp, DarkYellow, shape = RoundedCornerShape(15.dp))
+            .background(VistaWhite)
+            .border(1.dp, RipeLemon, shape = RoundedCornerShape(15.dp))
             .padding(10.dp)
     ) {
         Text(
             text = if (isEditing) "Redigerer takflate ${editingRoofSectionIndex!! + 1}" else "Legg til takflate",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = DarkYellow
+            color = RipeLemon
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -158,16 +157,16 @@ fun ManageRoofSectionCard(
                 panels = ""
             },
             colors = ButtonDefaults.buttonColors(
-                containerColor = Light
+                containerColor = VistaWhite
             ),
-            border = BorderStroke(1.dp, if (isValid) DarkYellow else Red),
+            border = BorderStroke(1.dp, if (isValid) RipeLemon else Tamarillo),
             modifier = Modifier
                 .defaultMinSize(100.dp, 30.dp),
             contentPadding = PaddingValues(0.dp),
         ) {
             Text(
                 if (isEditing) "Lagre" else "Legg til",
-                color = if (isValid) Color.Black else Red,
+                color = if (isValid) Color.Black else Tamarillo,
                 fontSize = 14.sp
             )
         }

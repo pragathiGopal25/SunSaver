@@ -49,9 +49,9 @@ import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.extension.compose.animation.viewport.MapViewportState
 import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.model.building.Address
-import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.Light
+import no.uio.ifi.in2000.team54.ui.theme.Mustard
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -169,18 +169,18 @@ private fun SearchTextField(
             .fillMaxWidth()
             .clip(RoundedCornerShape(100.dp))
             .background(
-                Light,
+                VistaWhite,
                 MaterialTheme.shapes.small
             )
-            .border(1.dp, DarkYellow, shape = RoundedCornerShape(100.dp))
+            .border(1.dp, RipeLemon, shape = RoundedCornerShape(100.dp))
             .padding(start = 30.dp)
             .onFocusChanged { onFocusChanged(it.isFocused) },
         value = address,
         onValueChange = onAddressChange,
         singleLine = true,
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.secondary),
+        cursorBrush = SolidColor(Color.Black),
         textStyle = LocalTextStyle.current.copy(
-            color = MaterialTheme.colorScheme.onSurface,
+            color = Color.Black,
             fontSize = 15.sp
         ),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -195,7 +195,7 @@ private fun SearchTextField(
                         Text(
                             text = "Søk adresse",
                             style = LocalTextStyle.current.copy(
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                color = Color.Black.copy(alpha = 0.6f),
                                 fontSize = 15.sp
                             )
                         )
@@ -210,7 +210,7 @@ private fun SearchTextField(
                         .width(40.dp)
                         .height(40.dp)
                         .clip(RoundedCornerShape(100.dp))
-                        .background(BrightYellow)
+                        .background(Mustard)
                         .padding(7.dp)
                 )
             }
@@ -231,8 +231,8 @@ private fun SuggestionsPopup(
                 .fillMaxWidth()
                 .padding(top = 60.dp, start = 10.dp, end = 10.dp)
                 .clip(RoundedCornerShape(15.dp))
-                .background(MaterialTheme.colorScheme.tertiary)
-                .border(1.dp, MaterialTheme.colorScheme.secondary, shape = RoundedCornerShape(15.dp))
+                .background(VistaWhite)
+                .border(1.dp, RipeLemon, shape = RoundedCornerShape(15.dp))
         ) {
             suggestions.forEach { suggestion ->
                 SuggestionItem(

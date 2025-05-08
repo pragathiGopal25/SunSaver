@@ -52,8 +52,9 @@ import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
-import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
+import no.uio.ifi.in2000.team54.ui.theme.Mustard
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
 
 val monthFormatter =
     CartesianValueFormatter { _, value, _ -> // overriding "format" method in CastertianValueFormatter
@@ -75,7 +76,7 @@ fun GraphContainer(
     if (graphLoadingState.isLoading) {
         Box(modifier.fillMaxSize(), Alignment.Center) {
             CircularProgressIndicator(
-                color = DarkYellow,
+                color = RipeLemon,
                 modifier = Modifier
                     .width(70.dp)
             )
@@ -117,7 +118,7 @@ fun ElectricityGraph(
             }
         }
 
-        val lineColors = listOf(BrightYellow)
+        val lineColors = listOf(Mustard)
         val legendItemLabelComponent = rememberTextComponent(vicoTheme.textColor)
 
         CartesianChartHost(
@@ -182,10 +183,10 @@ fun rememberMarker(
     val labelBackgroundShape = markerCorneredShape(CorneredShape.Corner.Rounded)
     val labelBackground =
         rememberShapeComponent(
-            fill = fill(MaterialTheme.colorScheme.background),
+            fill = fill(VistaWhite),
             shape = labelBackgroundShape,
             strokeThickness = 1.dp,
-            strokeFill = fill(MaterialTheme.colorScheme.outline),
+            strokeFill = fill(Color.Black),
         )
     val label =
         rememberTextComponent(
@@ -196,7 +197,7 @@ fun rememberMarker(
             minWidth = TextComponent.MinWidth.fixed(40.dp),
         )
     val indicatorFrontComponent =
-        rememberShapeComponent(fill(MaterialTheme.colorScheme.surface), CorneredShape.Pill)
+        rememberShapeComponent(fill(Color.Black), CorneredShape.Pill)
     //val guideline = rememberAxisGuidelineComponent()
     return rememberDefaultCartesianMarker(
         label = label,
