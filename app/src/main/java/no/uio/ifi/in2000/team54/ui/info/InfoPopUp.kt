@@ -188,7 +188,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Levetid: ")
                                         }
-                                        append("De fleste solceller har levetid på  25–30 år.")
+                                        append("De fleste solceller har levetid på 25–30 år.")
                                     }
                                 )
                             }
@@ -221,7 +221,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Lavere strømregninger: ")
                                         }
-                                        append("Man produserer egen strøm.")
+                                        append("Spar penger ved å produsere din egen strøm og redusere behovet for å kjøpe fra strømleverandører.")
                                     }
                                 )
                                 Spacer(Modifier.height(9.dp))
