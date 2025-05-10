@@ -153,7 +153,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                 .padding(5.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .width(395.dp)
-                                .height(258.dp),
+                                .height(260.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(
                                 contentColor = Color.Black,
@@ -186,7 +186,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                 Text(
                                     text = buildAnnotatedString {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                            append("Levetid: ")
+                                            append("Lang levetid: ")
                                         }
                                         append("De fleste solceller har levetid på 25–30 år.")
                                     }
@@ -221,7 +221,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Lavere strømregninger: ")
                                         }
-                                        append("Spar penger ved å produsere din egen strøm.")
+                                        append("Spar penger ved å produsere din egen strøm!")
                                     }
                                 )
                                 Spacer(Modifier.height(9.dp))
@@ -231,7 +231,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Økt selvforsyning: ")
                                         }
-                                        append("Reduser avhengigheten fra strømleverandører og åpne rom for investering i eget batterilagringssystem.")
+                                        append("Reduserer avhengigheten til strømleverandører, og åpner rom for investering i eget batterilagringssystem.")
                                     }
                                 )
                                 Spacer(Modifier.height(9.dp))
@@ -241,7 +241,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Støtteordninger: ")
                                         }
-                                        append("Norge tilbyr økonomisk støtte for installasjon.")
+                                        append("Norge tilbyr økonomisk støtte for installasjon av solcellepaneler.")
                                     }
                                 )
                             }
