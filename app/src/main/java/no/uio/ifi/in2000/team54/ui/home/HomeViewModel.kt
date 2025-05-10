@@ -34,7 +34,7 @@ data class HomeUiState(
 data class LoadingState(
     val isLoading: Boolean = false,
     // empty means the data is already processed
-    val statusMessage: String = "Ingen solanlegg er opprettet",
+    val statusMessage: String = "Ingen solcelleanlegg er opprettet",
 )
 
 data class PriceData(
