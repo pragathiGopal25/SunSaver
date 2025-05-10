@@ -7,17 +7,24 @@ validering av om brukeren har fylt ut alle felt; hendelsesforløp der bruker øn
 # Modellering
 ### Inkluderte diagrammer: 
 - Use case diagram: Gir en generell oversikt over de viktigste funksjonene appen tilbyr brukeren. 
-- Klassediagram: Viser arkiteturen i prosjektet og hvilke dataklasser som er brukt. 
-- Sekvensdiagrammer: for utvalgte/hver use case viser hvordan de ulike komponentene (fra klassediagrammet) kommuniserer sammen for å utføre use caset. Den fokuserer primært på appens komponenter, og overlater brukerinteraksjonen til aktivitetsdiagrammet. 
-- Aktivitetsdiagrammet: for utvalgte/hver use case viser hvordan brukeren skal interagere med appen. 
+- Klassediagram: Viser appens struktur og klasser, og hvordan de er relatert til hverandre. 
+- Sekvensdiagrammer: for utvalgte/hver use case viser hvordan de ulike komponentene (fra klassediagrammet) kommuniserer for å gjennomføre use caset. Den fokuserer primært på appens komponenter, og overlater brukerinteraksjonen til aktivitetsdiagrammet. 
+- Aktivitetsdiagrammet: for utvalgte/hver use case viser mulige scenarioer til hvordan bruker kan interagere med appen. 
 
 
 ## Use case diagram 
-![Use case diagram for SunSaver](image.png)
-Diagrammet ble laget ved hjelp av [app.diagrams.net](https://app.diagrams.net/) siden Mermaid ikke har Use case diagrammer. <br>
+Formålet med appen er at bruker skal kunne legge til en eller flere solcelleanlegg, og administrere dem (altså slette og redigere). Appen har også en infoskjerm, men den er ikke en del av hovedfunksjonaliteten i appen, og dermed er den ikke inkludert i use case diagrammet. <br/>
+
+![Use case diagram for SunSaver](image.png)<br/>
+
+\* estimat om hvor mye man sparer ved å installere dette solcelleanlegget, tid til man har tjent inn det man innvesterte inn i anlegget, og en graf som viser hvordan er strømproduksjonen i området mtp værforhold. <br/>
+Redigering, sletting og valg av nytt anlegg er markert med <<extend>> fordi de krever minst et lagret anlegg. <br/>
+<br/>
+Diagrammet ble laget ved hjelp av [app.diagrams.net](https://app.diagrams.net/) siden Mermaid ikke har Use case diagrammer. <br/>
 
 ## Klassediagram
-Formålet med klassediagrammet er å vise strukturen i prosjektet vårt.
+Klassediagrammet fokuserer på arkitekturen i appen vår (ViewModel - Repository - Datasource) og noen av de viktigste dataklasser. Vi inkluderer ikke composables siden de er strengt tatt funksjoner. 
+
 ```mermaid
 classDiagram
     class SolarArray {
