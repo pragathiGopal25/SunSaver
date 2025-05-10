@@ -5,5 +5,6 @@ import androidx.annotation.DrawableRes
 data class NavItem (
     @DrawableRes val selected: Int,
     @DrawableRes val unselected: Int,
-    val route: String
+    val route: String,
+    val description: String
 )

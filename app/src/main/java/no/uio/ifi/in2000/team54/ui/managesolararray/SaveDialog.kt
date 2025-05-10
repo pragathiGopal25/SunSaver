@@ -15,7 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,9 +28,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.uio.ifi.in2000.team54.ui.composables.CustomTextField
 import no.uio.ifi.in2000.team54.ui.composables.NumberInputField
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.Light
-import no.uio.ifi.in2000.team54.ui.theme.Red
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
+import no.uio.ifi.in2000.team54.ui.theme.Tamarillo
 
 @Composable
 fun SaveDialog(
@@ -43,11 +43,11 @@ fun SaveDialog(
         return
     }
     val solarEntity = viewModel.currentSolarArray.collectAsStateWithLifecycle()
-    var validate by remember { mutableStateOf(false) }
+    var validate by rememberSaveable { mutableStateOf(false) }
 
     // shows the saved name and power values. If they dont exist, shows the default values.
-    var name by remember { mutableStateOf(solarEntity.value?.name ?: "")}
-    var power by remember { mutableStateOf(solarEntity.value?.powerConsumption?.toString() ?: "1574.5") }
+    var name by rememberSaveable { mutableStateOf(solarEntity.value?.name ?: "")}
+    var power by rememberSaveable { mutableStateOf(solarEntity.value?.powerConsumption?.toString() ?: "1574.5") }
     val isValid = !validate || (name.isNotEmpty() && power.isNotEmpty())
 
     Dialog({
@@ -57,8 +57,8 @@ fun SaveDialog(
         Column(
             modifier = Modifier
                 .clip(RoundedCornerShape(15.dp))
-                .background(Light)
-                .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
+                .background(VistaWhite)
+                .border(1.dp, RipeLemon, RoundedCornerShape(15.dp))
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Text(
@@ -105,16 +105,16 @@ fun SaveDialog(
                     viewModel.resetUpdSolarArray()
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Light
+                    containerColor = VistaWhite
                 ),
                 contentPadding = PaddingValues(2.dp),
-                border = BorderStroke(1.dp, if (isValid) DarkYellow else Red),
+                border = BorderStroke(1.dp, if (isValid) RipeLemon else Tamarillo),
                 modifier = Modifier
                     .defaultMinSize(100.dp, 30.dp)
             ) {
                 Text(
                     "Lagre",
-                    color = if (isValid) Color.Black else Red,
+                    color = if (isValid) Color.Black else Tamarillo,
                     fontSize = 14.sp
                 )
             }

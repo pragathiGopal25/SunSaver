@@ -3,9 +3,7 @@ package no.uio.ifi.in2000.team54.ui.info
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,7 +21,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,14 +37,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import no.uio.ifi.in2000.team54.R
-import no.uio.ifi.in2000.team54.ui.theme.Butter
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.Light
-import no.uio.ifi.in2000.team54.ui.theme.LightGrey
-import no.uio.ifi.in2000.team54.ui.theme.YellowText
+import no.uio.ifi.in2000.team54.ui.theme.Astra
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
 
 @Composable
 fun FactDialog(onDismissRequest: () -> Unit) {
+    val scroll = rememberScrollState()
+
     Dialog(onDismissRequest = onDismissRequest) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
@@ -57,23 +54,18 @@ fun FactDialog(onDismissRequest: () -> Unit) {
                     .height(391.dp)
                     .width(325.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.outlinedCardColors(containerColor = Butter)
+                border = BorderStroke(1.dp, RipeLemon),
+                colors = CardDefaults.outlinedCardColors(containerColor = Astra)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(13.dp)
+                        .padding(15.dp)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(
-                            text = "Hva er solcellepaneler?",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(Modifier.height(3.dp))
                         Image(
                             painter = painterResource(R.drawable.panel_info),
                             contentDescription = null,
@@ -84,17 +76,24 @@ fun FactDialog(onDismissRequest: () -> Unit) {
                                 .clip(RoundedCornerShape(16.dp))
                         )
                         Spacer(Modifier.height(11.dp))
+                        Text(
+                            text = "Hva er solcellepaneler?",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(3.dp))
                     }
 
                     Column(
                         modifier = Modifier
                             .width(300.dp)
-                            .padding(start = 10.dp, end = 7.dp),
+                            .padding(start = 10.dp, end = 7.dp)
+                            .verticalScroll(scroll),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = "Solcellepaneler omdanner sollys direkte til " +
-                                    "elektrisk energi ved hjelp av halvledermaterialer, " +
+                            text = "Solcellepaneler absorberer sollys og " +
+                                    "genererer energi ved hjelp av halvledermaterialer, " +
                                     "vanligvis silisium.",
                             modifier = Modifier
                                 .padding(11.dp)
@@ -108,44 +107,16 @@ fun FactDialog(onDismissRequest: () -> Unit) {
                                 .padding(11.dp)
                                 .fillMaxWidth()
                         )
-
                     }
                 }
             }
-            Spacer(Modifier.height(8.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = Butter,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .border(
-                        width = 2.dp,
-                        color = YellowText,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-            ) {
-                TextButton(
-                    onClick = onDismissRequest,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Lukk",
-                        color = YellowText,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 21.sp
-                    )
-                }
-            }
         }
-
     }
 }
 
 @Composable
 fun SolarDialog(onDismissRequest: () -> Unit) {
-    val scroll= rememberScrollState()
+    val scroll = rememberScrollState()
 
     Dialog(onDismissRequest = onDismissRequest) {
         Column(
@@ -156,16 +127,19 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                     .height(490.dp)
                     .width(325.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.outlinedCardColors(containerColor = Butter)
+                border = BorderStroke(1.dp, RipeLemon),
+                colors = CardDefaults.outlinedCardColors(containerColor = Astra)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(8.dp)
+                        .padding(15.dp)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth().verticalScroll(scroll)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(scroll)
                     ) {
                         Text(
                             text = "Hvorfor er solcellepaneler bra for miljøet?",
@@ -173,13 +147,13 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
 
-                        )
+                            )
                         OutlinedCard(
                             modifier = Modifier
                                 .padding(5.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .width(395.dp)
-                                .height(258.dp),
+                                .height(260.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(
                                 contentColor = Color.Black,
@@ -196,7 +170,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Fornybar energi: ")
                                         }
-                                        append("Solenergi er uuttømmelig og forurenser ikke under bruk.")
+                                        append("Solenergi er uuttømmelig og slipper ingen klimagasser i luften.")
                                     }
                                 )
                                 Spacer(Modifier.height(8.dp))
@@ -205,16 +179,16 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Redusert CO₂-utslipp: ")
                                         }
-                                        append("Mindre behov for strøm fra fossile kilder som kull og gass.")
+                                        append("Solenergi har mindre påvirkning på miljøet enn andre metoder for kraftproduksjon.")
                                     }
                                 )
                                 Spacer(Modifier.height(8.dp))
                                 Text(
                                     text = buildAnnotatedString {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                            append("Lavt vedlikehold: ")
+                                            append("Lang levetid: ")
                                         }
-                                        append("Har lang levetid (typisk 25–30 år) og krever lite vedlikehold.")
+                                        append("De fleste solceller har levetid på 25–30 år.")
                                     }
                                 )
                             }
@@ -231,8 +205,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                             modifier = Modifier
                                 .padding(5.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .width(395.dp)
-                                .height(336.dp),
+                                .width(395.dp),
                             shape = RoundedCornerShape(20.dp),
                             colors = CardDefaults.cardColors(
                                 contentColor = Color.Black,
@@ -243,13 +216,12 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier.padding(10.dp)
                             ) {
-
                                 Text(
                                     text = buildAnnotatedString {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                            append("Lavere strømregninger: : ")
+                                            append("Lavere strømregninger: ")
                                         }
-                                        append("Man produserer egen strøm og kjøper mindre fra strømnettet.")
+                                        append("Spar penger ved å produsere din egen strøm!")
                                     }
                                 )
                                 Spacer(Modifier.height(9.dp))
@@ -259,7 +231,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Økt selvforsyning: ")
                                         }
-                                        append("Reduserer avhengigheten av strømleverandører og svingende strømpriser.")
+                                        append("Reduserer avhengigheten til strømleverandører, og åpner rom for investering i eget batterilagringssystem.")
                                     }
                                 )
                                 Spacer(Modifier.height(9.dp))
@@ -269,17 +241,7 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append("Støtteordninger: ")
                                         }
-                                        append("Mange land (inkl. Norge) tilbyr økonomisk støtte for installasjon.")
-                                    }
-                                )
-                                Spacer(Modifier.height(9.dp))
-
-                                Text(
-                                    text = buildAnnotatedString {
-                                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                            append("Potensiell verdistigning på bolig: ")
-                                        }
-                                        append("Hus med solcelleanlegg kan være mer attraktive for kjøpere.")
+                                        append("Norge tilbyr økonomisk støtte for installasjon av solcellepaneler.")
                                     }
                                 )
                             }
@@ -287,36 +249,8 @@ fun SolarDialog(onDismissRequest: () -> Unit) {
                     }
                 }
             }
-
-            Spacer(Modifier.height(8.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = Butter,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .border(
-                        width = 2.dp,
-                        color = YellowText,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-            ) {
-                TextButton(
-                    onClick = onDismissRequest,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Lukk",
-                        color = YellowText,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 21.sp
-                    )
-                }
-            }
         }
     }
-
 }
 
 @Composable
@@ -330,7 +264,8 @@ fun TutorialDialog(onDismissRequest: () -> Unit) {
                     .height(400.dp)
                     .width(350.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.outlinedCardColors(containerColor = Butter)
+                border = BorderStroke(1.dp, RipeLemon),
+                colors = CardDefaults.outlinedCardColors(containerColor = Astra)
             ) {
                 Column(
                     modifier = Modifier
@@ -356,23 +291,24 @@ fun TutorialDialog(onDismissRequest: () -> Unit) {
                                 .height(130.dp)
                                 .padding(start = 1.dp, end = 1.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.outlinedCardColors(containerColor = LightGrey)
-                        ){
+                            colors = CardDefaults.outlinedCardColors(containerColor = VistaWhite)
+                        ) {
 
                             Column(
-                                modifier = Modifier.fillMaxSize().padding(5.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(5.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Image (
+                                Image(
                                     painter = painterResource(R.drawable.add_button),
                                     contentDescription = "Knapp for å legge til eiendom",
                                     modifier = Modifier.size(45.dp)
                                 )
                                 Spacer(Modifier.height(7.dp))
                                 Text(
-                                    text = "Lagre anlegg ved å trykke på pluss k" +
-                                            "nappen nederst i hjemskermen",
+                                    text = "Legg til et anlegg med pluss-knappen nederst på hjemskjermen.",
                                     style = MaterialTheme.typography.bodySmall,
                                     fontSize = 13.sp,
                                     textAlign = TextAlign.Center
@@ -385,23 +321,24 @@ fun TutorialDialog(onDismissRequest: () -> Unit) {
                                 .height(130.dp)
                                 .padding(start = 1.dp, end = 1.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.outlinedCardColors(containerColor = LightGrey)
-                        ){
+                            colors = CardDefaults.outlinedCardColors(containerColor = VistaWhite)
+                        ) {
 
                             Column(
-                                modifier = Modifier.fillMaxSize().padding(5.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(5.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Image (
+                                Image(
                                     painter = painterResource(R.drawable.sok),
                                     contentDescription = "Knapp for å søke opp en adresse.",
                                     modifier = Modifier.size(45.dp)
                                 )
                                 Spacer(Modifier.height(7.dp))
                                 Text(
-                                    text = "Trykk på denne knappen for å " +
-                                            "søke opp en adresse.",
+                                    text = "Søk opp en adresse.",
                                     style = MaterialTheme.typography.bodySmall,
                                     fontSize = 13.sp,
                                     textAlign = TextAlign.Center
@@ -421,24 +358,30 @@ fun TutorialDialog(onDismissRequest: () -> Unit) {
                                 .weight(1f)
                                 .height(130.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.outlinedCardColors(containerColor = LightGrey)
-                        ){
+                            colors = CardDefaults.outlinedCardColors(containerColor = VistaWhite)
+                        ) {
 
                             Column(
-                                modifier = Modifier.fillMaxSize().padding(5.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(5.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
 
                                 Card(
-                                    colors = CardDefaults.cardColors(containerColor = Light),
-                                    border = BorderStroke(1.dp, DarkYellow),
-                                    modifier = Modifier.height(25.dp).width(70.dp)
-                                    ) {
+                                    colors = CardDefaults.cardColors(containerColor = VistaWhite),
+                                    border = BorderStroke(1.dp, RipeLemon),
+                                    modifier = Modifier
+                                        .height(25.dp)
+                                        .width(70.dp)
+                                ) {
                                     Text(
                                         text = "Lagre",
                                         color = Color.Black,
-                                        modifier = Modifier.fillMaxWidth().padding(top = 1.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 1.dp),
                                         textAlign = TextAlign.Center,
                                         fontSize = 11.sp
                                     )
@@ -446,8 +389,7 @@ fun TutorialDialog(onDismissRequest: () -> Unit) {
                                 Spacer(Modifier.height(7.dp))
 
                                 Text(
-                                    text = "Trykk på denne knappen " +
-                                            "for å lagre anlegget én eller flere takflater.",
+                                    text = "Trykk på denne knappen for å lagre solcelleanlegget.",
                                     style = MaterialTheme.typography.bodySmall,
                                     fontSize = 13.sp,
                                     textAlign = TextAlign.Center
@@ -459,15 +401,17 @@ fun TutorialDialog(onDismissRequest: () -> Unit) {
                                 .weight(1f)
                                 .height(130.dp),
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.outlinedCardColors(containerColor = LightGrey)
-                        ){
+                            colors = CardDefaults.outlinedCardColors(containerColor = VistaWhite)
+                        ) {
 
                             Column(
-                                modifier = Modifier.fillMaxSize().padding(5.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(5.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Image (
+                                Image(
                                     painter = painterResource(R.drawable.edit_icon),
                                     contentDescription = "Knapp for å redigere valgte takflater.",
                                     modifier = Modifier.size(45.dp)
@@ -483,33 +427,6 @@ fun TutorialDialog(onDismissRequest: () -> Unit) {
 
                         }
                     }
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = Butter,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    .border(
-                        width = 2.dp,
-                        color = YellowText,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-            ) {
-                TextButton(
-                    onClick = onDismissRequest,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Lukk",
-                        color = YellowText,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 21.sp
-                    )
                 }
             }
         }

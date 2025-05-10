@@ -1,6 +1,7 @@
 package no.uio.ifi.in2000.team54.ui.managesolararray
 
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.BorderStroke
@@ -45,7 +46,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -75,10 +75,11 @@ import kotlinx.coroutines.launch
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.domain.SolarArray
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
-import no.uio.ifi.in2000.team54.ui.theme.BrightYellow
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.Light
-import no.uio.ifi.in2000.team54.ui.theme.LightestYellow
+import no.uio.ifi.in2000.team54.ui.theme.Mustard
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
+import no.uio.ifi.in2000.team54.ui.theme.Astra
+import no.uio.ifi.in2000.team54.util.rememberSaveableMutableStateListOf
 import kotlin.math.roundToInt
 
 private val osloCenter = Point.fromLngLat(10.7522, 59.9139)
@@ -94,7 +95,7 @@ fun ManageSolarArrayScreen(
 ) {
 
     val solarEntity by viewModel.currentSolarArray.collectAsStateWithLifecycle()
-    val roofSections = remember { mutableStateListOf<RoofSection>() }
+    val roofSections = rememberSaveableMutableStateListOf<RoofSection>()
     val solarPanelType = rememberSaveable {
         mutableStateOf(solarEntity?.panelType ?: SolarPanelType.ECONOMY)
     }
@@ -143,13 +144,13 @@ private fun BackButton(viewModel: ManageSolarArrayViewModel, navController: NavC
     Icon(
         Icons.AutoMirrored.Default.ArrowBack,
         contentDescription = "Gå tilbake",
-        tint = DarkYellow,
+        tint = RipeLemon,
         modifier = Modifier
             .padding(10.dp)
             .width(35.dp)
             .height(35.dp)
             .clip(RoundedCornerShape(100.dp))
-            .background(LightestYellow)
+            .background(Astra)
             .padding(7.dp)
             .clickable {
                 viewModel.setSearchAddress("")
@@ -173,9 +174,12 @@ private fun ArraySettingsMenu(
     val screenSizeDp = LocalConfiguration.current.screenHeightDp.dp + 20.dp
     val screenSizePx = with(LocalDensity.current) { screenSizeDp.toPx() }
 
+    val orientation = LocalConfiguration.current.orientation
+    val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+
     val anchors = DraggableAnchors {
-        ArraySettingsMenuAnchors.Bottom at screenSizePx - 700f
-        ArraySettingsMenuAnchors.Top at 150f
+        ArraySettingsMenuAnchors.Bottom at if (isLandscape) 0f else screenSizePx - 700f
+        ArraySettingsMenuAnchors.Top at if (isLandscape) 0f else 150f
     }
 
     val decayAnimation = rememberSplineBasedDecay<Float>()
@@ -189,7 +193,11 @@ private fun ArraySettingsMenu(
             decayAnimationSpec = decayAnimation,
         )
     }
-    Column {
+    Column(
+        horizontalAlignment = Alignment.End,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
         DraggableBox(
             screenSizeDp = screenSizeDp,
             draggableState = draggableState
@@ -227,7 +235,7 @@ private fun DraggableBox(
             }
             .size(screenSizeDp)
             .clip(shape = RoundedCornerShape(25.dp, 25.dp, 0.dp, 0.dp))
-            .background(LightestYellow)
+            .background(Astra)
             .anchoredDraggable(draggableState, Orientation.Vertical)
     ) {
         content()
@@ -309,11 +317,16 @@ private fun ArraySettingsMainSection(
     val scope = rememberCoroutineScope()
     val scroll = rememberScrollState()
 
+    val orientation = LocalConfiguration.current.orientation
+    val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        DragHandle(draggableState)
+        if (!isLandscape) {
+            DragHandle(draggableState)
+        }
         SearchField(snackbarState, mapViewportState, draggableState, viewModel)
         Spacer(modifier = Modifier.size(10.dp))
         Column(
@@ -386,7 +399,7 @@ private fun DragHandle(draggableState: AnchoredDraggableState<ArraySettingsMenuA
                 .height(7.dp)
                 .rotate(20f * direction)
                 .clip(shape = RoundedCornerShape(100.dp))
-                .background(BrightYellow)
+                .background(Mustard)
         )
         Box(
             modifier = Modifier
@@ -395,7 +408,7 @@ private fun DragHandle(draggableState: AnchoredDraggableState<ArraySettingsMenuA
                 .height(7.dp)
                 .rotate(20f * direction * -1)
                 .clip(shape = RoundedCornerShape(100.dp))
-                .background(BrightYellow)
+                .background(Mustard)
         )
     }
 }
@@ -407,9 +420,9 @@ private fun SaveButton(
     OutlinedButton(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = Light
+            containerColor = VistaWhite
         ),
-        border = BorderStroke(1.dp, DarkYellow),
+        border = BorderStroke(1.dp, RipeLemon),
         modifier = Modifier
             .width(250.dp)
             .padding(top = 5.dp)
@@ -448,14 +461,14 @@ private fun SolarPanelTypeDropdown(
                 readOnly = true,
                 onValueChange = {},
                 textStyle = LocalTextStyle.current.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color.Black,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 ),
                 modifier = Modifier
                     .menuAnchor(MenuAnchorType.PrimaryEditable, true)
                     .clip(RoundedCornerShape(15))
-                    .background(Light)
-                    .border(1.dp, DarkYellow, RoundedCornerShape(15))
+                    .background(VistaWhite)
+                    .border(1.dp, RipeLemon, RoundedCornerShape(15))
                     .fillMaxWidth()
                     .padding(10.dp)
             )

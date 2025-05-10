@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,15 +49,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.SolarArray
-import no.uio.ifi.in2000.team54.ui.theme.Background
-import no.uio.ifi.in2000.team54.ui.theme.GreyText
-import no.uio.ifi.in2000.team54.ui.theme.Light
-import no.uio.ifi.in2000.team54.ui.theme.LightOrange
-import no.uio.ifi.in2000.team54.ui.theme.Lighter
-import no.uio.ifi.in2000.team54.ui.theme.Red
-import no.uio.ifi.in2000.team54.ui.theme.YellowBorder
-import no.uio.ifi.in2000.team54.ui.theme.YellowText
-import no.uio.ifi.in2000.team54.ui.theme.YellowerBorder
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.Emperor
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
+import no.uio.ifi.in2000.team54.ui.theme.Marzipan
+import no.uio.ifi.in2000.team54.ui.theme.BarleyWhite
+import no.uio.ifi.in2000.team54.ui.theme.Tamarillo
 
 @Composable
 fun HomeScreen(
@@ -75,11 +73,13 @@ fun HomeScreen(
     Column(
         Modifier
             .fillMaxSize()
-            .background(Background)
+            .background(BarleyWhite)
     ) {
         HomeScreenTopBar()
         Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
+                .fillMaxWidth()
                 .verticalScroll(scroll)
         ) {
             SolarArrayList(homeViewModel, navController)
@@ -119,7 +119,10 @@ fun HomeScreenTopBar() {
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .semantics(mergeDescendants = true) { }
+            ) {
                 GreetingMessage()
                 Row(Modifier.padding(top = 13.dp)) {
                     Text(
@@ -131,20 +134,20 @@ fun HomeScreenTopBar() {
                         text = " & ",
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
-                        color = YellowText
+                        color = RipeLemon
                     )
                 }
                 Text(
-                    text = "Status ",
+                    text = "Status",
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
-                    color = YellowText
+                    color = RipeLemon
                 )
             }
 
             Image(
                 painter = painterResource(R.drawable.logo_medium),
-                contentDescription = null,
+                contentDescription = "Sol som logo",
                 modifier = Modifier
                     .size(120.dp)
                     .align(Alignment.TopEnd)
@@ -188,15 +191,15 @@ fun SolarArrayCard(
         .height(250.dp)
         .padding(15.dp)
         .clip(RoundedCornerShape(20.dp))
-        .background(LightOrange)
+        .background(Marzipan)
         .clickable { viewModel.selectSolarArray(solarArray) }
     Box(
         modifier = Modifier
             .then(
                 if (solarArray == uiState.selectedSolarArray) {
-                    baseModifier.border(4.dp, YellowerBorder, shape = RoundedCornerShape(20.dp))
+                    baseModifier.border(4.dp, RipeLemon, shape = RoundedCornerShape(20.dp))
                 } else {
-                    baseModifier.border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
+                    baseModifier.border(1.dp, RipeLemon, shape = RoundedCornerShape(20.dp))
                 }
             ),
     ) {
@@ -209,11 +212,10 @@ fun SolarArrayCard(
             ) {
                 IconButton(
                     onClick = {
-                        //TOdo: add deleting option
                         viewModel.removeSolarArray(solarArray)
                     },
                     modifier = Modifier
-                        .background(LightOrange)
+                        .background(Marzipan)
                         .padding(top = 6.dp, end = 20.dp)
                         .size(35.dp)
                 ) {
@@ -222,8 +224,8 @@ fun SolarArrayCard(
                         modifier = Modifier
                             .padding(top = 2.dp, end = 7.dp, start = 5.dp)
                             .size(30.dp),
-                        contentDescription = "Slett Anlegg",
-                        tint = Red,// if you don't want to tint it
+                        contentDescription = "Slett anlegg ${solarArray.name}",
+                        tint = Tamarillo,// if you don't want to tint it
 
                     )
                 }
@@ -232,34 +234,34 @@ fun SolarArrayCard(
                         navController.navigate("editsolararrays/${solarArray.id}")
                     },
                     modifier = Modifier
-                        .background(LightOrange)
+                        .background(Marzipan)
                         .padding(top = 6.dp, end = 5.dp)
                         .size(28.dp)
                         .clip(RoundedCornerShape(20.dp))
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.edit_icon),
-                        contentDescription = "Redigere Anlegg",
+                        contentDescription = "Rediger anlegg ${solarArray.name}",
                         tint = Color.Unspecified // if you don't want to tint it
                     )
                 }
             }
             Image(
                 painter = painterResource(R.drawable.house),
-                contentDescription = "Hus med solcelleplaneter",
+                contentDescription = "Solecelleanlegg",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
                     .padding(end = 15.dp, start = 15.dp, bottom = 10.dp, top = 8.dp)
                     .clip(RoundedCornerShape(20.dp))
-                    .background(Lighter)
+                    .background(BarleyWhite)
                     .padding(15.dp)
             )
 
             Text(
                 text = solarArray.name,
                 fontSize = 20.sp,
-                color = GreyText,
+                color = Emperor,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -279,7 +281,7 @@ fun NoSolarArrayCard() {
             .padding(15.dp)
             .drawBehind {
                 drawRoundRect(
-                    color = YellowBorder,
+                    color = RipeLemon,
                     cornerRadius = CornerRadius(20.dp.toPx()),
                     style = Stroke(
                         width = 3f,
@@ -293,7 +295,7 @@ fun NoSolarArrayCard() {
             "Ingen anlegg",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Gray,
+            color = Emperor,
         )
 
         Spacer(Modifier.padding(13.dp))
@@ -301,7 +303,7 @@ fun NoSolarArrayCard() {
         Text(
             "Legg til et nytt anlegg ved å trykke på + symbolet på bunnen av skjermen.",
             fontSize = 12.sp,
-            color = Color.Gray,
+            color = Emperor,
         )
     }
 }
@@ -317,9 +319,9 @@ fun SelectedSolarArrayTitle(viewModel: HomeViewModel) {
     ) {
         Row(
             modifier = Modifier
-                .border(1.dp, YellowerBorder, RoundedCornerShape(100))
+                .border(1.dp, RipeLemon, RoundedCornerShape(100))
                 .clip(RoundedCornerShape(100))
-                .background(LightOrange)
+                .background(Marzipan)
                 .padding(horizontal = 10.dp, vertical = 5.dp)
         ) {
             Text(
@@ -343,14 +345,14 @@ fun HomeCard(
         modifier = modifier
             .padding(15.dp)
             .clip(RoundedCornerShape(20.dp))
-            .border(1.dp, YellowBorder, shape = RoundedCornerShape(20.dp))
+            .border(1.dp, RipeLemon, shape = RoundedCornerShape(20.dp))
             .width(395.dp),
 
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp),
         colors = CardDefaults.cardColors(
             contentColor = Color.Black,
-            containerColor = Light,
+            containerColor = VistaWhite,
         )
     ) {
 

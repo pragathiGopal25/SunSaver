@@ -29,16 +29,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import no.uio.ifi.in2000.team54.R
-import no.uio.ifi.in2000.team54.ui.theme.LightOrange
-import no.uio.ifi.in2000.team54.ui.theme.YellowNav
+import no.uio.ifi.in2000.team54.ui.theme.Marzipan
+import no.uio.ifi.in2000.team54.ui.theme.RobRoy
 
 @Composable
 fun NavBar(navController: NavController) {
     var selectedIndex by remember { mutableIntStateOf(0) }
 
     val navIconList = listOf(
-        NavItem(R.drawable.home_icon_clicked, R.drawable.home_icon_unclicked, "home"),
-        NavItem(R.drawable.info_icon_clicked, R.drawable.info_icon_unclicked, "info")
+        NavItem(
+            R.drawable.home_icon_clicked,
+            R.drawable.home_icon_unclicked,
+            "home",
+            "hjem"
+        ),
+        NavItem(
+            R.drawable.info_icon_clicked,
+            R.drawable.info_icon_unclicked,
+            "info",
+            "informasjon"
+        )
     )
 
     Box(
@@ -48,7 +58,7 @@ fun NavBar(navController: NavController) {
     ) {
         Icon(
             painter = painterResource(R.drawable.add_button),
-            contentDescription = "Add solar array",
+            contentDescription = "Legg til solcelleanlegg",
             tint = Color.Unspecified,
             modifier = Modifier
                 .width(50.dp)
@@ -66,7 +76,7 @@ fun NavBar(navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp))
-                .background(YellowNav)
+                .background(RobRoy)
         ) {
             navIconList.forEachIndexed { index, navItem ->
                 NavigationBarItem(
@@ -80,11 +90,11 @@ fun NavBar(navController: NavController) {
                             painter = painterResource(
                                 if (selectedIndex == index) navItem.selected else navItem.unselected
                             ),
-                            contentDescription = navItem.route,
+                            contentDescription = navItem.description,
                             modifier = Modifier.size(23.dp)
                         )
                     },
-                    colors = NavigationBarItemDefaults.colors(indicatorColor = if (selectedIndex == index) LightOrange else YellowNav),
+                    colors = NavigationBarItemDefaults.colors(indicatorColor = if (selectedIndex == index) Marzipan else RobRoy),
                 )
             }
         }

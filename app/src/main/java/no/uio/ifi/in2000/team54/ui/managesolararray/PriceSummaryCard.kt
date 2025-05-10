@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.sp
 import no.uio.ifi.in2000.team54.R
 import no.uio.ifi.in2000.team54.domain.RoofSection
 import no.uio.ifi.in2000.team54.enums.SolarPanelType
-import no.uio.ifi.in2000.team54.ui.theme.DarkYellow
-import no.uio.ifi.in2000.team54.ui.theme.Light
+import no.uio.ifi.in2000.team54.ui.theme.RipeLemon
+import no.uio.ifi.in2000.team54.ui.theme.VistaWhite
 import no.uio.ifi.in2000.team54.util.calculateSubsidy
 import java.util.Locale
 
@@ -45,8 +45,8 @@ fun PriceSummaryCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(15.dp))
-            .background(Light)
-            .border(1.dp, DarkYellow, RoundedCornerShape(15.dp))
+            .background(VistaWhite)
+            .border(1.dp, RipeLemon, RoundedCornerShape(15.dp))
             .padding(horizontal = 40.dp, vertical = 15.dp)
     ) {
         Row(

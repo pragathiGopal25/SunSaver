@@ -17,8 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import no.uio.ifi.in2000.team54.ui.theme.Red
-import no.uio.ifi.in2000.team54.ui.theme.SoftRed
+import no.uio.ifi.in2000.team54.ui.theme.Tamarillo
+import no.uio.ifi.in2000.team54.ui.theme.Shilo
 
 @Composable
 fun Snackbar(snackbarState: SnackbarHostState) {
@@ -36,11 +36,11 @@ fun Snackbar(snackbarState: SnackbarHostState) {
                     .padding(4.dp)
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20))
-                    .background(SoftRed)
-                    .border(3.dp, Red, RoundedCornerShape(20))
+                    .background(Shilo)
+                    .border(3.dp, Tamarillo, RoundedCornerShape(20))
                     .padding(vertical = 10.dp),
                 text = message ?: "",
-                color = Red,
+                color = Tamarillo,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center,

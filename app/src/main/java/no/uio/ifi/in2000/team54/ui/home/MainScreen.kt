@@ -86,7 +86,7 @@ fun MainScreen() {
                     arrayId
                 )
             }
-            composable("supplier") { SupplierScreen(navController) }
+            composable("suppliers") { SupplierScreen(navController) }
         }
 
         Snackbar(snackbarState)
