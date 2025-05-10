@@ -92,8 +92,8 @@ sequenceDiagram
         ManageSolarArrayScreen ->> ManageSolarArrayViewModel: addSolarArray(SolarArray)<br/>setSearchAddress("")
         ManageSolarArrayViewModel ->> SunSaverRepository: addSolarArray(SolarArray)
         SunSaverRepository ->> SunSaverDatasource: insert(SolarArrayWithRoofSections)
-        SunSaverDatasource ->> Database: insertSolarArray(SolarArrayEntity)
-        Database -->> SunSaverDatasource: id til solar array 
+        SunSaverDatasource ->> Database(DAO): insertSolarArray(SolarArrayEntity)
+        Database(DAO) -->> SunSaverDatasource: id til solar array 
         SunSaverDatasource ->> Database(DAO): insertRoofSections(List<RoofSectionEntity>)
     end
 
