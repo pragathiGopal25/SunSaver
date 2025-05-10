@@ -1,9 +1,3 @@
-# TODO 
-- Aktivitetsdiagram skal inneholde hvordan interaksjonen ser ut fra brukerens perspektiv. Den skal f.eks. inkludere validering av brukerinput, som ikke blir inkludert i sekvensdiagrammet for å gjøre sekvensdiagrammet 
-mer arkitekturnært, mens aktivitetsdiagrammet skal være mer brukerinteraksjonsnært. Aktivitetsdiagrammet for use case "lagre ny" bør herved inneholde (i tillegg til resten av brukerinteraksjon i sekvensdiagrammet): 
-validering av om brukeren har fylt ut alle felt; hendelsesforløp der bruker ønsker å endre (f.eks.) antall paneler i et valgt takflate; bruker bytter type på solcellepaneller
-
-
 # Modellering
 ### Inkluderte diagrammer: 
 - Use case diagram: Gir en generell oversikt over de viktigste funksjonene appen tilbyr brukeren. 
@@ -353,3 +347,21 @@ Kommentarer:
 - HomeViewModel ble veldig stor. Det er fordi den håndterer mye data, og har StateFlows (som i god praksis krever en privat mutable versjon og offentlig immutable)
 - Om databasen: Vi lager en abstrakt klasse SunSaverDatabase som arver fra RoomDatabase, og Room-biblioteket fikser implementasjonen for oss. Vi inkluderte RoomDatabase for å vise arv, men den er tom siden den kommer fra Room-biblioteket. 
 - SolarArray og SunSaverRepository: Siden det allerede er en assosiasjon mellom SolarArray og ISunSaverRepository, og SunSaverRepository implementerer dette interfacet, lager vi ikke en egen assosiasjon mellom SolarArray og SunSaverRepository, da dette er underforstått gjennom arv. Det samme gjelder for SolarArrayWithRoofSections og SunSaverDatasource.
+- TODO: Må finne ut hvilke klasser skal inkluderes. 
+
+## Use case: Legg til solcelleanlegg
+Sekvensdiagrammet under arbeid. Må også ha en aktivitetdiagram her. <br/>
+Aktivitetsdiagram skal inneholde hvordan interaksjonen ser ut fra brukerens perspektiv. Den skal f.eks. inkludere validering av brukerinput, som ikke blir inkludert i sekvensdiagrammet for å gjøre sekvensdiagrammet mer arkitekturnært, mens aktivitetsdiagrammet skal være mer brukerinteraksjonsnært. Aktivitetsdiagrammet for use case "lagre ny" bør herved inneholde (i tillegg til resten av brukerinteraksjon i sekvensdiagrammet): 
+validering av om brukeren har fylt ut alle felt; hendelsesforløp der bruker ønsker å endre (f.eks.) antall paneler i et valgt takflate; bruker bytter type på solcellepaneller
+
+## Use case: Se lagrede solcelleanlegg med data 
+Sekvensdiagram. Kan ha en aktivitetsdiagram hvor man trykker på ting på skjermen, men strengt tatt ikke nødvendig.
+
+## Use case: Redigere solcelleanlegg
+Sekvensdiagram og aktivitetsdiagram. 
+
+## Use case: Slette solcelleanlegg
+Kun sekvensdiagram. Aktivitetsdiagram ikke nødvendig siden bruker bare gjør et klikk. 
+
+## Use case: Velge et anlegg for å se tilhørende data
+Mulig kan (og bør) kombineres med "Se lagrede solcelleanlegg med data". Kan ha en liten aktivitetsdiagram som viser at man kan ikke velge før data er lastet (men er kanskje ikke nødvendig)
