@@ -3,7 +3,7 @@
 - Use case diagram: Gir en generell oversikt over de viktigste funksjonene appen tilbyr brukeren. 
 - Klassediagram: Viser appens struktur og klasser, og hvordan de er relatert til hverandre. 
 - Sekvensdiagrammer: for utvalgte/hver use case viser hvordan de ulike komponentene (fra klassediagrammet) kommuniserer for å gjennomføre use caset. Den fokuserer primært på appens komponenter, og overlater brukerinteraksjonen til aktivitetsdiagrammet. 
-- Aktivitetsdiagrammet: for utvalgte/hver use case viser mulige scenarioer til hvordan bruker kan interagere med appen. 
+- Aktivitetsdiagrammet: for utvalgte/hver use case viser mulige scenarioer til hvordan bruker kan interagere med appen. Vi lager aktivitetsdiagrammer kun for de use casene der brukeren må foreta noen valg, f.eks. "lagre et anlegg" og "redigere et anlegg". 
 
 
 ## Use case diagram 
@@ -361,7 +361,38 @@ Sekvensdiagram. Kan ha en aktivitetsdiagram hvor man trykker på ting på skjerm
 Sekvensdiagram og aktivitetsdiagram. 
 
 ## Use case: Slette solcelleanlegg
-Kun sekvensdiagram. Aktivitetsdiagram ikke nødvendig siden bruker bare gjør et klikk. 
+Vi gir også brukeren mulighet til å slette solcelleanlegg. For dette use caset har vi kun sekvensdiagram fordi å slette et anlegg tar kun ett klikk. 
+```mermaid
+sequenceDiagram
+    Bruker ->> HomeScreen: Slett anlegg "hytte"
+    HomeScreen ->> HomeViewModel: removeSolarArray(SolarArray)
+    HomeViewModel ->> SunSaverRepository: deleteSolarArray(SolarArray)
+	SunSaverRepository ->> SunSaverDatasource: delete(solarArray)
+	SunSaverDatasource ->> Database(DAO): delete(solarArray) 
+	
+	Database(DAO) -->> SunSaverDatasource: oppdatert liste 
+	SunSaverDatasource -->> SunSaverRepository: oppdatert liste
+	SunSaverRepository -->> HomeViewModel: oppdatert liste
+	HomeViewModel -->> HomeScreen: oppdatert liste
+    
+    alt Var >1 lagrede anlegg
+        HomeScreen -->> Bruker: viser oppdatert liste og <br/>setter fokus på første anlegg
+    else Bruker sletta siste anlegg 
+        HomeScreen -->> Bruker: "Ingen solcelleanlegg er opprettet"
+    end
+```
+Tekstlig beskrivelse: <br/>
+Pre: Bruker har minst en (1) solcelleanlegg lagret. <br/>
+Post: Den aktuelle solcelleanlegget er slettet. <br/>
+Hovedflyt:
+1. Bruker klikker på søppelkasse ikonet et lagret solcelleanlegg. 
+2. Anlegget slettes fra databasen. 
+3. På grunn av Flow blir hjemsiden oppdatert slik at anlegget forsvinner fra lista over lagrede anlegg. 
+4. Viser data for det første anlegget som er lagret. 
+
+<br/>Alternativ flyt: Bruker sletter siste anlegg<br/>
+
+4. Viser meldingen "Ingen solcelleanlegg er opprettet"
 
 ## Use case: Velge et anlegg for å se tilhørende data
 Mulig kan (og bør) kombineres med "Se lagrede solcelleanlegg med data". Kan ha en liten aktivitetsdiagram som viser at man kan ikke velge før data er lastet (men er kanskje ikke nødvendig)
