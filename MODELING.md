@@ -1,19 +1,20 @@
+# TODO 
+- Aktivitetsdiagram skal inneholde hvordan interaksjonen ser ut fra brukerens perspektiv. Den skal f.eks. inkludere validering av brukerinput, som ikke blir inkludert i sekvensdiagrammet for å gjøre sekvensdiagrammet 
+mer arkitekturnært, mens aktivitetsdiagrammet skal være mer brukerinteraksjonsnært. Aktivitetsdiagrammet for use case "lagre ny" bør herved inneholde (i tillegg til resten av brukerinteraksjon i sekvensdiagrammet): 
+validering av om brukeren har fylt ut alle felt; hendelsesforløp der bruker ønsker å endre (f.eks.) antall paneler i et valgt takflate; bruker bytter type på solcellepaneller
+
+
 # Modellering
 ### Inkluderte diagrammer: 
-- Use case diagram: Gir en oversikt over de viktigste funksjonene 
-i appen sett fra brukerens perspektiv, og hvilke handlinger brukeren kan utføre.
-- Klassediagram: viser hvilke klasser og datamodeller, og hvordan de henger sammen.
-- Sekvensdiagrammer: for utvalgte/hver use case viser hvordan de ulike komponentene 
-(fra klassediagrammet) kommuniserer sammen for å utføre use caset
-- Aktivitetsdiagrammet: for utvalgte/hver use case viser hvordan interaksjonen 
-ser ut fra brukerens perspektiv 
+- Use case diagram: Gir en generell oversikt over de viktigste funksjonene appen tilbyr brukeren. 
+- Klassediagram: Viser arkiteturen i prosjektet og hvilke dataklasser som er brukt. 
+- Sekvensdiagrammer: for utvalgte/hver use case viser hvordan de ulike komponentene (fra klassediagrammet) kommuniserer sammen for å utføre use caset. Den fokuserer primært på appens komponenter, og overlater brukerinteraksjonen til aktivitetsdiagrammet. 
+- Aktivitetsdiagrammet: for utvalgte/hver use case viser hvordan brukeren skal interagere med appen. 
 
 
 ## Use case diagram 
 ![Use case diagram for SunSaver](image.png)
-Diagrammet ble laget ved hjelp av [app.diagrams.net](https://app.diagrams.net/) 
-siden Mermaid ikke tilbyr Use case diagrammer. <br>
-TODO: babling om de ulike funksjonalitetene her 
+Diagrammet ble laget ved hjelp av [app.diagrams.net](https://app.diagrams.net/) siden Mermaid ikke har Use case diagrammer. <br>
 
 ## Klassediagram
 Formålet med klassediagrammet er å vise strukturen i prosjektet vårt.
@@ -338,13 +339,10 @@ classDiagram
     BuildingRepository --> BuildingDataSource: fetcher data om takflater, koordinater og adresser
     ManageSolarArrayViewModel --> BuildingRepository: fetcher adressedata med bygningsdata
 
-    %% should also include database's implementation somehow 
-    %% probably just include abstract class sunSaverDatabase with its entities and dao
 ```
 
 Kommentarer: 
 - Siden Mermaid og markdown ikke støttet to <> inni hverandre, har jeg brukt "of" i disse tilfellene. For eksempel Flow&lt;list of SolarArray&gt;. 
 - HomeViewModel ble veldig stor. Det er fordi den håndterer mye data, og har StateFlows (som i god praksis krever en privat mutable versjon og offentlig immutable)
 - Om databasen: Vi lager en abstrakt klasse SunSaverDatabase som arver fra RoomDatabase, og Room-biblioteket fikser implementasjonen for oss. Vi inkluderte RoomDatabase for å vise arv, men den er tom siden den kommer fra Room-biblioteket. 
-- SolarArray og SunSaverRepository: Siden det allerede er en assosiasjon mellom SolarArray og ISunSaverRepository, og SunSaverRepository implementerer dette interfacet, lager vi ikke en egen assosiasjon mellom SolarArray og SunSaverRepository, da dette er underforstått gjennom arv.
-Det samme gjelder for SolarArrayWithRoofSections og SunSaverDatasource.
+- SolarArray og SunSaverRepository: Siden det allerede er en assosiasjon mellom SolarArray og ISunSaverRepository, og SunSaverRepository implementerer dette interfacet, lager vi ikke en egen assosiasjon mellom SolarArray og SunSaverRepository, da dette er underforstått gjennom arv. Det samme gjelder for SolarArrayWithRoofSections og SunSaverDatasource.
