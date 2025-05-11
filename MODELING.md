@@ -364,6 +364,7 @@ sequenceDiagram
 
     %% deklarerer medvirkende
     actor Bruker
+    participant HomeScreen
     participant ManageSolarArrayScreen as AddScreen 
     participant ManageSolarArrayViewModel 
     participant BuildingRepository 
@@ -375,6 +376,8 @@ sequenceDiagram
     participant SunSaverDatasource 
     participant Database(DAO)
 
+    Bruker ->> HomeScreen: Trykker på + tegnet nede i navbaren
+    HomeScreen ->> ManageSolarArrayScreen: Navigerer til ManageSolarArrayScreen
     ManageSolarArrayScreen -->> Bruker: Viser kart og søkefelt for adresser
 
     alt Bruker søker på en adresse
@@ -472,7 +475,11 @@ Post: Solcelleanlegget er lagret i databasen og vises på hjemskjermen. <br/>
 10. Appen markerer takflater på skjermen. 
 11. Bruker velger et takflate. 
 12. Appen lagrer takflate som kort. Regner ut installasjonsprisen. Viser til brukeren.
-
+13. Bruker trykker på lagre. 
+14. Appen ber om å oppgi navn på anlegger og strømforbruk. 
+15. Bruker skriver inn navn 
+16. Bruker trykker på lagre. 
+17. Appen lagrer til databasen og navigerer til HomeScreen. 
 
  <br/>**Alternativ flyt**: Brukeren velger å zoome inn på adressen manuelt.<br/>
 
@@ -485,9 +492,12 @@ Post: Solcelleanlegget er lagret i databasen og vises på hjemskjermen. <br/>
 - Vi sier at adresseforslag hentes kun en gang selv de egentlig hentes for hver bokstav som skriver/slettes i søkefeltet. 
 - Utelatter å forklare alle steg i "appen gjør"-punktene, siden de kan sees i detalj på sekvensdiagrammet. 
 - Valideringer/div. brukerinteraksjon etter at adressen er satt skal vises i aktivitetsdiagrammet. Dette er fordi det er lite givende å ha det i sekvensdigrammet, da det er kun interaksjon mellom bruker og ManageSolarArrayScreen-skjermen. 
+- Etter at det nye anlegget er lagret, vil databasen automatisk sende ut en oppdatert liste (på grunn av Flow) som HomeScreen vil fange opp. Da vil HomeScreen sette det nye solcelleanlegget i fokus og hente data for den. Dette utelatter vi fra sekvensdiagrammet for å minke kompleksiteten. 
 
-## Use case: Se lagrede solcelleanlegg med data 
-Sekvensdiagram. Kan ha en aktivitetsdiagram hvor man trykker på ting på skjermen, men strengt tatt ikke nødvendig.
+## Use case: Se lagrede solcelleanlegg med data + Velge et anlegg for å se tilhørende data
+Sekvensdiagram. Kan ha en aktivitetsdiagram hvor man trykker på ting på skjermen, men strengt tatt ikke nødvendig. <br/>
+Velge et anlegg for å se tilhørende data: 
+Mulig kan (og bør) kombineres med "Se lagrede solcelleanlegg med data". Kan ha en liten aktivitetsdiagram som viser at man kan ikke velge før data er lastet (men er kanskje ikke nødvendig)
 
 ## Use case: Redigere solcelleanlegg
 Sekvensdiagram og aktivitetsdiagram. 
@@ -496,6 +506,13 @@ Sekvensdiagram og aktivitetsdiagram.
 Vi gir også brukeren mulighet til å slette solcelleanlegg. For dette use caset har vi kun sekvensdiagram fordi å slette et anlegg tar kun ett klikk. 
 ```mermaid
 sequenceDiagram
+    actor Bruker
+    participant HomrScreem
+    participant HomeViewModel
+    participant SunSaverRepository
+    participant SunSaverDatasource
+    participant Database(DAO)
+
     Bruker ->> HomeScreen: Slett anlegg "hytte"
     HomeScreen ->> HomeViewModel: removeSolarArray(SolarArray)
     HomeViewModel ->> SunSaverRepository: deleteSolarArray(SolarArray)
@@ -525,6 +542,3 @@ Hovedflyt:
 <br/>Alternativ flyt: Bruker sletter siste anlegg<br/>
 
 4. Viser meldingen "Ingen solcelleanlegg er opprettet"
-
-## Use case: Velge et anlegg for å se tilhørende data
-Mulig kan (og bør) kombineres med "Se lagrede solcelleanlegg med data". Kan ha en liten aktivitetsdiagram som viser at man kan ikke velge før data er lastet (men er kanskje ikke nødvendig)
