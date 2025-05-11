@@ -363,9 +363,9 @@ validering av om brukeren har fylt ut alle felt; hendelsesforløp der bruker øn
 sequenceDiagram
 
     %% deklarerer medvirkende
-    actor Bruker
+    actor User
     participant HomeScreen
-    participant ManageSolarArrayScreen as AddScreen 
+    participant ManageSolarArrayScreen
     participant ManageSolarArrayViewModel 
     participant BuildingRepository 
     participant BuildingDatasource
@@ -376,86 +376,86 @@ sequenceDiagram
     participant SunSaverDatasource 
     participant Database(DAO)
 
-    Bruker ->> HomeScreen: Trykker på + tegnet nede i navbaren
-    HomeScreen ->> ManageSolarArrayScreen: Navigerer til ManageSolarArrayScreen
-    ManageSolarArrayScreen -->> Bruker: Viser kart og søkefelt for adresser
+    User ->> HomeScreen: Clicks on + in the navbar
+    HomeScreen ->> ManageSolarArrayScreen: navigates to ManageSolarArrayScreen
+    ManageSolarArrayScreen -->> User: Show map and address search feild
 
-    alt Bruker søker på en adresse
-        %% adresse forslag
-        Bruker ->> ManageSolarArrayScreen: Skriver inn en adresse
-        ManageSolarArrayScreen ->> ManageSolarArrayViewModel: setMapAddress(adresse)
-        ManageSolarArrayViewModel ->> BuildingRepository: getAddressSuggestions(adresse)
-        BuildingRepository ->> BuildingDatasource: getAddressSuggestions(adresse)
-        BuildingDatasource ->> GeoNorge: api kall for adresser
+    alt User searches for an address
+        %% address suggestions 
+        User ->> ManageSolarArrayScreen: Types an address
+        ManageSolarArrayScreen ->> ManageSolarArrayViewModel: setMapAddress(address)
+        ManageSolarArrayViewModel ->> BuildingRepository: getAddressSuggestions(address)
+        BuildingRepository ->> BuildingDatasource: getAddressSuggestions(address)
+        BuildingDatasource ->> GeoNorge: api call for addresses
         GeoNorge -->> BuildingDatasource: http responce
-        BuildingDatasource -->> BuildingRepository: liste av adresser 
-        BuildingRepository -->> ManageSolarArrayViewModel: liste av adresser
-        ManageSolarArrayViewModel -->> ManageSolarArrayScreen: StateFlow av adresseforslag 
-        ManageSolarArrayScreen -->> Bruker: Viser adresseforslag 
+        BuildingDatasource -->> BuildingRepository: list addresses 
+        BuildingRepository -->> ManageSolarArrayViewModel: list of addresses
+        ManageSolarArrayViewModel -->> ManageSolarArrayScreen: StateFlow of address <br/> suggestions 
+        ManageSolarArrayScreen -->> User: Show address suggestions  
 
         %% bruker velger adresse
-        Bruker ->> ManageSolarArrayScreen: Velger adresse 
-        ManageSolarArrayScreen ->> ManageSolarArrayViewModel: setSearchAddress(adresse)<br/>setMapAddress(adresse)
-        ManageSolarArrayScreen -->> Bruker: Zoomer inn på stedet 
+        User ->> ManageSolarArrayScreen: Choose address 
+        ManageSolarArrayScreen ->> ManageSolarArrayViewModel: setSearchAddress(address)<br/>setMapAddress(address)
+        ManageSolarArrayScreen -->> User: Zoom on the address 
 
-    else Bruker zoomer inn på kartet
-        Bruker ->> ManageSolarArrayScreen: zoomer inn på kartet 
+    else Bruker zooms in on an address
+        User ->> ManageSolarArrayScreen: Zooms in 
     
-        ManageSolarArrayScreen ->> ManageSolarArrayViewModel: queryAddressAtPos(koordinater)
-        ManageSolarArrayViewModel ->> BuildingRepository: getNearestAddressToPos(koordinater)
-        BuildingRepository ->> BuildingDatasource: getAddressFromPos(koordinater)
-        BuildingDatasource ->> GeoNorge: api kall
+        ManageSolarArrayScreen ->> ManageSolarArrayViewModel: queryAddressAtPos(coordinates)
+        ManageSolarArrayViewModel ->> BuildingRepository: getNearestAddressToPos(coordinates)
+        BuildingRepository ->> BuildingDatasource: getAddressFromPos(coordinates)
+        BuildingDatasource ->> GeoNorge: api call
         
         GeoNorge -->> BuildingDatasource: response
-        BuildingDatasource -->> BuildingRepository: liste av adresser
-        BuildingRepository -->> ManageSolarArrayViewModel: nærmeste adresse/null
-        ManageSolarArrayViewModel ->> ManageSolarArrayViewModel: setSearchAddress(adresse)<br/>setMapAddress(adresse)
+        BuildingDatasource -->> BuildingRepository: list of addresses
+        BuildingRepository -->> ManageSolarArrayViewModel: nearest address
+        ManageSolarArrayViewModel ->> ManageSolarArrayViewModel: setSearchAddress(address)<br/>setMapAddress(address)
     end
 
     %% henter takflater
-    ManageSolarArrayViewModel ->> BuildingRepository: getRoofSections(adresse)
-    BuildingRepository ->> BuildingRepository: getBuildingIds(adresse)
-    BuildingRepository ->> BuildingDatasource: getCadastreId(adress)
-    BuildingDatasource ->> Kartverket: api kall for ??
+    ManageSolarArrayViewModel ->> BuildingRepository: getRoofSections(address)
+    BuildingRepository ->> BuildingRepository: getBuildingIds(address)
+    BuildingRepository ->> BuildingDatasource: getCadastreId(address)
+    BuildingDatasource ->> Kartverket: api kall for cadastreId
 
     Kartverket -->> BuildingDatasource: http response
-    BuildingDatasource -->> BuildingRepository: cadastreId?
+    BuildingDatasource -->> BuildingRepository: cadastreId
     
     BuildingRepository ->> BuildingDatasource: getBuildingsIds(cadastreId)
-    BuildingDatasource ->> Fjordkraft: api kall for ?? 
+    BuildingDatasource ->> Fjordkraft: api call for buildingids
     Fjordkraft -->> BuildingDatasource: http responce
-    BuildingDatasource -->> BuildingRepository: liste av buildingids
+    BuildingDatasource -->> BuildingRepository: list of buildingids
 
     BuildingRepository ->> BuildingDatasource: getRoofSections(buildingId)
-    BuildingDatasource -->> BuildingRepository: Liste av takflater
-    BuildingRepository -->> ManageSolarArrayViewModel: Liste av takflater
-    ManageSolarArrayViewModel -->> ManageSolarArrayScreen:  StateFlow<MapRoofSectionsState>
-    ManageSolarArrayScreen -->> Bruker: Markerer takflater på adressen
+    BuildingDatasource -->> BuildingRepository: list of roof sections
+    BuildingRepository -->> ManageSolarArrayViewModel: list of roof sections
+    ManageSolarArrayViewModel -->> ManageSolarArrayScreen:  StateFlow<roof sections>
+    ManageSolarArrayScreen -->> User: Highlights roof sections on the address
 
     %% Brukeren velger takflater
-    loop Til brukeren er ferdig
-        Bruker ->> ManageSolarArrayScreen: Velger takflater
-        ManageSolarArrayScreen ->> ManageSolarArrayScreen: Lager et takflatekort<br/>Beregner installasjonsprisen.
-        ManageSolarArrayScreen -->> Bruker: Viser valgt takflate, takflatekort og installasjonsprisen. 
+    loop until user is done
+        User ->> ManageSolarArrayScreen: Choose roof section
+        ManageSolarArrayScreen ->> ManageSolarArrayScreen: make a roof section card<br/>calculate installation price
+        ManageSolarArrayScreen -->> User: Show chosen roof sections, card and price
     end 
 
     %% lagrer
-    Bruker ->> ManageSolarArrayScreen: Trykker på lagre
-    ManageSolarArrayScreen ->> Bruker: Ber om å gi navn til anlegget<br/>og oppgi strømforbruk
-    Bruker ->> ManageSolarArrayScreen: Skriver inn navn og trykker på lagre 
+    User ->> ManageSolarArrayScreen: clik on "lagre"
+    ManageSolarArrayScreen ->> User: Asks about name and <br/>electricity consumption 
+    User ->> ManageSolarArrayScreen: Types name and Saves
     
-    par Navigerer brukeren 
-        ManageSolarArrayScreen ->> Bruker: naviger til hjemskjermen 
-    and Lagrer til databasen 
+    par Navigate user 
+        ManageSolarArrayScreen ->> User: navigate to home  
+    and Saves in database
         create participant SolarArray
-        ManageSolarArrayScreen ->> SolarArray: Lag ny SolarArray-objekt 
-        SolarArray -->> ManageSolarArrayScreen: Lagd 
+        ManageSolarArrayScreen ->> SolarArray: create SolarArray-object 
+        SolarArray -->> ManageSolarArrayScreen: SolarArray 
 
         ManageSolarArrayScreen ->> ManageSolarArrayViewModel: addSolarArray(SolarArray)<br/>setSearchAddress("")
         ManageSolarArrayViewModel ->> SunSaverRepository: addSolarArray(SolarArray)
         SunSaverRepository ->> SunSaverDatasource: insert(SolarArrayWithRoofSections)
         SunSaverDatasource ->> Database(DAO): insertSolarArray(SolarArrayEntity)
-        Database(DAO) -->> SunSaverDatasource: id til solar array 
+        Database(DAO) -->> SunSaverDatasource: id of the solar array 
         SunSaverDatasource ->> Database(DAO): insertRoofSections(List<RoofSectionEntity>)
     end
 ```
@@ -513,20 +513,20 @@ sequenceDiagram
     participant SunSaverDatasource
     participant Database(DAO)
 
-    Bruker ->> HomeScreen: Slett anlegg "hytte"
-    HomeScreen ->> HomeViewModel: removeSolarArray(SolarArray)
-    HomeViewModel ->> SunSaverRepository: deleteSolarArray(SolarArray)
-	SunSaverRepository ->> SunSaverDatasource: delete(solarArray)
-	SunSaverDatasource ->> Database(DAO): delete(solarArray) 
+    Bruker ->> HomeScreen: Delete array "hytte"
+    HomeScreen ->> HomeViewModel: removeSolarArray(array)
+    HomeViewModel ->> SunSaverRepository: deleteSolarArray(array)
+	SunSaverRepository ->> SunSaverDatasource: delete(array)
+	SunSaverDatasource ->> Database(DAO): delete(array) 
 	
-	Database(DAO) -->> SunSaverDatasource: oppdatert liste 
-	SunSaverDatasource -->> SunSaverRepository: oppdatert liste
-	SunSaverRepository -->> HomeViewModel: oppdatert liste
-	HomeViewModel -->> HomeScreen: oppdatert liste
+	Database(DAO) -->> SunSaverDatasource: updated list 
+	SunSaverDatasource -->> SunSaverRepository: updated list
+	SunSaverRepository -->> HomeViewModel: updated list
+	HomeViewModel -->> HomeScreen: updated list
     
-    alt Var >1 lagrede anlegg
-        HomeScreen -->> Bruker: viser oppdatert liste og <br/>setter fokus på første anlegg
-    else Bruker sletta siste anlegg 
+    alt If one than one saved array
+        HomeScreen -->> Bruker: show updated list and <br/> focus on the first array
+    else User deleted the last array
         HomeScreen -->> Bruker: "Ingen solcelleanlegg er opprettet"
     end
 ```
