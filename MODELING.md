@@ -2,9 +2,8 @@
 ### Inkluderte diagrammer: 
 - Use case diagram: Gir en generell oversikt over de viktigste funksjonene appen tilbyr brukeren. 
 - Klassediagram: Viser appens struktur og klasser, og hvordan de er relatert til hverandre. 
-- Sekvensdiagrammer: for utvalgte/hver use case viser hvordan de ulike komponentene (fra klassediagrammet) kommuniserer for å gjennomføre use caset. Den fokuserer primært på appens komponenter, og overlater brukerinteraksjonen til aktivitetsdiagrammet. 
-- Aktivitetsdiagrammet: for utvalgte/hver use case viser mulige scenarioer til hvordan bruker kan interagere med appen. Vi lager aktivitetsdiagrammer kun for de use casene der brukeren må foreta noen valg, f.eks. "lagre et anlegg" og "redigere et anlegg". 
-
+- Sekvensdiagrammer: for utvalgte/hver use case viser hvordan de ulike komponentene (fra klassediagrammet) kommuniserer for å gjennomføre use caset. Den fokuserer primært på appens komponenter, og overlater brukerinteraksjonen til aktivitetsdiagrammet.
+- Aktivitetsdiagrammet: målet med aktivitetsdiagrammet er å vise hvordan brukerne kan interagere med appen, og hva brukeren ser som resultat av interaksjon. Vi har valgt å ha to aktivitetsdiagrammer, den ene for hjemskjermen, og den andre for legg-til skjermen. 
 
 ## Use case diagram 
 Formålet med appen er at bruker skal kunne legge til en eller flere solcelleanlegg, og administrere dem (altså slette og redigere). Appen har også en infoskjerm, men den er ikke en del av hovedfunksjonaliteten i appen, og dermed er den ikke inkludert i use case diagrammet. <br/>
@@ -343,22 +342,158 @@ classDiagram
 
     BuildingRepository --> BuildingDataSource: fetcher data om takflater, koordinater og adresser
     ManageSolarArrayViewModel --> BuildingRepository: fetcher adressedata med bygningsdata
-
-    
 ```
 
-Kommentarer: 
+### Kommentarer: 
 - Siden Mermaid og markdown ikke støttet to <> inni hverandre, har jeg brukt "of" i disse tilfellene. For eksempel Flow&lt;list of SolarArray&gt;. 
 - HomeViewModel ble veldig stor. Det er fordi den håndterer mye data, og har StateFlows (som i god praksis krever en privat mutable versjon og offentlig immutable)
 - Om databasen: Vi lager en abstrakt klasse SunSaverDatabase som arver fra RoomDatabase, og Room-biblioteket fikser implementasjonen for oss. Vi inkluderte RoomDatabase for å vise arv, men den er tom siden den kommer fra Room-biblioteket. 
 - SolarArray og SunSaverRepository: Siden det allerede er en assosiasjon mellom SolarArray og ISunSaverRepository, og SunSaverRepository implementerer dette interfacet, lager vi ikke en egen assosiasjon mellom SolarArray og SunSaverRepository, da dette er underforstått gjennom arv. Det samme gjelder for SolarArrayWithRoofSections og SunSaverDatasource.
 - TODO: Må finne ut hvilke klasser skal inkluderes. 
 
-## Use case: Legg til solcelleanlegg
-Sekvensdiagrammet under arbeid. Må også ha en aktivitetdiagram her. <br/>
-Aktivitetsdiagram skal inneholde hvordan interaksjonen ser ut fra brukerens perspektiv. Den skal f.eks. inkludere validering av brukerinput, som ikke blir inkludert i sekvensdiagrammet for å gjøre sekvensdiagrammet mer arkitekturnært, mens aktivitetsdiagrammet skal være mer brukerinteraksjonsnært. Aktivitetsdiagrammet for use case "lagre ny" bør herved inneholde (i tillegg til resten av brukerinteraksjon i sekvensdiagrammet): 
-validering av om brukeren har fylt ut alle felt; hendelsesforløp der bruker ønsker å endre (f.eks.) antall paneler i et valgt takflate; bruker bytter type på solcellepaneller
+## Aktivitetsdiagrammer
+Dette aktivitetsdiagrammet viser hva bruker kan gjøre på hjemskjermen. Den følgene use case: 
+- Bruker skal kunne se statistikk for et lagret anlegg. 
+- Bruker skal kunne velge et anlegg for å se statistikk for det. 
+- Bruker skal kunne slette et anlegg.
 
+Aktivitetsdiagram 1
+
+Dette diagrammet viser hvordan en bruker kan legge til/redigere et anlegg. Siden det er bare noen få forskjeller mellom flyten i disse to use casene, har vi valgt å slå dem sammen til et diagram. 
+
+Aktivitetsdiagram 2
+
+## Sekvensdiagram: Se statistikk for lagret anlegg
+Bemerkning: dette er et use case i seg selv, men dette kan også sees på som en del av de andre use casene (opprett, rediger og slett). Det som er forskjellen på de ulike casene er hvilket solcelleanlegg som er i fokus. For å unngå copy-paste, vil de referere til dette diagrammet med kommentar om hvilket solcelleanlegg det hentes data for. Et av punktene i "Forenklinger/kommentarer" under diagrammet gir også en full oversikt over de ulike scenarioene. 
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant HomeScreen
+    participant HomeViewModel 
+    participant FrostRepository 
+    participant FrostDatasource
+    participant Frost
+    participant elRep as ElectricityPriceRepository 
+    participant elDat as ElectricityPriceDatasource
+    participant hks as HvaKosterStrømmen 
+    participant SunSaverRepository 
+    participant SunSaverDatasource
+    participant Database 
+
+    HomeViewModel ->> SunSaverRepository: getAllSolarArrays()
+    SunSaverRepository ->> SunSaverDatasource: getAllSolarArrays()
+    SunSaverDatasource ->> Database: getAllSolarArrays()
+
+    Database -->> SunSaverDatasource: list of arrays
+    SunSaverDatasource -->> SunSaverRepository: list of arrays
+    SunSaverRepository -->> HomeViewModel: list of arrays
+    HomeViewModel -->> HomeViewModel: selectSolarArray(array)
+    par What user sees
+        HomeViewModel -->> HomeScreen: chosen array,<br/> retrieving data message
+        HomeScreen -->> User: visual feedback 
+    and Fetching and processing of data
+        HomeViewModel ->> HomeViewModel: getPriceData(array)<br/>getWeatherData(array)
+        
+        par Fetching data from HvaKosterStrømmen
+            HomeViewModel ->> elRep: getPriceArea(coord)
+            elRep -->> HomeViewModel: price area
+            loop For 5/30/365 days 
+                loop need an api call for each day
+                    HomeViewModel ->> elRep: getPriceDataInterval(day, area)
+                    elRep ->> elDat: getElectricityPrices(are, date)
+                    elDat ->> hks: fetch data for one day
+
+                    hks -->> elDat: prices per hour
+                    elDat -->> elRep: prices per day 
+                    elRep ->> elDat: avg. prices
+                end
+            end
+            
+        and Fetching data from Frost 
+            loop For each element 
+                par asycrone calls 
+                    HomeViewModel ->> FrostRepository: getData(coord, element)
+                    FrostRepository ->> FrostDatasource: fetchObservationDataFromFrost(coord, element)
+
+                    FrostDatasource ->> FrostDatasource: fetchNearestSource(coord, element)
+                    FrostDatasource ->> Frost: fetch 5 nearest sensors
+                    Frost -->> FrostDatasource: sensors
+
+                    FrostDatasource ->> Frost: given 5 nearest, which do <br/>have data in our time interval 
+                    Frost -->> FrostDatasource: sensors 
+                    FrostDatasource ->> Frost: fetch data from the nearest sensor
+                    Frost ->> FrostDatasource: data
+
+                    FrostDatasource -->> FrostRepository: all data
+                    FrostRepository ->> FrostRepository: getMonthlyAverageValues(data)
+                    FrostRepository -->> HomeViewModel: avg. per month 
+                end
+            end
+        end
+
+        HomeViewModel ->> HomeViewModel: useWeatherData(array)
+        HomeViewModel -->> HomeScreen: show graph
+        HomeViewModel ->> HomeViewModel: loadElectricityPrices(array)
+        HomeViewModel ->> elRep: getPriceData(days, generated_by_array,<br/> usage, avg_price)
+        elRep -->> HomeViewModel: saving with and without arrays
+        HomeViewModel ->> HomeViewModel: seePrices(array)<br/>calculateRecoup(array)
+    end
+    HomeViewModel -->> HomeScreen: show saving and recoup statistic 
+```
+
+### Tekstlig beskrivelse: 
+Navn: Se statistikk for lagret anlegg
+Aktør: Bruker
+Prebetingelse: Bruker har minst et lagret anlegg. Bruker går inn på appen. <br/>
+Postbetingelse: Bruker fikk sett statistikk for sin anlegg. <br/>
+1. Appen henter lagrede anlegg fra databasen og viser dem på HomeScreen. 
+2. Appen setter i fokus et av anleggene. 
+3. Appen viser viser til brukeren at data lastes. 
+4. Samtidig gjøres det asykrone kall til HvaKosterStrømmen og Frost for å hente gjennomsnittlige verdier per måned. 
+5. Når data fra Frost er hentet, beregnes forventet gjennomsnittlig strømproduksjonen per måned. 
+6. Resultatet vises til brukeren.
+7. Etter det beregnes forventet sparing og inntjenningstid. 
+8. Resulatet av det vises også til brukeren. 
+
+### Forenklinger/Kommentarer
+- Hvilket anlegg som settes i fokus, avhenger av hvilken use case det er snakk om. Hvis appen er nettopp åpnet (og brukeren har noen anlegg lagret) så vil det første anlegget settes i fokus. Hvis vi ble nettopp navigert til hjemskjermen etter å ha lagt til et nytt anlegg, så blir det nye anlegget satt i fokus. Hvis man ble navigert til hjemskjermen etter å ha oppdatert et anlegg, så vil det oppdaterte anlegget være i fokus. Hvis et anlegg blir sletta, retter vi fokus til det første anlegget (hvis det finnes)
+- Bruker "coord" for "coordinater" for å spare litt plass
+- Grunnen til at vi har mange api kall per tidsenhet til HvaKosterStrømmen er at apiet bare har en json fil for hver dag som finnes, så må man gjøre et api call per dag for å hente ut flere dager. Altså itererer loopen gjennom hver dag vi trenger å hente strømdata for, og henter strømpriser med et api-kall for hver dag. Dette blir mange kall, så noen dager blir hoppet over. Når dataen/prisene er hentet, legges det til i en liste, slik at etter loopen er ferdig, kan sitte igjen med en gjennomsnittsverdi av strømprisen for de dagene vi har hentet for.
+- Siden Frost ikke alltid har data som vi trenger (se rapport 3.2 API), så måtte vi finne en løsning på dette. Løsningen vi fikk for, var at for hver element (værkategori), finner vi først 5 nærmeste sensorer, og så sjekker vi, hvilke av de sensorene har data i den tidsperioden vi ønsker. Hvis det er flere enn en (1) sensor, bruker vi den nærmeste sensoren for å hente data i denne værkategorien. 
+- Siden diagrammet er komplisert og vi ønsker å gjenbruke det i andre use case, er alternativt flyt ikke inkludert. 
+
+## Sekvensdiagram: Velg et anlegg for å se statistikk for det. 
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant HomeScreen 
+    participant HomeViewModel
+    participant DataLayer
+
+    User ->> HomeScreen: choose a new array
+    HomeScreen ->> HomeViewModel: selectSolarArray(array)
+    alt Data has already been retrieved 
+        HomeViewModel -->> HomeScreen: display statistic for this array 
+    else Data haven't been retrieved or retrieving previously failed 
+        HomeViewModel ->> DataLayer: same as sequence diagram above 
+    end 
+```
+
+### Tekstlig beskrivelse
+1. Bruker velger et annet anlegg 
+2. Appen viser data 
+
+Alternativt flyt: Dette anlegget har allerede vært i fokus siden appen ble åpnet (eller det skjedde feil ved tidligere henting av data). <br/>
+
+2. Appen henter data som i sekvensdiagrammet ovenfor. 
+
+### Kommentarer: 
+- Kan sees som et fortsettelse av sekvensdiagrammet for "Se statistikk for lagret anlegg" med et alternativt flyt. 
+- Hovedmålet med diagrammet er å vise at data ikke må hentes på nytt, hvis forrige henting var vellykket. 
+
+## Sekvensdiagram: Legg til solcelleanlegg
 ```mermaid
 sequenceDiagram
 
@@ -383,7 +518,7 @@ sequenceDiagram
     alt User searches for an address
         %% address suggestions 
         User ->> ManageSolarArrayScreen: Types an address
-        ManageSolarArrayScreen ->> ManageSolarArrayViewModel: setMapAddress(address)
+        ManageSolarArrayScreen ->> ManageSolarArrayViewModel: setSearchAddress(address)
         ManageSolarArrayViewModel ->> BuildingRepository: getAddressSuggestions(address)
         BuildingRepository ->> BuildingDatasource: getAddressSuggestions(address)
         BuildingDatasource ->> GeoNorge: api call for addresses
@@ -468,42 +603,34 @@ Post: Solcelleanlegget er lagret i databasen og vises på hjemskjermen. <br/>
 3. Bruker skriver inn en adresse. 
 4. Appen gjør et kall mot GeoNorge for å hente adresseforslag. 
 5. Bruker velger noe fra forslagene. 
-6. Appen gjør et nytt kall mot GeoNorge for å hente hele adressen. (????)
-7. Brukeren blir zoomet inn på stedet. 
-8. Appen gjør et kall mot Kartverket for å få cadastreId. 
-9. Appen gjør et kall mot Fjordkraft for å hente takflater. 
-10. Appen markerer takflater på skjermen. 
-11. Bruker velger et takflate. 
-12. Appen lagrer takflate som kort. Regner ut installasjonsprisen. Viser til brukeren.
-13. Bruker trykker på lagre. 
-14. Appen ber om å oppgi navn på anlegger og strømforbruk. 
-15. Bruker skriver inn navn 
-16. Bruker trykker på lagre. 
-17. Appen lagrer til databasen og navigerer til HomeScreen. 
+6. Brukeren blir zoomet inn på stedet. 
+7. Appen gjør et kall mot Kartverket for å få cadastreId. 
+8. Appen gjør et kall mot Fjordkraft for å hente takflater. 
+9. Appen markerer takflater på skjermen. 
+10. Bruker velger et takflate. 
+11. Appen lagrer takflate som kort. Regner ut installasjonsprisen. Viser til brukeren.
+12. Bruker trykker på lagre. 
+13. Appen ber om å oppgi navn på anlegger og strømforbruk. 
+14. Bruker skriver inn navn 
+15. Bruker trykker på lagre. 
+16. Appen lagrer til databasen og navigerer til HomeScreen. 
 
  <br/>**Alternativ flyt**: Brukeren velger å zoome inn på adressen manuelt.<br/>
 
 3. Bruker zoomer inn på riktig adresse. <br/>
-4. Appen gjør et kall mot GeoNorge for å hente adressen. (???) <br/>
-5. Hopp til punkt 8. <br/>
+4. Appen gjør et kall mot GeoNorge for å hente adressen. <br/>
+5. Hopp til punkt 7. <br/>
 
-#### Forenklinger/Kommentarer
+### Forenklinger/Kommentarer
 - Vi starter interaksjon med at brukeren er nettopp blitt navigert til ManageSolarArrayScreen.
 - Vi sier at adresseforslag hentes kun en gang selv de egentlig hentes for hver bokstav som skriver/slettes i søkefeltet. 
 - Utelatter å forklare alle steg i "appen gjør"-punktene, siden de kan sees i detalj på sekvensdiagrammet. 
 - Valideringer/div. brukerinteraksjon etter at adressen er satt skal vises i aktivitetsdiagrammet. Dette er fordi det er lite givende å ha det i sekvensdigrammet, da det er kun interaksjon mellom bruker og ManageSolarArrayScreen-skjermen. 
-- Etter at det nye anlegget er lagret, vil databasen automatisk sende ut en oppdatert liste (på grunn av Flow) som HomeScreen vil fange opp. Da vil HomeScreen sette det nye solcelleanlegget i fokus og hente data for den. Dette utelatter vi fra sekvensdiagrammet for å minke kompleksiteten. 
-
-## Use case: Se lagrede solcelleanlegg med data + Velge et anlegg for å se tilhørende data
-Sekvensdiagram. Kan ha en aktivitetsdiagram hvor man trykker på ting på skjermen, men strengt tatt ikke nødvendig. <br/>
-Velge et anlegg for å se tilhørende data: 
-Mulig kan (og bør) kombineres med "Se lagrede solcelleanlegg med data". Kan ha en liten aktivitetsdiagram som viser at man kan ikke velge før data er lastet (men er kanskje ikke nødvendig)
+- Etter at det nye anlegget er lagret, vil appen hente data for dette nye anlegget. Så videre på hjemskjermen får vi samme flyt som i sekvensdiagrammet for "Se statistikk for lagret anlegg" med det nye anlegget i fokus. 
 
 ## Use case: Redigere solcelleanlegg
-Sekvensdiagram og aktivitetsdiagram. 
 
 ## Use case: Slette solcelleanlegg
-Vi gir også brukeren mulighet til å slette solcelleanlegg. For dette use caset har vi kun sekvensdiagram fordi å slette et anlegg tar kun ett klikk. 
 ```mermaid
 sequenceDiagram
     actor Bruker
