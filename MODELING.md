@@ -398,7 +398,7 @@ classDiagram
 <br/>
 
 ```mermaid
-flowchart RL;
+flowchart LR;
     Start((Start))
 
     HomeScreen(Shows homescreen)
@@ -512,7 +512,7 @@ flowchart RL;
 1.6 System returns to step 2<br/>
 
 ```mermaid
-flowchart RL;
+flowchart LR;
 
     Start((Start))
     SelectSecond(User clicks on the second solar array)
