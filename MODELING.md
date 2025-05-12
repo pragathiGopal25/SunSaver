@@ -8,15 +8,15 @@
 ## Use case diagram 
 Formålet med appen er at bruker skal kunne legge til en eller flere solcelleanlegg, og administrere dem (altså slette og redigere). Appen har også en infoskjerm, men den er ikke en del av hovedfunksjonaliteten i appen, og dermed er den ikke inkludert i use case diagrammet. <br/>
 
-![Use case diagram for SunSaver](image.png)<br/>
+![Use case diagram](image.png)<br/>
 
-\* estimat om hvor mye man sparer ved å installere dette solcelleanlegget, tid til man har tjent inn det man innvesterte inn i anlegget, og en graf som viser hvordan er strømproduksjonen i området mtp værforhold. <br/>
+Med statistikk menes en estimat om hvor mye man sparer ved å installere dette solcelleanlegget, tid til man har tjent inn det man innvesterte inn i anlegget, og en graf som viser hvordan er strømproduksjonen i området mtp værforhold. <br/>
 Redigering, sletting og valg av nytt anlegg er markert med <<extend>> fordi de krever minst et lagret anlegg. <br/>
 <br/>
 Diagrammet ble laget ved hjelp av [app.diagrams.net](https://app.diagrams.net/) siden Mermaid ikke har Use case diagrammer. <br/>
 
 ## Klassediagram
-Klassediagrammet fokuserer på arkitekturen i appen vår (ViewModel - Repository - Datasource) og noen av de viktigste dataklasser. Vi inkluderer ikke composables siden de er strengt tatt funksjoner. 
+Klassediagrammet fokuserer på arkitekturen i appen vår (ViewModel - Repository - Datasource) og noen av de viktigste dataklassene. Vi inkluderer ikke composables siden de er strengt tatt funksjoner. 
 
 ```mermaid
 classDiagram
@@ -352,16 +352,198 @@ classDiagram
 - TODO: Må finne ut hvilke klasser skal inkluderes. 
 
 ## Aktivitetsdiagrammer
-Dette aktivitetsdiagrammet viser hva bruker kan gjøre på hjemskjermen. Den følgene use case: 
-- Bruker skal kunne se statistikk for et lagret anlegg. 
-- Bruker skal kunne velge et anlegg for å se statistikk for det. 
-- Bruker skal kunne slette et anlegg.
+### **Name**: Create/edit a solar array
+**Pre - conditions**: User has not created or edited a solar array before 
+**Post - conditions**: User has created the solar array, it is saved in the homescreen and they are able to edit it.
+<br/>
 
-Aktivitetsdiagram 1
+**Main flow**:<br/>
+1. User opens the app
+2. The system shows the homescreen 
+3. User clicks on the pluss button 
+4. The app shows a map and a dropdown menu
+5. The user searches for an address 
+6. The system navigates to that address in the graph
+7. The system displays the available roof sections
+8. The user clicks on their desired number of roof sections
+9. The user drags up the drop - down menu
+10. The user clicks on a roof section 
+11. The user chooses not to edit the roof section 
+12. The user selects a solar panel type 
+13. The system shows a price overview
+14. The user presses the save button
+15. The user provides a name for the solar array
+16. The user provides their electricity usage
+17. The user saves the solar array
+18. The system navigates back to the home screen. <br/>
+<br/>
 
-Dette diagrammet viser hvordan en bruker kan legge til/redigere et anlegg. Siden det er bare noen få forskjeller mellom flyten i disse to use casene, har vi valgt å slå dem sammen til et diagram. 
+**Alternative flow**:<br/>
+3.1 The user clicks on the edit button on an existing solar array<br/>
+3.2 The system navigates to the edit screen<br/>
+3.3 The system zooms in on the address in the map <br/>
 
-Aktivitetsdiagram 2
+4.1 The user navigates to their address on the map<br/>
+4.2 The user clicks on a house<br/>
+4.3 The system returns to step 7<br/>
+
+8.1 The user provides the required roof measurements (area, direction, angle and panels)<br/>
+8.2 The user adds the roof section<br/>
+8.3 The system returns to step 9<br/>
+
+10.1 The user chooses what to edit <br/>
+10.2 The user edits the chosen element <br/>
+10.3 The user saves their edited roof section<br/>
+10.4 The system returns to step 12<br/>
+<br/>
+
+```mermaid
+flowchart RL;
+    Start((Start))
+
+    HomeScreen(Shows homescreen)
+    PlusButton(Create new solar array)
+    MapAndDropdown(Shows a map and a drop-down menu)
+    Search{Search address or navigate on map?}
+
+    EditOrCreate{Create a new solar array or edit an existing one?}
+    EditSolarArray(User clicks on edit button)
+    AddressZoom(System zooms in on address in the map)
+
+    ClickAddress(Select a house on the map)
+    ShowRoofSections(Show available roof sections)
+    ChooseRoofSections(Add desired roof sections)
+    AddRoofManually{Add from map or add manually?}
+
+    AddArea(Write area)
+    AddDirection(Write direction)
+    AddAngle(Write angle)
+    AddPanels(Write number of panels)
+
+    ClickRoofSection(Click on chosen roof section)
+    EditRoofSection{Edit roof section?}
+    ChooseEditSegment{Choose editing segment}
+
+    Edit(Edit)
+    SaveChanges(Save)
+
+    SelectSolarPanel{Select a solar panel type}
+    ShowPriceOverview(Show price overview)
+
+    SelectSaveButton(Press save button)
+    WriteName(Write solar array name)
+    WriteElectricity(Write electricity usage)
+    Save(Save)
+
+    SavedHomeScreen(Shows homescreen with saved solar array)
+
+    Start --> HomeScreen
+    HomeScreen --> EditOrCreate
+    EditOrCreate --Create--> PlusButton
+    EditOrCreate --Edit--> EditSolarArray
+
+    PlusButton --> MapAndDropdown
+    MapAndDropdown --> Search 
+
+    EditSolarArray --> AddressZoom 
+    AddressZoom --> ShowRoofSections 
+
+    Search --Navigate on map--> ClickAddress --> ShowRoofSections 
+    Search --Search on searchfield --> ShowRoofSections
+
+    ShowRoofSections --> ChooseRoofSections 
+    ChooseRoofSections --> AddRoofManually
+
+    AddRoofManually --From map--> ClickRoofSection
+    AddRoofManually --Manually-->AddArea
+
+    AddArea --> AddDirection
+    AddDirection --> AddAngle
+    AddAngle --> AddPanels
+    AddPanels --> ClickRoofSection
+
+    ClickRoofSection --> EditRoofSection
+    EditRoofSection --YES--> ChooseEditSegment
+    EditRoofSection --NO--> SelectSolarPanel
+
+    ChooseEditSegment --Area--> Edit
+    ChooseEditSegment --Direction-->  Edit
+    ChooseEditSegment --Angle-->  Edit
+    ChooseEditSegment --Panels-->  Edit
+
+    Edit --> SaveChanges
+    SaveChanges --> SelectSolarPanel
+    SelectSolarPanel --PREMIUM--> ShowPriceOverview
+    SelectSolarPanel --ECONOMY--> ShowPriceOverview
+    SelectSolarPanel --PERFORMANCE--> ShowPriceOverview
+
+
+    ShowPriceOverview --> SelectSaveButton
+    SelectSaveButton --> WriteName
+    WriteName --> WriteElectricity
+    WriteElectricity --> Save
+    Save --> SavedHomeScreen
+
+    End((End))
+
+    SavedHomeScreen --> End
+
+```
+
+### **Name**: Navigating between solar arrays and deleting them
+**Pre - conditions**: User opens the app to the homescreen with two existing solar arrays <br/>
+**Post - conditions**: User has successfully navigated between the solar arrays and deleted one.<br/>
+
+**Main flow**:<br/>
+1. User clicks on the second solar array 
+2. System retrieves data for the second solar array
+3. System displays the graph, savings and price recoup components for second solar array 
+4. User deletes the first solar array
+5. System navigates user back to the first solar array
+6. System displays the previously retrieved data 
+<br/>
+
+**Alternative flow**:<br/>
+1.1 System has not yet retrieved data for the first solar array<br/>
+1.2 System shows an error and prevents user from navigating to the second solar array.<br/>
+1.3 User waits for data be retrieved<br/>
+1.4 System retrieves data<br/>
+1.5 User clicks on second solar array<br/>
+1.6 System returns to step 2<br/>
+
+```mermaid
+flowchart RL;
+
+    Start((Start))
+    SelectSecond(User clicks on the second solar array)
+    RetrievedData{Has the system retrieved data?}
+    DisplayComponents(System displays graph, savings and price recoup components)
+
+    ShowError(System shows error)
+    Wait(User waits til data is retrieved)
+    ReSelect(User selects second solar array)
+
+    Delete(User deletes second solar array)
+    SelectFirst(System selects first solar array)
+    DisplayPrev(System displays previously retrieved data)
+
+    Start --> SelectSecond
+    SelectSecond --> RetrievedData
+    RetrievedData --YES--> DisplayComponents 
+    RetrievedData --NO--> ShowError
+
+    ShowError --> Wait
+    Wait --> ReSelect
+    ReSelect --> DisplayComponents
+
+    DisplayComponents --> Delete
+    Delete --> SelectFirst
+    SelectFirst --> DisplayPrev
+
+    End((End))
+
+    DisplayPrev --> End 
+```
 
 ## Sekvensdiagram: Se statistikk for lagret anlegg
 Bemerkning: dette er et use case i seg selv, men dette kan også sees på som en del av de andre use casene (opprett, rediger og slett). Det som er forskjellen på de ulike casene er hvilket solcelleanlegg som er i fokus. For å unngå copy-paste, vil de referere til dette diagrammet med kommentar om hvilket solcelleanlegg det hentes data for. Et av punktene i "Forenklinger/kommentarer" under diagrammet gir også en full oversikt over de ulike scenarioene. 
@@ -443,8 +625,8 @@ sequenceDiagram
 ```
 
 ### Tekstlig beskrivelse: 
-Navn: Se statistikk for lagret anlegg
-Aktør: Bruker
+Navn: Se statistikk for lagret anlegg<br/>
+Aktør: Bruker<br/>
 Prebetingelse: Bruker har minst et lagret anlegg. Bruker går inn på appen. <br/>
 Postbetingelse: Bruker fikk sett statistikk for sin anlegg. <br/>
 1. Appen henter lagrede anlegg fra databasen og viser dem på HomeScreen. 
@@ -509,7 +691,7 @@ sequenceDiagram
     participant Fjordkraft
     participant SunSaverRepository
     participant SunSaverDatasource 
-    participant Database(DAO)
+    participant Database
 
     User ->> HomeScreen: Clicks on + in the navbar
     HomeScreen ->> ManageSolarArrayScreen: navigates to ManageSolarArrayScreen
@@ -533,7 +715,7 @@ sequenceDiagram
         ManageSolarArrayScreen ->> ManageSolarArrayViewModel: setSearchAddress(address)<br/>setMapAddress(address)
         ManageSolarArrayScreen -->> User: Zoom on the address 
 
-    else Bruker zooms in on an address
+    else User zooms in on an address
         User ->> ManageSolarArrayScreen: Zooms in 
     
         ManageSolarArrayScreen ->> ManageSolarArrayViewModel: queryAddressAtPos(coordinates)
@@ -589,12 +771,14 @@ sequenceDiagram
         ManageSolarArrayScreen ->> ManageSolarArrayViewModel: addSolarArray(SolarArray)<br/>setSearchAddress("")
         ManageSolarArrayViewModel ->> SunSaverRepository: addSolarArray(SolarArray)
         SunSaverRepository ->> SunSaverDatasource: insert(SolarArrayWithRoofSections)
-        SunSaverDatasource ->> Database(DAO): insertSolarArray(SolarArrayEntity)
-        Database(DAO) -->> SunSaverDatasource: id of the solar array 
-        SunSaverDatasource ->> Database(DAO): insertRoofSections(List<RoofSectionEntity>)
+        SunSaverDatasource ->> Database: insertSolarArray(SolarArrayEntity)
+        Database -->> SunSaverDatasource: id of the solar array 
+        SunSaverDatasource ->> Database: insertRoofSections(List<RoofSectionEntity>)
     end
 ```
 ### Tekstlig beskrivelse: 
+Navn: Legg til et anlegg<br/>
+Aktør: Bruker<br/>
 Pre: Brukeren har trykket på +-tegnet nede i navbaren og er nå dirigert til ManageSolarArrayScreen. <br/>
 Post: Solcelleanlegget er lagret i databasen og vises på hjemskjermen. <br/>
 
@@ -628,9 +812,79 @@ Post: Solcelleanlegget er lagret i databasen og vises på hjemskjermen. <br/>
 - Valideringer/div. brukerinteraksjon etter at adressen er satt skal vises i aktivitetsdiagrammet. Dette er fordi det er lite givende å ha det i sekvensdigrammet, da det er kun interaksjon mellom bruker og ManageSolarArrayScreen-skjermen. 
 - Etter at det nye anlegget er lagret, vil appen hente data for dette nye anlegget. Så videre på hjemskjermen får vi samme flyt som i sekvensdiagrammet for "Se statistikk for lagret anlegg" med det nye anlegget i fokus. 
 
-## Use case: Redigere solcelleanlegg
+## Sekvensdiagram: Redigere solcelleanlegg
 
-## Use case: Slette solcelleanlegg
+```mermaid
+sequenceDiagram
+    actor User
+    participant scr as ManageSolarArrayScreen
+    participant vm as ManageSolarArrayViewModel
+    participant BuildingDataLayer
+    participant SunSaverRepository 
+    participant SunSaverDatasource
+    participant Database
+
+    scr ->> vm: getSolarArray(id)
+    vm ->> SunSaverRepository: getAllSolarArrays()
+    SunSaverRepository ->> SunSaverDatasource: getAllSolarArrays()
+    SunSaverDatasource ->> Database: getAllSolarArrays()
+
+    Database -->> SunSaverDatasource: list of arrays
+    SunSaverDatasource -->> SunSaverRepository: list of arrays
+    SunSaverRepository -->> vm: list of arrays
+
+    vm -->> scr: solar array in question
+
+    scr ->> vm: updateSolarArrayAddress(solar array)
+    par What user sees
+        scr -->> User: zoom in on coords
+    and Fetching data
+        vm ->> vm: queryAddressAtPos(coords)
+        vm ->> BuildingDataLayer: get roof sections
+        Note over vm,BuildingDataLayer: same interaction with api's as <br/> in add solar array sequence diagram<br/> part 2 of alt flow and right after
+        BuildingDataLayer -->> vm: roof sections    
+        vm -->> scr: roof sections    
+    end 
+    scr -->> User: highlight roof sections
+
+    Note over User,scr: user interaction shown <br/>in activity diagram 
+    User ->> scr: save
+
+    par Navigate user 
+        vm ->> User: navigate to home  
+    and updates in database
+        create participant SolarArray
+        vm ->> SolarArray: create SolarArray-object 
+        SolarArray -->> vm: SolarArray 
+
+        vm ->> vm: updateSolarArray(SolarArray)<br/>setSearchAddress("")
+        vm ->> SunSaverRepository: updateSolarArray(SolarArray)
+        SunSaverRepository ->> SunSaverDatasource: update(SolarArrayWithRoofSections)
+        SunSaverDatasource ->> Database: updateSolarArray(SolarArrayEntity)
+        SunSaverDatasource ->> Database: updateRoofSections(List<RoofSectionEntity>)
+        
+        SunSaverDatasource ->> Database: deleteRoofSections(deleted roof sections)
+        SunSaverDatasource ->> Database: insertRoofSections(added Roof Sections)
+    end
+```
+### Tekstlig beskrivelse: 
+Navn: Redigere eksisterende anlegg <br/>
+Aktør: Bruker<br/>
+Pre: Bruker har minst ett lagret anlegg. Brukeren har trykket på redigeringsikonet og blitt navigert til ny skjerm <br/>
+Post: Det aktuelle anlegget er oppdatert<br/>
+1. Appen henter solcelleanlegget som skal redigeres vha dets id. 
+2. Appen zoomer inn på koordinter samtidig som adresse og takflater hentes. 
+3. Bruker manipulerer takflater. 
+4. Bruker trykker på lagre. 
+5. Appen navigerer brukeren til hjemskjermen og oppdaterer array. 
+
+### Forenklinger/Kommentarer
+- Med tanke på appens bruksområde, vil det være et fåtall anlegg lagret, så det er ikke så stor overheng å hente alle lagrede anlegg.
+- For å gjøre diagrammet mindre, dropppet vi noen av de delene som var vist i forrige diagrammer. 
+- Etter at brukeren er navigert til hjemskjermen, er det oppdaterte anlegget i fokus. Ingen data hentes (da adressen forblir den samme), men beregninger kjøres på nytt med oppdatert data. 
+
+
+## Sekvensdiagram: Slette solcelleanlegg
 ```mermaid
 sequenceDiagram
     actor Bruker
@@ -638,15 +892,15 @@ sequenceDiagram
     participant HomeViewModel
     participant SunSaverRepository
     participant SunSaverDatasource
-    participant Database(DAO)
+    participant Database
 
     Bruker ->> HomeScreen: Delete array "hytte"
     HomeScreen ->> HomeViewModel: removeSolarArray(array)
     HomeViewModel ->> SunSaverRepository: deleteSolarArray(array)
 	SunSaverRepository ->> SunSaverDatasource: delete(array)
-	SunSaverDatasource ->> Database(DAO): delete(array) 
+	SunSaverDatasource ->> Database: delete(array) 
 	
-	Database(DAO) -->> SunSaverDatasource: updated list 
+	Database -->> SunSaverDatasource: updated list 
 	SunSaverDatasource -->> SunSaverRepository: updated list
 	SunSaverRepository -->> HomeViewModel: updated list
 	HomeViewModel -->> HomeScreen: updated list
@@ -657,7 +911,9 @@ sequenceDiagram
         HomeScreen -->> Bruker: "Ingen solcelleanlegg er opprettet"
     end
 ```
-Tekstlig beskrivelse: <br/>
+### Tekstlig beskrivelse: <br/>
+Navn: Slett et anlegg<br/>
+Aktør: Bruker<br/>
 Pre: Bruker har minst en (1) solcelleanlegg lagret. <br/>
 Post: Den aktuelle solcelleanlegget er slettet. <br/>
 Hovedflyt:
