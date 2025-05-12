@@ -323,6 +323,7 @@ fun SelectedSolarArrayTitle(viewModel: HomeViewModel) {
                 .clip(RoundedCornerShape(100))
                 .background(Marzipan)
                 .padding(horizontal = 10.dp, vertical = 5.dp)
+                .semantics(true) {}
         ) {
             Text(
                 text = "Valgt anlegg: ",
