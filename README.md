@@ -1,10 +1,10 @@
-# TEAM 54
-- Alex
-- Antonina
-- Hani
-- Radwa
-- Pragathi
-- Amund
+# TEAM 54: Sunsaver
+- Alexander Paul With
+- Amund Hillestad 
+- Antonina Bukhantsova 
+- Hani Hussein Ali
+- Pragathi Gopalakrishnan
+- Radwa Ayanle Godor
 
 ## Requirements and notices before running the application: 
 - The application runs on the Android studio version Ladybug
@@ -21,19 +21,19 @@ In order to run the application, do the following steps:
 5. Run the app!
 
 ## Libraries used:
-- #### [Vico - compose](https://www.patrykandpatrick.com/vico/guide/stable)
+- [Vico - compose](https://www.patrykandpatrick.com/vico/guide/stable)
     - This is the library we used to make/design the graph in our app. This is referenced in the file, ElectricityGraph. We decided to implement vico - compose due to its wide range of graph options. 
-- #### [Room](https://developer.android.com/jetpack/androidx/releases/room)
+- [Room](https://developer.android.com/jetpack/androidx/releases/room)
     - We used the Room database to store solar arrays and their respective roof sections in our app.
-- #### [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
+- [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
     - We utilised Hilt for dependency injection in our code. 
-- #### [Mapbox](https://docs.mapbox.com/android/maps/guides/)
+- [Mapbox](https://docs.mapbox.com/android/maps/guides/)
     - This is the library we used to access and display the map in our app.
-- #### [LottieFiles](https://lottiefiles.com/blog/working-with-lottie-animations/getting-started-with-lottie-animations-in-android-app)
-    - We used LottieFiles to create and implement our animated splashscreen. 
-- #### [Ktor](https://ktor.io/docs/welcome.html)
+- [LottieFiles](https://lottiefiles.com/blog/working-with-lottie-animations/getting-started-with-lottie-animations-in-android-app)
+    - We used LottieFiles to create and implement our animated splash screen. 
+- [Ktor](https://ktor.io/docs/welcome.html)
     - We used Ktor for making HTTP connections/requests for API calls to Frost, Fjordkraft, Kartverket, Geonorge and HvaKosterStrommen.
-- #### [Jetpack Compose](https://developer.android.com/develop/ui/compose/documentation)
+- [Jetpack Compose](https://developer.android.com/develop/ui/compose/documentation)
     - We used Jetpack Compose to design and build the UI components in our app.
 
 
