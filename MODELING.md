@@ -3,7 +3,7 @@
 - Use case diagram: Gir en generell oversikt over de viktigste funksjonene appen tilbyr brukeren. 
 - Klassediagram: Viser appens struktur og klasser, og hvordan de er relatert til hverandre. 
 - Sekvensdiagrammer: for utvalgte/hver use case viser hvordan de ulike komponentene (fra klassediagrammet) kommuniserer for å gjennomføre use caset. Den fokuserer primært på appens komponenter, og overlater brukerinteraksjonen til aktivitetsdiagrammet.
-- Aktivitetsdiagrammet: målet med aktivitetsdiagrammet er å vise hvordan brukerne kan interagere med appen, og hva brukeren ser som resultat av interaksjon. Vi har valgt å ha to aktivitetsdiagrammer, den ene for hjemskjermen, og den andre for legg-til skjermen. 
+- Aktivitetsdiagrammet: målet med aktivitetsdiagrammet er å vise hvordan brukerne kan interagere med appen, og hva brukeren ser som resultat av interaksjon. Vi har valgt å ha to aktivitetsdiagrammer, den ene for hjemskjermen, og den andre for legg-til skjermen. De legges ved på slutten, siden de er så store i mermaid. 
 
 ## Use case diagram 
 Formålet med appen er at bruker skal kunne legge til en eller flere solcelleanlegg, og administrere dem (altså slette og redigere). Appen har også en infoskjerm, men den er ikke en del av hovedfunksjonaliteten i appen, og dermed er den ikke inkludert i use case diagrammet. <br/>
@@ -351,199 +351,6 @@ classDiagram
 - SolarArray og SunSaverRepository: Siden det allerede er en assosiasjon mellom SolarArray og ISunSaverRepository, og SunSaverRepository implementerer dette interfacet, lager vi ikke en egen assosiasjon mellom SolarArray og SunSaverRepository, da dette er underforstått gjennom arv. Det samme gjelder for SolarArrayWithRoofSections og SunSaverDatasource.
 - TODO: Må finne ut hvilke klasser skal inkluderes. 
 
-## Aktivitetsdiagrammer
-### **Name**: Create/edit a solar array
-**Pre - conditions**: User has not created or edited a solar array before 
-**Post - conditions**: User has created the solar array, it is saved in the homescreen and they are able to edit it.
-<br/>
-
-**Main flow**:<br/>
-1. User opens the app
-2. The system shows the homescreen 
-3. User clicks on the pluss button 
-4. The app shows a map and a dropdown menu
-5. The user searches for an address 
-6. The system navigates to that address in the graph
-7. The system displays the available roof sections
-8. The user clicks on their desired number of roof sections
-9. The user drags up the drop - down menu
-10. The user clicks on a roof section 
-11. The user chooses not to edit the roof section 
-12. The user selects a solar panel type 
-13. The system shows a price overview
-14. The user presses the save button
-15. The user provides a name for the solar array
-16. The user provides their electricity usage
-17. The user saves the solar array
-18. The system navigates back to the home screen. <br/>
-<br/>
-
-**Alternative flow**:<br/>
-3.1 The user clicks on the edit button on an existing solar array<br/>
-3.2 The system navigates to the edit screen<br/>
-3.3 The system zooms in on the address in the map <br/>
-
-4.1 The user navigates to their address on the map<br/>
-4.2 The user clicks on a house<br/>
-4.3 The system returns to step 7<br/>
-
-8.1 The user provides the required roof measurements (area, direction, angle and panels)<br/>
-8.2 The user adds the roof section<br/>
-8.3 The system returns to step 9<br/>
-
-10.1 The user chooses what to edit <br/>
-10.2 The user edits the chosen element <br/>
-10.3 The user saves their edited roof section<br/>
-10.4 The system returns to step 12<br/>
-<br/>
-
-```mermaid
-flowchart LR;
-    Start((Start))
-
-    HomeScreen(Shows homescreen)
-    PlusButton(Create new solar array)
-    MapAndDropdown(Shows a map and a drop-down menu)
-    Search{Search address or navigate on map?}
-
-    EditOrCreate{Create a new solar array or edit an existing one?}
-    EditSolarArray(User clicks on edit button)
-    AddressZoom(System zooms in on address in the map)
-
-    ClickAddress(Select a house on the map)
-    ShowRoofSections(Show available roof sections)
-    ChooseRoofSections(Add desired roof sections)
-    AddRoofManually{Add from map or add manually?}
-
-    AddArea(Write area)
-    AddDirection(Write direction)
-    AddAngle(Write angle)
-    AddPanels(Write number of panels)
-
-    ClickRoofSection(Click on chosen roof section)
-    EditRoofSection{Edit roof section?}
-    ChooseEditSegment{Choose editing segment}
-
-    Edit(Edit)
-    SaveChanges(Save)
-
-    SelectSolarPanel{Select a solar panel type}
-    ShowPriceOverview(Show price overview)
-
-    SelectSaveButton(Press save button)
-    WriteName(Write solar array name)
-    WriteElectricity(Write electricity usage)
-    Save(Save)
-
-    SavedHomeScreen(Shows homescreen with saved solar array)
-
-    Start --> HomeScreen
-    HomeScreen --> EditOrCreate
-    EditOrCreate --Create--> PlusButton
-    EditOrCreate --Edit--> EditSolarArray
-
-    PlusButton --> MapAndDropdown
-    MapAndDropdown --> Search 
-
-    EditSolarArray --> AddressZoom 
-    AddressZoom --> ShowRoofSections 
-
-    Search --Navigate on map--> ClickAddress --> ShowRoofSections 
-    Search --Search on searchfield --> ShowRoofSections
-
-    ShowRoofSections --> ChooseRoofSections 
-    ChooseRoofSections --> AddRoofManually
-
-    AddRoofManually --From map--> ClickRoofSection
-    AddRoofManually --Manually-->AddArea
-
-    AddArea --> AddDirection
-    AddDirection --> AddAngle
-    AddAngle --> AddPanels
-    AddPanels --> ClickRoofSection
-
-    ClickRoofSection --> EditRoofSection
-    EditRoofSection --YES--> ChooseEditSegment
-    EditRoofSection --NO--> SelectSolarPanel
-
-    ChooseEditSegment --Area--> Edit
-    ChooseEditSegment --Direction-->  Edit
-    ChooseEditSegment --Angle-->  Edit
-    ChooseEditSegment --Panels-->  Edit
-
-    Edit --> SaveChanges
-    SaveChanges --> SelectSolarPanel
-    SelectSolarPanel --PREMIUM--> ShowPriceOverview
-    SelectSolarPanel --ECONOMY--> ShowPriceOverview
-    SelectSolarPanel --PERFORMANCE--> ShowPriceOverview
-
-
-    ShowPriceOverview --> SelectSaveButton
-    SelectSaveButton --> WriteName
-    WriteName --> WriteElectricity
-    WriteElectricity --> Save
-    Save --> SavedHomeScreen
-
-    End((End))
-
-    SavedHomeScreen --> End
-
-```
-
-### **Name**: Navigating between solar arrays and deleting them
-**Pre - conditions**: User opens the app to the homescreen with two existing solar arrays <br/>
-**Post - conditions**: User has successfully navigated between the solar arrays and deleted one.<br/>
-
-**Main flow**:<br/>
-1. User clicks on the second solar array 
-2. System retrieves data for the second solar array
-3. System displays the graph, savings and price recoup components for second solar array 
-4. User deletes the first solar array
-5. System navigates user back to the first solar array
-6. System displays the previously retrieved data 
-<br/>
-
-**Alternative flow**:<br/>
-1.1 System has not yet retrieved data for the first solar array<br/>
-1.2 System shows an error and prevents user from navigating to the second solar array.<br/>
-1.3 User waits for data be retrieved<br/>
-1.4 System retrieves data<br/>
-1.5 User clicks on second solar array<br/>
-1.6 System returns to step 2<br/>
-
-```mermaid
-flowchart LR;
-
-    Start((Start))
-    SelectSecond(User clicks on the second solar array)
-    RetrievedData{Has the system retrieved data?}
-    DisplayComponents(System displays graph, savings and price recoup components)
-
-    ShowError(System shows error)
-    Wait(User waits til data is retrieved)
-    ReSelect(User selects second solar array)
-
-    Delete(User deletes second solar array)
-    SelectFirst(System selects first solar array)
-    DisplayPrev(System displays previously retrieved data)
-
-    Start --> SelectSecond
-    SelectSecond --> RetrievedData
-    RetrievedData --YES--> DisplayComponents 
-    RetrievedData --NO--> ShowError
-
-    ShowError --> Wait
-    Wait --> ReSelect
-    ReSelect --> DisplayComponents
-
-    DisplayComponents --> Delete
-    Delete --> SelectFirst
-    SelectFirst --> DisplayPrev
-
-    End((End))
-
-    DisplayPrev --> End 
-```
 
 ## Sekvensdiagram: Se statistikk for lagret anlegg
 Bemerkning: dette er et use case i seg selv, men dette kan også sees på som en del av de andre use casene (opprett, rediger og slett). Det som er forskjellen på de ulike casene er hvilket solcelleanlegg som er i fokus. For å unngå copy-paste, vil de referere til dette diagrammet med kommentar om hvilket solcelleanlegg det hentes data for. Et av punktene i "Forenklinger/kommentarer" under diagrammet gir også en full oversikt over de ulike scenarioene. 
@@ -925,3 +732,198 @@ Hovedflyt:
 <br/>Alternativ flyt: Bruker sletter siste anlegg<br/>
 
 4. Viser meldingen "Ingen solcelleanlegg er opprettet"
+
+
+## Aktivitetsdiagrammer
+### **Name**: Create/edit a solar array
+**Pre - conditions**: User has not created or edited a solar array before 
+**Post - conditions**: User has created the solar array, it is saved in the homescreen and they are able to edit it.
+<br/>
+
+**Main flow**:<br/>
+1. User opens the app
+2. The system shows the homescreen 
+3. User clicks on the pluss button 
+4. The app shows a map and a dropdown menu
+5. The user searches for an address 
+6. The system navigates to that address in the graph
+7. The system displays the available roof sections
+8. The user clicks on their desired number of roof sections
+9. The user drags up the drop - down menu
+10. The user clicks on a roof section 
+11. The user chooses not to edit the roof section 
+12. The user selects a solar panel type 
+13. The system shows a price overview
+14. The user presses the save button
+15. The user provides a name for the solar array
+16. The user provides their electricity usage
+17. The user saves the solar array
+18. The system navigates back to the home screen. <br/>
+<br/>
+
+**Alternative flow**:<br/>
+3.1 The user clicks on the edit button on an existing solar array<br/>
+3.2 The system navigates to the edit screen<br/>
+3.3 The system zooms in on the address in the map <br/>
+
+4.1 The user navigates to their address on the map<br/>
+4.2 The user clicks on a house<br/>
+4.3 The system returns to step 7<br/>
+
+8.1 The user provides the required roof measurements (area, direction, angle and panels)<br/>
+8.2 The user adds the roof section<br/>
+8.3 The system returns to step 9<br/>
+
+10.1 The user chooses what to edit <br/>
+10.2 The user edits the chosen element <br/>
+10.3 The user saves their edited roof section<br/>
+10.4 The system returns to step 12<br/>
+<br/>
+
+```mermaid
+flowchart TD;
+    Start((Start))
+
+    HomeScreen(Shows homescreen)
+    PlusButton(Create new solar array)
+    MapAndDropdown(Shows a map and a drop-down menu)
+    Search{Search address or navigate on map?}
+
+    EditOrCreate{Create a new solar array or edit an existing one?}
+    EditSolarArray(User clicks on edit button)
+    AddressZoom(System zooms in on address in the map)
+
+    ClickAddress(Select a house on the map)
+    ShowRoofSections(Show available roof sections)
+    ChooseRoofSections(Add desired roof sections)
+    AddRoofManually{Add from map or add manually?}
+
+    AddArea(Write area)
+    AddDirection(Write direction)
+    AddAngle(Write angle)
+    AddPanels(Write number of panels)
+
+    ClickRoofSection(Click on chosen roof section)
+    EditRoofSection{Edit roof section?}
+    ChooseEditSegment{Choose editing segment}
+
+    Edit(Edit)
+    SaveChanges(Save)
+
+    SelectSolarPanel{Select a solar panel type}
+    ShowPriceOverview(Show price overview)
+
+    SelectSaveButton(Press save button)
+    WriteName(Write solar array name)
+    WriteElectricity(Write electricity usage)
+    Save(Save)
+
+    SavedHomeScreen(Shows homescreen with saved solar array)
+
+    Start --> HomeScreen
+    HomeScreen --> EditOrCreate
+    EditOrCreate --Create--> PlusButton
+    EditOrCreate --Edit--> EditSolarArray
+
+    PlusButton --> MapAndDropdown
+    MapAndDropdown --> Search 
+
+    EditSolarArray --> AddressZoom 
+    AddressZoom --> ShowRoofSections 
+
+    Search --Navigate on map--> ClickAddress --> ShowRoofSections 
+    Search --Search on searchfield --> ShowRoofSections
+
+    ShowRoofSections --> ChooseRoofSections 
+    ChooseRoofSections --> AddRoofManually
+
+    AddRoofManually --From map--> ClickRoofSection
+    AddRoofManually --Manually-->AddArea
+
+    AddArea --> AddDirection
+    AddDirection --> AddAngle
+    AddAngle --> AddPanels
+    AddPanels --> ClickRoofSection
+
+    ClickRoofSection --> EditRoofSection
+    EditRoofSection --YES--> ChooseEditSegment
+    EditRoofSection --NO--> SelectSolarPanel
+
+    ChooseEditSegment --Area--> Edit
+    ChooseEditSegment --Direction-->  Edit
+    ChooseEditSegment --Angle-->  Edit
+    ChooseEditSegment --Panels-->  Edit
+
+    Edit --> SaveChanges
+    SaveChanges --> SelectSolarPanel
+    SelectSolarPanel --PREMIUM--> ShowPriceOverview
+    SelectSolarPanel --ECONOMY--> ShowPriceOverview
+    SelectSolarPanel --PERFORMANCE--> ShowPriceOverview
+
+
+    ShowPriceOverview --> SelectSaveButton
+    SelectSaveButton --> WriteName
+    WriteName --> WriteElectricity
+    WriteElectricity --> Save
+    Save --> SavedHomeScreen
+
+    End((End))
+
+    SavedHomeScreen --> End
+
+```
+
+### **Name**: Navigating between solar arrays and deleting them
+**Pre - conditions**: User opens the app to the homescreen with two existing solar arrays <br/>
+**Post - conditions**: User has successfully navigated between the solar arrays and deleted one.<br/>
+
+**Main flow**:<br/>
+1. User clicks on the second solar array 
+2. System retrieves data for the second solar array
+3. System displays the graph, savings and price recoup components for second solar array 
+4. User deletes the first solar array
+5. System navigates user back to the first solar array
+6. System displays the previously retrieved data 
+<br/>
+
+**Alternative flow**:<br/>
+1.1 System has not yet retrieved data for the first solar array<br/>
+1.2 System shows an error and prevents user from navigating to the second solar array.<br/>
+1.3 User waits for data be retrieved<br/>
+1.4 System retrieves data<br/>
+1.5 User clicks on second solar array<br/>
+1.6 System returns to step 2<br/>
+
+```mermaid
+flowchart TD;
+
+    Start((Start))
+    SelectSecond(User clicks on the second solar array)
+    RetrievedData{Has the system retrieved data?}
+    DisplayComponents(System displays graph, savings and price recoup components)
+
+    ShowError(System shows error)
+    Wait(User waits til data is retrieved)
+    ReSelect(User selects second solar array)
+
+    Delete(User deletes second solar array)
+    SelectFirst(System selects first solar array)
+    DisplayPrev(System displays previously retrieved data)
+
+    Start --> SelectSecond
+    SelectSecond --> RetrievedData
+    RetrievedData --YES--> DisplayComponents 
+    RetrievedData --NO--> ShowError
+
+    ShowError --> Wait
+    Wait --> ReSelect
+    ReSelect --> DisplayComponents
+
+    DisplayComponents --> Delete
+    Delete --> SelectFirst
+    SelectFirst --> DisplayPrev
+
+    End((End))
+
+    DisplayPrev --> End 
+```
