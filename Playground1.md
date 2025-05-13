@@ -1,7 +1,28 @@
-
 ```mermaid
 classDiagram
-    class SolarArray {
+
+    class Coordinates ::: dataclass {
+        + latitude: Double
+        + longitude: Double
+        + toPoint() Point
+    }
+    note for Coordinates "Also used in Frost Data Layer, ElectricityPriceRepository <br/> and Pos. Relations not included for better readablity"
+
+    class SolarPanelType ::: dataclass {
+        <<Enumeration>>
+        + displayName: String
+        + watt: Int
+        - price: Double
+        - installationPrice: Double
+        + length: Double
+        + width: Double
+        + totalPrice(Int) Double
+        + nameWithWatt() String
+        + area() Double
+    }
+    note for SolarPanelType "Economy<br/>Performance<br/>Premium"
+
+    class SolarArray ::: dataclass {
         + id: Long
         + name: String
         + panelType: SolarPanelType
@@ -11,7 +32,7 @@ classDiagram
         + address: String
     }
 
-    class RoofSection {
+    class RoofSection  ::: dataclass {
         + id: Long?
         + area: Double
         + incline: Double
@@ -26,7 +47,8 @@ classDiagram
         - connectivityManager: ConnectivityManager
         + isNetworkAvailable() Boolean
     }
-        class Elements {
+    
+    class Elements ::: dataclass {
         <<Enumeration>>
         +TEMP
         + CLOUD
@@ -35,7 +57,7 @@ classDiagram
         + SUNHOURS
     }
 
-    class HomeUiState {
+    class HomeUiState ::: dataclass {
         + solarArrays: List~SolarArray~ 
         + selectedSolarArray: SolarArray? 
         + priceData: PriceData 
@@ -44,16 +66,30 @@ classDiagram
         + timeUntilRecoup: Double 
     }
 
-    class LoadingState {
+    class LoadingState ::: dataclass {
         + isLoading: Boolean 
         + statusMessage: String
     }
 
-    class TimeScope {
+    class TimeScope ::: dataclass {
         <<Enumeration>>
         + DAY 
         + MONTH
         + YEAR
+    }
+
+    class PriceData ::: dataclass {
+        + realPrice: Double
+        + solarPrice: Double
+        + saved: Double
+    }
+
+    class WeatherData ::: dataclass {
+        + temp: Map~String, Double~
+        + cloud: Map~String, Double~
+        + snow: Map~String, Double~
+        + irradiance: Map~String, Double~
+        + sunhours: Map~String, Double~ 
     }
 
     class HomeViewModel {
@@ -115,19 +151,43 @@ classDiagram
         + fetchObservationDataFromFrost(Coordinates, Elements) List~ObservationData~
     } 
 
-    class ObservationData {
+    class ObservationData ::: dataclass {
         + sourceId: String
         + referenceTime: String
         + observations: List~Observation~
     }
 
-    class Observation {
+    class Observation ::: dataclass {
         + elementId: String
         + value: Double
         + unit: String
         + qualityCode: Double
     }
-    
+
+    class AvailableObservation ::: dataclass {
+        + sourceId: String
+        + validFrom: String
+        + timeOffset: String
+        + timeResolution: String
+        + timeSeriesId: Int
+        + elementId: String
+        + unit: String
+    }
+
+    class SensorSystem ::: dataclass {
+        + id: String
+        + name: String
+        + shortName: String
+        + geometry: SystemGeometry
+        + distance: Double
+        + validFrom: String
+    }
+
+    class SystemGeometry ::: dataclass {
+        + coordinates: List~Double~
+        + nearest: Boolean
+    }
+
     %% ElectricityPrice
     class ElectricityPriceRepository {
         - datasource: ElectricityPriceDataSource
@@ -144,7 +204,7 @@ classDiagram
         + getElectricityPrices(String, String) List~ElectricityPriceInfo~
     }
 
-    class ElectricityPriceInfo{
+    class ElectricityPriceInfo  ::: dataclass{
         + nokPrKiloWh: Double
         + eurPrKiloWh: Double
         + exchangeRate: Double
@@ -183,7 +243,7 @@ classDiagram
         + delete(SolarArrayWithRoofSections)
         + update(SolarArrayWithRoofSections)
     }    
-    class SolarArrayWithRoofSections {
+    class SolarArrayWithRoofSections ::: dataclass {
         + solarArray: SolarArrayEntity
         + roofSections: List~RoofSectionEntity~
     }
@@ -210,7 +270,7 @@ classDiagram
     }
 
  
-    class SolarArrayEntity {
+    class SolarArrayEntity ::: dataclass {
         + id: Long
         + name: String
         + panelType: String
@@ -219,7 +279,7 @@ classDiagram
         + powerConsumption: Double
         + address: String
     }
-    class RoofSectionEntity {
+    class RoofSectionEntity ::: dataclass {
         + roofSectionId: Long
         + solarArrayId: Long
         + area: Double
@@ -237,7 +297,61 @@ classDiagram
         class SunSaverDao
     }
 
-    %% ViewModel TODO: Data classes here too
+    
+    class MapRoofSection ::: dataclass {
+        + id: String
+        + incline: Double
+        + direction: Double
+        + length: Double
+        + width: Double
+        + geometry: RoofSectionGeometry
+        + latitude: Double
+        + longitude: Double
+    }
+
+    class RoofSectionGeometry ::: dataclass {
+        + coordinates: List~list of list of Double~
+        + contains(Point) Boolean
+        + toPoints() List~Point~
+    }
+
+    class Pos ::: dataclass {
+        + lat: Double
+        + lon: Double
+        + toPoint() Point 
+        + toCoordinates() Coordinates 
+        + fromPoint(Point) Pos 
+    }
+
+    class Address ::: dataclass {
+        + address: String
+        + area: String
+        + areaCode: String
+        + pos: Pos
+        + cadastralNumber: Int
+        + propertyNumber: Int
+        + communityNumber: String
+        + distanceFromPoint: Double
+        + toFormatted() String 
+    }
+
+    class AddressState ::: dataclass {
+        + address: Address
+    }
+    
+    class MapRoofSectionsState ::: dataclass {
+        + roofSections: List~MapRoofSection~
+        + isError: Boolean
+    }
+
+    class SearchAddressState ::: dataclass {
+        + query: String
+    }
+
+    class AddressSuggestionsState ::: dataclass {
+        + suggestions: List~Address~
+    }
+
     class ManageSolarArrayViewModel {
         - repository: BuildingRepository
         - _sunSaverRepository: SunSaverRepository
@@ -283,36 +397,43 @@ classDiagram
     }
     %% relations 
 
+    SolarPanelType -- SolarArray
     RoofSection "1..*" --* "1" SolarArray : roofsections
+    Coordinates -- SolarArray
     SolarArray -- HomeViewModel
-    SolarArray -- ManageSolarArrayViewModel
     SolarArray -- ISunSaverRepository
-
+    SolarArray -- ManageSolarArrayViewModel
 
     TimeScope -- HomeUiState
     HomeUiState -- HomeViewModel
-    TimeScope -- HomeViewModel
     
+    TimeScope -- HomeViewModel
+    PriceData -- HomeViewModel
+    WeatherData -- HomeViewModel
     LoadingState -- HomeViewModel    
     NetworkObserver -- HomeViewModel
-
+    HomeViewModel -- Elements
+    
     %% Frost 
     ObservationData -- Observation
     FrostRepository --> FrostDatasource: fetcher værdata (snø, skydekke, temperatur, flux, soltimer)
     HomeViewModel --> FrostRepository: fetcher gjennomsnittlige verdier av værdata
-    Elements -- HomeViewModel
 
-    Elements -- FrostRepository
-    ObservationData -- FrostRepository
-    ObservationData -- FrostDatasource 
-    Elements -- FrostDatasource
-
+    FrostRepository -- Elements
+    FrostRepository -- ObservationData
+ 
+    FrostDatasource -- Elements
+    FrostDatasource -- AvailableObservation
+    FrostDatasource -- SensorSystem
+    SensorSystem -- SystemGeometry
+    
+    FrostDatasource -- ObservationData
     %% electrisity prices
 
     HomeViewModel --> ElectricityPriceRepository: gjennomsnittlig strømpris gitt tidsintervall
     ElectricityPriceRepository --> ElectricityPriceDataSource: fetcher NOK per kWn per dag
     
-    ElectricityPriceInfo -- ElectricityPriceRepository
+    %% ElectricityPriceInfo -- ElectricityPriceRepository
     ElectricityPriceDataSource -- ElectricityPriceInfo
     
     %% db 
@@ -337,14 +458,45 @@ classDiagram
     
     ManageSolarArrayViewModel -- ISunSaverRepository: lagrer og henter data
     HomeViewModel -- ISunSaverRepository: lagrer og henter data
+    SearchAddressState -- ManageSolarArrayViewModel
+   
+
+    ManageSolarArrayViewModel -- AddressState
+    ManageSolarArrayViewModel -- AddressSuggestionsState
+        
+
+    ManageSolarArrayViewModel -- MapRoofSectionsState
+
     
+    BuildingDataSource -- MapRoofSection 
+    BuildingRepository -- MapRoofSection 
+    ManageSolarArrayViewModel -- MapRoofSection 
+
+    MapRoofSectionsState -- MapRoofSection
+    AddressState -- Address
+    AddressSuggestionsState -- Address
+
     ManageSolarArrayViewModel --> BuildingRepository: fetcher adressedata med bygningsdata
     BuildingRepository --> BuildingDataSource: fetcher data om takflater, koordinater og adresser
- 
+
+    MapRoofSection -- RoofSectionGeometry
+    Address -- Pos
+    ManageSolarArrayViewModel -- Pos
+    BuildingRepository -- Pos
+        
+    BuildingDataSource -- Pos
+
+    ManageSolarArrayViewModel -- Address
+    BuildingRepository -- Address    
+    BuildingDataSource -- Address
+
+
+
+    classDef dataclass fill:#520c0c,color:white
 ```
 
 - We chose not to include the smaller classes that are only used internally in the functions, like classes that are only for serialization of api responces (e.g. classes used in Frost-part to get sensor data)
-
+- We chose not to draw relation between Coordinates and FrostRepository, FrostDatasource and ElectrisityRepository and Pos. The decision was made because it is a trade off between readability and correctness. In this particular case, the diagram will because too messy if we include those relations.
 
 Coordinates: 
 - Frost repository 
