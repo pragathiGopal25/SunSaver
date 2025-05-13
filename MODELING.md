@@ -21,14 +21,14 @@ Klassediagrammet fokuserer på arkitekturen i appen vår (ViewModel - Repository
 ```mermaid
 classDiagram
 
-    class Coordinates ::: dataclass {
+    class Coordinates {
         + latitude: Double
         + longitude: Double
         + toPoint() Point
     }
     note for Coordinates "Also used in Frost Data Layer, ElectricityPriceRepository <br/> and Pos. Relations not included for better readablity"
 
-    class SolarPanelType ::: dataclass {
+    class SolarPanelType {
         <<Enumeration>>
         + displayName: String
         + watt: Int
@@ -42,7 +42,7 @@ classDiagram
     }
     note for SolarPanelType "Economy<br/>Performance<br/>Premium"
 
-    class SolarArray ::: dataclass {
+    class SolarArray {
         + id: Long
         + name: String
         + panelType: SolarPanelType
@@ -52,7 +52,7 @@ classDiagram
         + address: String
     }
 
-    class RoofSection  ::: dataclass {
+    class RoofSection {
         + id: Long?
         + area: Double
         + incline: Double
@@ -68,7 +68,7 @@ classDiagram
         + isNetworkAvailable() Boolean
     }
     
-    class Elements ::: dataclass {
+    class Elements {
         <<Enumeration>>
         +TEMP
         + CLOUD
@@ -77,7 +77,7 @@ classDiagram
         + SUNHOURS
     }
 
-    class HomeUiState ::: dataclass {
+    class HomeUiState {
         + solarArrays: List~SolarArray~ 
         + selectedSolarArray: SolarArray? 
         + priceData: PriceData 
@@ -86,25 +86,25 @@ classDiagram
         + timeUntilRecoup: Double 
     }
 
-    class LoadingState ::: dataclass {
+    class LoadingState {
         + isLoading: Boolean 
         + statusMessage: String
     }
 
-    class TimeScope ::: dataclass {
+    class TimeScope {
         <<Enumeration>>
         + DAY 
         + MONTH
         + YEAR
     }
 
-    class PriceData ::: dataclass {
+    class PriceData {
         + realPrice: Double
         + solarPrice: Double
         + saved: Double
     }
 
-    class WeatherData ::: dataclass {
+    class WeatherData {
         + temp: Map~String, Double~
         + cloud: Map~String, Double~
         + snow: Map~String, Double~
@@ -171,20 +171,20 @@ classDiagram
         + fetchObservationDataFromFrost(Coordinates, Elements) List~ObservationData~
     } 
 
-    class ObservationData ::: dataclass {
+    class ObservationData {
         + sourceId: String
         + referenceTime: String
         + observations: List~Observation~
     }
 
-    class Observation ::: dataclass {
+    class Observation {
         + elementId: String
         + value: Double
         + unit: String
         + qualityCode: Double
     }
 
-    class AvailableObservation ::: dataclass {
+    class AvailableObservation {
         + sourceId: String
         + validFrom: String
         + timeOffset: String
@@ -194,7 +194,7 @@ classDiagram
         + unit: String
     }
 
-    class SensorSystem ::: dataclass {
+    class SensorSystem {
         + id: String
         + name: String
         + shortName: String
@@ -203,7 +203,7 @@ classDiagram
         + validFrom: String
     }
 
-    class SystemGeometry ::: dataclass {
+    class SystemGeometry {
         + coordinates: List~Double~
         + nearest: Boolean
     }
@@ -224,7 +224,7 @@ classDiagram
         + getElectricityPrices(String, String) List~ElectricityPriceInfo~
     }
 
-    class ElectricityPriceInfo  ::: dataclass{
+    class ElectricityPriceInfo {
         + nokPrKiloWh: Double
         + eurPrKiloWh: Double
         + exchangeRate: Double
@@ -263,7 +263,7 @@ classDiagram
         + delete(SolarArrayWithRoofSections)
         + update(SolarArrayWithRoofSections)
     }    
-    class SolarArrayWithRoofSections ::: dataclass {
+    class SolarArrayWithRoofSections {
         + solarArray: SolarArrayEntity
         + roofSections: List~RoofSectionEntity~
     }
@@ -290,7 +290,7 @@ classDiagram
     }
 
  
-    class SolarArrayEntity ::: dataclass {
+    class SolarArrayEntity {
         + id: Long
         + name: String
         + panelType: String
@@ -299,7 +299,7 @@ classDiagram
         + powerConsumption: Double
         + address: String
     }
-    class RoofSectionEntity ::: dataclass {
+    class RoofSectionEntity {
         + roofSectionId: Long
         + solarArrayId: Long
         + area: Double
@@ -318,7 +318,7 @@ classDiagram
     }
 
     
-    class MapRoofSection ::: dataclass {
+    class MapRoofSection {
         + id: String
         + incline: Double
         + direction: Double
@@ -329,13 +329,13 @@ classDiagram
         + longitude: Double
     }
 
-    class RoofSectionGeometry ::: dataclass {
+    class RoofSectionGeometry {
         + coordinates: List~list of list of Double~
         + contains(Point) Boolean
         + toPoints() List~Point~
     }
 
-    class Pos ::: dataclass {
+    class Pos {
         + lat: Double
         + lon: Double
         + toPoint() Point 
@@ -343,7 +343,7 @@ classDiagram
         + fromPoint(Point) Pos 
     }
 
-    class Address ::: dataclass {
+    class Address {
         + address: String
         + area: String
         + areaCode: String
@@ -355,20 +355,20 @@ classDiagram
         + toFormatted() String 
     }
 
-    class AddressState ::: dataclass {
+    class AddressState {
         + address: Address
     }
     
-    class MapRoofSectionsState ::: dataclass {
+    class MapRoofSectionsState {
         + roofSections: List~MapRoofSection~
         + isError: Boolean
     }
 
-    class SearchAddressState ::: dataclass {
+    class SearchAddressState {
         + query: String
     }
 
-    class AddressSuggestionsState ::: dataclass {
+    class AddressSuggestionsState {
         + suggestions: List~Address~
     }
 
@@ -505,8 +505,6 @@ classDiagram
     ManageSolarArrayViewModel -- Address
     BuildingRepository -- Address
     BuildingDataSource -- Address: serialization
-
-    classDef dataclass fill:#520c0c,color:white
 ```
 
 ### Kommentarer: 
