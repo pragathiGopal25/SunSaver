@@ -20,7 +20,29 @@ Klassediagrammet fokuserer på arkitekturen i appen vår (ViewModel - Repository
 
 ```mermaid
 classDiagram
-    class SolarArray {
+
+    class Coordinates ::: dataclass {
+        + latitude: Double
+        + longitude: Double
+        + toPoint() Point
+    }
+    note for Coordinates "Also used in Frost Data Layer, ElectricityPriceRepository <br/> and Pos. Relations not included for better readablity"
+
+    class SolarPanelType ::: dataclass {
+        <<Enumeration>>
+        + displayName: String
+        + watt: Int
+        - price: Double
+        - installationPrice: Double
+        + length: Double
+        + width: Double
+        + totalPrice(Int) Double
+        + nameWithWatt() String
+        + area() Double
+    }
+    note for SolarPanelType "Economy<br/>Performance<br/>Premium"
+
+    class SolarArray ::: dataclass {
         + id: Long
         + name: String
         + panelType: SolarPanelType
@@ -30,7 +52,7 @@ classDiagram
         + address: String
     }
 
-    class RoofSection {
+    class RoofSection  ::: dataclass {
         + id: Long?
         + area: Double
         + incline: Double
@@ -45,7 +67,8 @@ classDiagram
         - connectivityManager: ConnectivityManager
         + isNetworkAvailable() Boolean
     }
-        class Elements {
+    
+    class Elements ::: dataclass {
         <<Enumeration>>
         +TEMP
         + CLOUD
@@ -54,7 +77,7 @@ classDiagram
         + SUNHOURS
     }
 
-    class HomeUiState {
+    class HomeUiState ::: dataclass {
         + solarArrays: List~SolarArray~ 
         + selectedSolarArray: SolarArray? 
         + priceData: PriceData 
@@ -63,16 +86,30 @@ classDiagram
         + timeUntilRecoup: Double 
     }
 
-    class LoadingState {
+    class LoadingState ::: dataclass {
         + isLoading: Boolean 
         + statusMessage: String
     }
 
-    class TimeScope {
+    class TimeScope ::: dataclass {
         <<Enumeration>>
-            + DAY 
-            + MONTH
-            + YEAR
+        + DAY 
+        + MONTH
+        + YEAR
+    }
+
+    class PriceData ::: dataclass {
+        + realPrice: Double
+        + solarPrice: Double
+        + saved: Double
+    }
+
+    class WeatherData ::: dataclass {
+        + temp: Map~String, Double~
+        + cloud: Map~String, Double~
+        + snow: Map~String, Double~
+        + irradiance: Map~String, Double~
+        + sunhours: Map~String, Double~ 
     }
 
     class HomeViewModel {
@@ -134,19 +171,43 @@ classDiagram
         + fetchObservationDataFromFrost(Coordinates, Elements) List~ObservationData~
     } 
 
-    class ObservationData {
+    class ObservationData ::: dataclass {
         + sourceId: String
         + referenceTime: String
         + observations: List~Observation~
     }
 
-    class Observation {
+    class Observation ::: dataclass {
         + elementId: String
         + value: Double
         + unit: String
         + qualityCode: Double
     }
-    
+
+    class AvailableObservation ::: dataclass {
+        + sourceId: String
+        + validFrom: String
+        + timeOffset: String
+        + timeResolution: String
+        + timeSeriesId: Int
+        + elementId: String
+        + unit: String
+    }
+
+    class SensorSystem ::: dataclass {
+        + id: String
+        + name: String
+        + shortName: String
+        + geometry: SystemGeometry
+        + distance: Double
+        + validFrom: String
+    }
+
+    class SystemGeometry ::: dataclass {
+        + coordinates: List~Double~
+        + nearest: Boolean
+    }
+
     %% ElectricityPrice
     class ElectricityPriceRepository {
         - datasource: ElectricityPriceDataSource
@@ -157,10 +218,20 @@ classDiagram
         + getPriceAreal(Coordinates) String
 
     }
+    
     class ElectricityPriceDataSource {
         - client: HttpClient
-        + getElectricityPrices(String, String): List~ElectricityPriceInfo~
+        + getElectricityPrices(String, String) List~ElectricityPriceInfo~
     }
+
+    class ElectricityPriceInfo  ::: dataclass{
+        + nokPrKiloWh: Double
+        + eurPrKiloWh: Double
+        + exchangeRate: Double
+        + timeStart: String
+        + timeEnd: String
+    }
+    
 
     %% SunSaver
     class ISunSaverRepository {
@@ -192,7 +263,7 @@ classDiagram
         + delete(SolarArrayWithRoofSections)
         + update(SolarArrayWithRoofSections)
     }    
-    class SolarArrayWithRoofSections {
+    class SolarArrayWithRoofSections ::: dataclass {
         + solarArray: SolarArrayEntity
         + roofSections: List~RoofSectionEntity~
     }
@@ -219,7 +290,7 @@ classDiagram
     }
 
  
-    class SolarArrayEntity {
+    class SolarArrayEntity ::: dataclass {
         + id: Long
         + name: String
         + panelType: String
@@ -228,7 +299,7 @@ classDiagram
         + powerConsumption: Double
         + address: String
     }
-    class RoofSectionEntity {
+    class RoofSectionEntity ::: dataclass {
         + roofSectionId: Long
         + solarArrayId: Long
         + area: Double
@@ -246,7 +317,61 @@ classDiagram
         class SunSaverDao
     }
 
-    %% ViewModel TODO: Data classes here too
+    
+    class MapRoofSection ::: dataclass {
+        + id: String
+        + incline: Double
+        + direction: Double
+        + length: Double
+        + width: Double
+        + geometry: RoofSectionGeometry
+        + latitude: Double
+        + longitude: Double
+    }
+
+    class RoofSectionGeometry ::: dataclass {
+        + coordinates: List~list of list of Double~
+        + contains(Point) Boolean
+        + toPoints() List~Point~
+    }
+
+    class Pos ::: dataclass {
+        + lat: Double
+        + lon: Double
+        + toPoint() Point 
+        + toCoordinates() Coordinates 
+        + fromPoint(Point) Pos 
+    }
+
+    class Address ::: dataclass {
+        + address: String
+        + area: String
+        + areaCode: String
+        + pos: Pos
+        + cadastralNumber: Int
+        + propertyNumber: Int
+        + communityNumber: String
+        + distanceFromPoint: Double
+        + toFormatted() String 
+    }
+
+    class AddressState ::: dataclass {
+        + address: Address
+    }
+    
+    class MapRoofSectionsState ::: dataclass {
+        + roofSections: List~MapRoofSection~
+        + isError: Boolean
+    }
+
+    class SearchAddressState ::: dataclass {
+        + query: String
+    }
+
+    class AddressSuggestionsState ::: dataclass {
+        + suggestions: List~Address~
+    }
+
     class ManageSolarArrayViewModel {
         - repository: BuildingRepository
         - _sunSaverRepository: SunSaverRepository
@@ -292,34 +417,49 @@ classDiagram
     }
     %% relations 
 
-    RoofSection "1..*" --* "1" SolarArray : roofsections
+    %% data classes
+    SolarPanelType "1" -- SolarArray
+    RoofSection "1..*" --* "1" SolarArray
+    Coordinates "1" -- SolarArray
     SolarArray -- HomeViewModel
-    SolarArray -- ManageSolarArrayViewModel
     SolarArray -- ISunSaverRepository
+    SolarArray -- ManageSolarArrayViewModel
 
-    NetworkObserver -- HomeViewModel
     TimeScope -- HomeUiState
-    HomeUiState -- HomeViewModel
-    TimeScope -- HomeViewModel
-    LoadingState -- HomeViewModel
-    Elements -- HomeViewModel
-
-    %% Frost 
-    ObservationData -- Observation
-    FrostRepository --> FrostDatasource: fetcher værdata (snø, skydekke, temperatur, flux, soltimer)
-    HomeViewModel --> FrostRepository: fetcher gjennomsnittlige verdier av værdata
-    Elements -- FrostRepository
-    ObservationData -- FrostRepository
-    ObservationData -- FrostDatasource 
-    Elements -- FrostDatasource
-
-    HomeViewModel --> ElectricityPriceRepository: gjennomsnittlig strømpris gitt tidsintervall
-    ElectricityPriceRepository --> ElectricityPriceDataSource: fetcher NOK per kWn per dag
-
-    %% db 
+    HomeUiState -- HomeViewModel: ui
     
+    TimeScope -- HomeViewModel: ui
+    PriceData -- HomeViewModel: ui
+    WeatherData -- HomeViewModel: ui
+    LoadingState -- HomeViewModel: ui 
+    NetworkObserver -- HomeViewModel
+    HomeViewModel -- Elements
+    
+    %% Frost 
+    ObservationData "1" *-- "1..*" Observation
+    FrostRepository --> "1" FrostDatasource: fetch weather data (show, sky coverage, <br/>temperature, flux, sun hours)
+    HomeViewModel --> "1" FrostRepository: get avg weather values
+
+    FrostRepository -- Elements
+    FrostRepository -- ObservationData: serialized data
+ 
+    FrostDatasource -- Elements
+    FrostDatasource -- AvailableObservation: serialization
+    FrostDatasource -- SensorSystem: serialization
+    SensorSystem *-- "1" SystemGeometry
+    
+    FrostDatasource -- ObservationData: serialization
+
+    %% electricity prices
+    HomeViewModel --> ElectricityPriceRepository: get avg. electricity prise 
+    ElectricityPriceRepository --> ElectricityPriceDataSource: fetch NOK per kWn per day
+    
+    %% ElectricityPriceInfo -- ElectricityPriceRepository
+    ElectricityPriceDataSource -- ElectricityPriceInfo: serialization
+    
+    %% db 
     ISunSaverRepository <|.. SunSaverRepository
-    SunSaverRepository -- ISunSaverDatasource: lagrer og henter data
+    SunSaverRepository -- ISunSaverDatasource: save or get data
     
     ISunSaverDatasource <|.. SunSaverDatasource
     ISunSaverDatasource -- SolarArrayWithRoofSections
@@ -329,27 +469,53 @@ classDiagram
     SolarArrayWithRoofSections -- SunSaverDao
     SunSaverDao -- SolarArrayEntity
     
-    SunSaverDatabase -- RoofSectionEntity: tabell     
-    SunSaverDatabase -- SolarArrayEntity: tabell
+    SunSaverDatabase -- RoofSectionEntity: table
+    SunSaverDatabase -- SolarArrayEntity: table
 
-    
     SolarArrayEntity "1" *-- "1..*" RoofSectionEntity
     SolarArrayWithRoofSections "1" -- "1" SolarArrayEntity
     
-    
-    ManageSolarArrayViewModel -- ISunSaverRepository: lagrer og henter data
-    HomeViewModel -- ISunSaverRepository: lagrer og henter data
+    ManageSolarArrayViewModel -- ISunSaverRepository: save or get data
+    HomeViewModel -- ISunSaverRepository: save or get data
 
-    BuildingRepository --> BuildingDataSource: fetcher data om takflater, koordinater og adresser
-    ManageSolarArrayViewModel --> BuildingRepository: fetcher adressedata med bygningsdata
+    %% manage solar array
+    SearchAddressState -- ManageSolarArrayViewModel: ui
+   
+    ManageSolarArrayViewModel -- AddressState: ui
+    ManageSolarArrayViewModel -- AddressSuggestionsState: ui
+    ManageSolarArrayViewModel -- MapRoofSectionsState: ui
+    
+    BuildingDataSource -- MapRoofSection: serialization
+    BuildingRepository -- MapRoofSection 
+    ManageSolarArrayViewModel -- MapRoofSection 
+
+    MapRoofSectionsState -- "*" MapRoofSection
+    AddressState -- "1" Address
+    AddressSuggestionsState -- "*" Address
+
+    ManageSolarArrayViewModel --> BuildingRepository: fetch address and building data
+    BuildingRepository --> BuildingDataSource: fetch data about roof sections, <br/>coords and address
+
+    MapRoofSection *-- "1" RoofSectionGeometry
+    Address -- "1" Pos
+    ManageSolarArrayViewModel -- Pos
+    BuildingRepository -- Pos
+    BuildingDataSource -- Pos: serialization
+
+    ManageSolarArrayViewModel -- Address
+    BuildingRepository -- Address
+    BuildingDataSource -- Address: serialization
+
+    classDef dataclass fill:#520c0c,color:white
 ```
 
 ### Kommentarer: 
+- The class diagram does not include data classes that are only used store the responce from API 
+- We chose not to show the relationships between Coordinates and the classes FrostRepository, FrostDatasource, ElectricityRepository, and Pos. We made this decision as a trade-off between completeness and readability. Including all of these connections would have made the diagram overly cluttered, which would reduce its clarity. 
+- SolarArrayType: : In Kotlin, enum classes can contain fields and functions, which is not typically supported by standard UML enum representations. Therefore, we chose to model it as a class with fields and methods, and included the enum values as a note.
+- Data classes are red. You cannot see it in Guthub due to Guthub's limitation, but you can see this in Preview in VSCode 
 - Siden Mermaid og markdown ikke støttet to <> inni hverandre, har jeg brukt "of" i disse tilfellene. For eksempel Flow&lt;list of SolarArray&gt;. 
-- HomeViewModel ble veldig stor. Det er fordi den håndterer mye data, og har StateFlows (som i god praksis krever en privat mutable versjon og offentlig immutable)
-- Om databasen: Vi lager en abstrakt klasse SunSaverDatabase som arver fra RoomDatabase, og Room-biblioteket fikser implementasjonen for oss. Vi inkluderte RoomDatabase for å vise arv, men den er tom siden den kommer fra Room-biblioteket. 
 - SolarArray og SunSaverRepository: Siden det allerede er en assosiasjon mellom SolarArray og ISunSaverRepository, og SunSaverRepository implementerer dette interfacet, lager vi ikke en egen assosiasjon mellom SolarArray og SunSaverRepository, da dette er underforstått gjennom arv. Det samme gjelder for SolarArrayWithRoofSections og SunSaverDatasource.
-- TODO: Må finne ut hvilke klasser skal inkluderes. 
 
 
 ## Sekvensdiagram: Se statistikk for lagret anlegg
