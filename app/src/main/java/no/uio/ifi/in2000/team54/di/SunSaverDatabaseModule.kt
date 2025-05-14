@@ -25,8 +25,7 @@ object SunSaverDatabaseModule {
             context,
             SunSaverDatabase::class.java,
             "SunSaverDatabase")
-            .fallbackToDestructiveMigration(true). // todo: delete before submitting
-            build()
+            .build()
     }
 
     @Provides

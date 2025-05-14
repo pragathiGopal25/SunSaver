@@ -92,7 +92,7 @@ class HomeViewModelUnitTest {
             "12" to 1.0
         )
 
-         val monthlySunhours = mapOf( // todo: Get from datasource!!
+         val monthlySunhours = mapOf(
             "01" to 74.0,
             "02" to 90.0,
             "03" to 150.0,

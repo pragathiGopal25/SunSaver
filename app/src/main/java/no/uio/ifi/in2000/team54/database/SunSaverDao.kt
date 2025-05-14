@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 interface SunSaverDao {
 
     // returns created id
-    @Insert(onConflict = OnConflictStrategy.IGNORE) // todo: check if should be changed
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertSolarArray(solarArray: SolarArrayEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
