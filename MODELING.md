@@ -909,19 +909,18 @@ sequenceDiagram
 3. User clicks on the pluss button 
 4. The app shows a map and a dropdown menu
 5. The user searches for an address 
-6. The system navigates to that address in the graph
+6. The system navigates to that address in the map
 7. The system displays the available roof sections
 8. The user clicks on their desired number of roof sections
 9. The user drags up the drop - down menu
-10. The user clicks on a roof section 
-11. The user chooses not to edit the roof section 
-12. The user selects a solar panel type 
-13. The system shows a price overview
-14. The user presses the save button
-15. The user provides a name for the solar array
-16. The user provides their electricity usage
-17. The user saves the solar array
-18. The system navigates back to the home screen. <br/>
+10. The user chooses not to edit the roof section 
+11. The user selects a solar panel type 
+12. The system shows a price overview
+13. The user presses the save button
+14. The user provides a name for the solar array
+15. The user provides their electricity usage
+16. The user saves the solar array
+17. The system navigates back to the home screen. <br/>
 <br/>
 
 **Alternative flow**:<br/>
@@ -937,10 +936,11 @@ sequenceDiagram
 8.2 The user adds the roof section<br/>
 8.3 The system returns to step 9<br/>
 
-10.1 The user chooses what to edit <br/>
-10.2 The user edits the chosen element <br/>
-10.3 The user saves their edited roof section<br/>
-10.4 The system returns to step 12<br/>
+10.1 The user clicks on a roof section 
+10.2 The user chooses what to edit <br/>
+10.3 The user edits the chosen element <br/>
+10.4 The user saves their edited roof section<br/>
+10.5 The system returns to step 12<br/>
 <br/>
 
 ```mermaid
@@ -964,15 +964,17 @@ flowchart TD;
     AddRoofManually{Add from map or 
     add manually?}
 
-    AddArea(Write area)
-    AddDirection(Write direction)
-    AddAngle(Write angle)
-    AddPanels(Write number of panels)
+    AddDimensions(Write area, direction, angle
+    and number of panels)
+
+    AnyEmptyFields{Any empty fields?}
 
     AddRoofSection(Press the add button)
 
     ClickRoofSection(Click on chosen roof section)
     EditRoofSection{Edit roof section?}
+    DragUpMenu(User drags up drop -
+    down menu)
     ChooseEditSegment{Choose editing segment}
 
     Edit(Edit)
@@ -1011,15 +1013,15 @@ flowchart TD;
     ChooseRoofSections --> AddRoofManually
 
     AddRoofManually --From map--> Done
-    AddRoofManually --Manually-->AddArea
+    AddRoofManually --Manually-->AddDimensions
 
-    AddArea --> AddDirection
-    AddDirection --> AddAngle
-    AddAngle --> AddPanels
-    AddPanels --> AddRoofSection
+    AddDimensions --> AnyEmptyFields
+    AnyEmptyFields --YES--> AddDimensions
+    AnyEmptyFields --NO--> AddRoofSection
     AddRoofSection --> Done
 
-    Done --YES--> EditRoofSection
+    Done --YES--> DragUpMenu
+    DragUpMenu --> EditRoofSection
     Done --NO--> AddRoofManually
     
     EditRoofSection --YES--> ClickRoofSection
@@ -1063,7 +1065,7 @@ flowchart TD;
 1. User clicks on the second solar array 
 2. System retrieves data for the second solar array
 3. System displays the graph, savings and price recoup components for second solar array 
-4. User deletes the first solar array
+4. User deletes the second solar array
 5. System navigates user back to the first solar array
 6. System displays the previously retrieved data 
 <br/>
