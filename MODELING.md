@@ -11,7 +11,7 @@ The purpose of the app is for the user to be able to add one or more solar array
 ![Use case diagram](image.png)<br/>
 
 Statistics refer to three things: an estimate of how much you save by installing the chosen solar array, the time it takes to earn back what you have invested in the system, and a graph that shows an overview of electricity production in the area of the solar array based on weather conditions. <br/>
-Editing, deleting and selecting a new solar array are marked with <<extend>> because they require at least one stored solar array.<br/>
+Editing, deleting and selecting a new solar array are marked with <\<extend\>> because they require at least one stored solar array.<br/>
 <br/>
 The diagram was made with the help of [app.diagrams.net](https://app.diagrams.net/) because Mermaid does not provide functionality to model Use case diagrams. <br/>
 
@@ -510,8 +510,7 @@ classDiagram
 ### Comments:
 - The class diagram does not include the data classes that are only used to store the API reponses
 - We chose not to show the relationships between Coordinates, FrostRepository, FrostDatasource, ElectricityRepository, and Pos. We made this decision as a trade-off between completeness and readability. Including all of these connections would have made the diagram appear cluttered, which would reduce its clarity.
-- SolarArrayType: : In Kotlin, enum classes can contain fields and functions, which is not typically supported by standard UML enum representations. Therefore, we chose to model it as a class with fields and methods, and included the enum values ​​as a note.
-- Data classes are red. You cannot see this Github due to Github's limitation but it can be viewed using VSCode's preview button.
+- SolarArrayType: In Kotlin, enum classes can contain fields and functions, which is not typically supported by standard UML enum representations. Therefore, we chose to model it as a class with fields and methods, and included the enum values ​​as a note.
 - Since Mermaid and markdown did not support two <> inside each other, we have used "of" in these cases. For example Flow&lt;list of SolarArray&gt;.
 - SolarArray and SunSaverRepository: Since there is already an association between SolarArray and ISunSaverRepository, and SunSaverRepository implements this interface, we do not create a separate association between SolarArray and SunSaverRepository, as this is implied by inheritance. The same applies to SolarArrayWithRoofSections and SunSaverDatasource.
 
@@ -760,11 +759,11 @@ sequenceDiagram
 4. The app makes an API call to GeoNorge to retrieve address suggestions.
 5. User selects something from the suggestions.
 6. The app zooms in on the address.
-7. The app makes an API call to the Norwegian Mapping Authority to get the cadastreId.
+7. The app makes an API call to the Kartverket to get the cadastreId.
 8. The app makes an API call to Fjordkraft to retrieve roof sections.
 9. The app marks roof sections on the screen.
 10. User selects a roof section.
-11. The app saves the roof area as a map. It calculates the installation price and shows it to the user.
+11. The app saves the roof area as a card. It calculates the installation price and shows it to the user.
 12. User presses save.
 13. The app asks to enter the name of the solar array and their power consumption.
 14. User enters the name
@@ -900,7 +899,7 @@ sequenceDiagram
 
 ## Activity Diagrams
 ### **Name**: Create/edit a solar array
-**Precondition**: User has not added or edited a solar array before 
+**Precondition**: User has not added or edited a solar array before <br/>
 **Postcondition**: User has added the solar array, it is saved in the home screen and they are able to edit it.
 <br/>
 
