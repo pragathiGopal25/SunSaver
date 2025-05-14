@@ -7,7 +7,7 @@
 - Radwa Ayanle Godor
 
 ## Requirements and notices before running the application: 
-- The application runs on the Android studio version Ladybug
+- The application runs on the Android studio version Ladybug/Meerkat
 - In order to use the application you need access to the internet.
 - Please note that you cannot type norwegian characters Æ, Ø and Å on your computers keyboard when using the app. However, it is possible to write these characters using the keyboard in the emulator.
 
@@ -35,7 +35,8 @@ In order to run the application, do the following steps:
     - We used Ktor for making HTTP connections/requests for API calls to Frost, Fjordkraft, Kartverket, Geonorge and HvaKosterStrommen.
 - [Jetpack Compose](https://developer.android.com/develop/ui/compose/documentation)
     - We used Jetpack Compose to design and build the UI components in our app.
-
+## Calculations 
+- Explain how the calculations are made
 
 ## Warnings in Logcat:
 - Please note that when you run our app, you will see several logcat warnings from MapBox, but dont worry these are to be expected. The app functions correctly, however the warnings occur due to the fact that Mapbox is not able to manage the activity lifecyle regarding annotations and drawings on the map well. Therefore, it displays warnings indicating that it was not possible to delete certain annotations despite everything functioning well. This is something that might be fixed in the future, however at the time of this submission these warnings will still appear.
