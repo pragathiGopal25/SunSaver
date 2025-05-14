@@ -3,7 +3,7 @@
 - Use case diagram: Provides a general overview of the most important functions our app provides to the user.
 - Class diagram: Shows the app's structure, classes and how they are related to each other.
 - Sequence diagrams: for each use case, shows how the different components (from the class diagram) communicate with each other to implement that use case. It focuses primarily on the app's components, leaving user interaction to the activity diagram.
-- Activity diagram: The goal of the activity diagram is to show how users can interact with the app, and what they see as a result of the interaction. We have chosen to have two activity diagrams, one for the home screen, and the other for the create solar array screen. They are attached at the end, since they are made so large in mermaid.
+- Activity diagrams: The goal of the activity diagram is to showcase how users can interact with the app, and what they see as a result of that interaction. We have chosen to have two activity diagrams, one for the home screen, and the other for the ManageSolarArray screen. These are attached at the end of the file.
 
 ## Use case diagram 
 The purpose of the app is for the user to be able to add one or more solar array, and manage them (i.e. delete and edit). The app also has an info screen, but it is not part of the main functionality of the app, and thus it is not included in the use case diagram. <br/>
@@ -16,7 +16,7 @@ Editing, deleting and selecting a new solar array are marked with <<extend>> bec
 The diagram was made with the help of [app.diagrams.net](https://app.diagrams.net/) because Mermaid does not provide functionality to model Use case diagrams. <br/>
 
 ## Class Diagram
-The class diagram focuses on the architecture in our app (Viewmodel - Repositoty - Datasource) and some of the most important data classes. We do not include composables since they are strictly functions.
+The class diagram focuses on our apps architecture  (Viewmodel - Repositoty - Datasource) and some of the most important data classes. We do not include composables since they are strictly functions.
 
 ```mermaid
 classDiagram
@@ -508,16 +508,16 @@ classDiagram
 ```
 
 ### Comments:
-- The class diagram does not include data classes that are only used to store the response from API
-- We chose not to show the relationships between Coordinates and the following classes: FrostRepository, FrostDatasource, ElectricityRepository, and Pos. We made this decision as a trade-off between completeness and readability. Including all of these connections would have made the diagram overly cluttered, which would reduce its clarity.
+- The class diagram does not include the data classes that are only used to store the API reponses
+- We chose not to show the relationships between Coordinates, FrostRepository, FrostDatasource, ElectricityRepository, and Pos. We made this decision as a trade-off between completeness and readability. Including all of these connections would have made the diagram appear cluttered, which would reduce its clarity.
 - SolarArrayType: : In Kotlin, enum classes can contain fields and functions, which is not typically supported by standard UML enum representations. Therefore, we chose to model it as a class with fields and methods, and included the enum values ​​as a note.
-- Data classes are red. You cannot see it in Guthub due to Guthub's limitation, but you can see this in Preview in VSCode
+- Data classes are red. You cannot see this Github due to Github's limitation but it can be viewed using VSCode's preview button.
 - Since Mermaid and markdown did not support two <> inside each other, we have used "of" in these cases. For example Flow&lt;list of SolarArray&gt;.
 - SolarArray and SunSaverRepository: Since there is already an association between SolarArray and ISunSaverRepository, and SunSaverRepository implements this interface, we do not create a separate association between SolarArray and SunSaverRepository, as this is implied by inheritance. The same applies to SolarArrayWithRoofSections and SunSaverDatasource.
 
 
 ## Sequence Diagram: View the statistics for a saved solar array.
-Note: this is a use case in itself, but it can also be seen as part of the other use cases (create, edit and delete). The difference between the use cases is the solar array that is in focus. To avoid repetition, they (the sequence diagrams for the other use cases) will refer to this diagram with a comment about which solar array the data is being retrieved for. One of the points in "Simplifications/Comments", situated below the diagram also gives a full overview of the different scenarios.
+Note: This is a use case in itself, but it can also be seen as part of the other use cases (create, edit and delete). The difference between the use cases is the solar array that is in focus. To avoid repetition, they (the sequence diagrams for the other use cases) will refer to this diagram with a comment about which solar array the data is being retrieved for. The section, "Simplifications/Comments" situated below the diagram also provides an overview of the different scenarios.
 
 ```mermaid
 sequenceDiagram
@@ -600,6 +600,7 @@ sequenceDiagram
 **Actor**: User<br/>
 **Precondition**: User has at least one saved solar array. User enters the app. <br/>
 **Postcondition**: User has seen statistics for their solar array. <br/>
+**Main Flow**:
 1. The app retrieves saved solar arrays from the database and displays them on the HomeScreen.
 2. The app focuses on one of the solar arrays.
 3. The app shows the user that data is being loaded.
@@ -611,9 +612,9 @@ sequenceDiagram
 
 ### Simplifications/Comments
 - Which solar array is set in focus depends on the use case. If the app has just been opened (and the user has some solar arrays saved) then the first solar array will be set in focus. If we were just navigated to the home screen after adding a new solar array, then the new solar array will be set in focus. If we were navigated to the home screen after updating a solar array, then the updated solar array will be in focus. If a solar array is deleted, we direct focus to the first solar array (if it exists)
-- Used "coord" for "coordinates" to save some space
-- The reason we have many api calls per time unit to HvaKosterStrømmen is that the api only has one json file for each day that exists, so you have to make an api call per day to retrieve multiple days. So the loop iterates through each day we need to retrieve electricity data for, and retrieves electricity prices with an api call for each day. This will be a lot of calls, so some days will be skipped. When the data/prices are retrieved, it is added to a list, so that after the loop is finished, we can be left with an average value of the electricity price for the days we have retrieved for.
-- Since Frost did not always have the data that we needed (see report 3.2 API), we had to find a solution for this. The solution we came up with was that for each element (weather category), we first find the 5 closest sensors, and then we check which of those sensors have data in the time period we want. If there is more than one (1) sensor, we use the closest sensor to retrieve data in that weather category.
+- We have used "coord" as a simplification for "coordinates" to save some space
+- The reason we have many API calls per time unit to HvaKosterStrømmen is that the API only has one json file for each day that exists, so you have to make multiple API calls to retrieve data for multiple days. The loop iterates through each day we need to get electricity data for and retrieves electricity prices for that day with an API call. This will be a lot of API calls, so some days will be skipped. When the data/prices are fetched they are added to a list and when the loop is finished we are left with an average value of the electricity price for the days we have retrieved data for.
+- Since Frost did not always have the data that we needed (see report 3.2 API), we had to find a workaround. Our solution was that for each element (in the weather category), we first find the five closest sensors, and then we check which of those sensors have data in the time period we want. If there is more than one sensor, we use the closest sensor to retrieve data in that weather category.
 - Since the diagram is complicated and we want to reuse it in other use cases, alternative flow is not included.
 
 ## Sequence Diagram: Select a solar array to see its statistics 
@@ -635,10 +636,11 @@ sequenceDiagram
 ```
 
 ### Textual description
+**Main Flow**:
 1. User selects another solar array
 2. App displays data
 
-Alternative flow: This solar array has already been in focus since the app was opened (or an error occurred during previous data retrieval). <br/>
+**Alternative flow**: This solar array has already been in focus since the app was opened (or an error occurred during previous data retrieval). <br/>
 
 2. App retrieves data as in the sequence diagram above.
 ### Comments: 
@@ -751,7 +753,7 @@ sequenceDiagram
 **Actor**: User<br/>
 **Precondition**: The user has pressed the + sign at the bottom of the navbar and is now directed to ManageSolarArrayScreen. <br/>
 **Postcondition**: The solar array is saved in the database and displayed on the home screen. <br/>
-
+**Main flow**:<br/>
 1. User presses the + sign at the bottom to add a new solar array.
 2. User is navigated to ManageSolarArrayScreen.
 3. User enters an address.
@@ -842,6 +844,7 @@ sequenceDiagram
 **Actor**: User<br/>
 **Precondition**: User has at least one saved solar array. The user has pressed the edit icon and has been navigated to the ManageSolarArray screen <br/>
 **Postcondition**: The current solar array has been updated<br/>
+**Main flow**:
 1. The app retrieves the solar array to be edited using its id.
 2. The app zooms in on its coordinates while retrieving address and roof surfaces.
 3. User edits roof sections.
@@ -851,7 +854,7 @@ sequenceDiagram
 ### Simplifications/Comments
 - Considering the apps use case, there will only be a small number of solar arrays saved, so retrieving all of them is not a big concern.
 - To make the diagram smaller, we left out some of the elements that were shown in previous diagrams.
-- After the user navigates to the homescreen, the updated solar array is in focus. No data is retrieved (as the address remains the same), but calculations are rerun with the updated information.
+- After the user navigates to the home screen, the updated solar array is in focus. No data is retrieved (as the address remains the same), but calculations are rerun with the updated information.
 
 ## Sequence diagram: Deleting a solar array
 ```mermaid
@@ -885,25 +888,25 @@ sequenceDiagram
 **Actor**: User<br/>
 **Precondition**: User has at least one solar array saved. <br/>
 **Postcondition**: The current solar array has been deleted. <br/>
-Main flow:
+**Main flow**:
 1. User clicks on the trashcan icon on the solar array card.
 2. The solar array is deleted from the database.
 3. Due to Flow, the homepage is updated so that the solar array card disappears from the list of saved solar arrays.
 4. Displays data for the first solar array saved.
 
-<br/>Alternative flow: User deletes the last solar array<br/>
+<br/>**Alternative flow**: User deletes the last solar array<br/>
 
 4. Displays the message "No solar array has been created"
 
 ## Activity Diagrams
 ### **Name**: Create/edit a solar array
 **Precondition**: User has not added or edited a solar array before 
-**Postcondition**: User has added the solar array, it is saved in the homescreen and they are able to edit it.
+**Postcondition**: User has added the solar array, it is saved in the home screen and they are able to edit it.
 <br/>
 
 **Main flow**:<br/>
 1. User opens the app
-2. The system shows the homescreen 
+2. The system shows the home screen 
 3. User clicks on the pluss button 
 4. The app shows a map and a dropdown menu
 5. The user searches for an address 
@@ -945,7 +948,7 @@ Main flow:
 flowchart TD;
     Start((Start))
 
-    HomeScreen(Shows homescreen)
+    HomeScreen(Shows home screen)
     PlusButton(Create new solar array)
     MapAndDropdown(Shows a map and a drop-down menu)
     Search{Search address 
@@ -988,7 +991,7 @@ flowchart TD;
     EmptyFields{Any empty fields?}
     NoNameOrPower(Error empty field)
 
-    SavedHomeScreen(Shows homescreen 
+    SavedHomeScreen(Shows home screen 
     with saved solar array)
 
     Start --> HomeScreen
@@ -1054,7 +1057,7 @@ flowchart TD;
 ```
 
 ### **Name**: Navigating between solar arrays and deleting them
-**Precondition**: User opens the app to the homescreen with two existing solar arrays <br/>
+**Precondition**: User opens the app to the home screen with two existing solar arrays <br/>
 **Postcondition**: User has successfully navigated between the solar arrays and deleted one.<br/>
 
 **Main flow**:<br/>
