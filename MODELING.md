@@ -1,22 +1,22 @@
-# Modellering
-### Inkluderte diagrammer: 
-- Use case diagram: Gir en generell oversikt over de viktigste funksjonene appen tilbyr brukeren. 
-- Klassediagram: Viser appens struktur og klasser, og hvordan de er relatert til hverandre. 
-- Sekvensdiagrammer: for utvalgte/hver use case viser hvordan de ulike komponentene (fra klassediagrammet) kommuniserer for å gjennomføre use caset. Den fokuserer primært på appens komponenter, og overlater brukerinteraksjonen til aktivitetsdiagrammet.
-- Aktivitetsdiagrammet: målet med aktivitetsdiagrammet er å vise hvordan brukerne kan interagere med appen, og hva brukeren ser som resultat av interaksjon. Vi har valgt å ha to aktivitetsdiagrammer, den ene for hjemskjermen, og den andre for legg-til skjermen. De legges ved på slutten, siden de er så store i mermaid. 
+# Modelling 
+### Included Diagrams : 
+- Use case diagram: Provides a general overview of the most important functions our app provides to the user.
+- Class diagram: Shows the app's structure, classes and how they are related to each other.
+- Sequence diagrams: for each use case, shows how the different components (from the class diagram) communicate with each other to implement that use case. It focuses primarily on the app's components, leaving user interaction to the activity diagram.
+- Activity diagram: The goal of the activity diagram is to show how users can interact with the app, and what they see as a result of the interaction. We have chosen to have two activity diagrams, one for the home screen, and the other for the create solar array screen. They are attached at the end, since they are made so large in mermaid.
 
 ## Use case diagram 
-Formålet med appen er at bruker skal kunne legge til en eller flere solcelleanlegg, og administrere dem (altså slette og redigere). Appen har også en infoskjerm, men den er ikke en del av hovedfunksjonaliteten i appen, og dermed er den ikke inkludert i use case diagrammet. <br/>
+The purpose of the app is for the user to be able to add one or more solar array, and manage them (i.e. delete and edit). The app also has an info screen, but it is not part of the main functionality of the app, and thus it is not included in the use case diagram. <br/>
 
 ![Use case diagram](image.png)<br/>
 
-Med statistikk menes en estimat om hvor mye man sparer ved å installere dette solcelleanlegget, tid til man har tjent inn det man innvesterte inn i anlegget, og en graf som viser hvordan er strømproduksjonen i området mtp værforhold. <br/>
-Redigering, sletting og valg av nytt anlegg er markert med <<extend>> fordi de krever minst et lagret anlegg. <br/>
+Statistics refer to three things: an estimate of how much you save by installing the chosen solar array, the time it takes to earn back what you have invested in the system, and a graph that shows an overview of electricity production in the area of the solar array based on weather conditions. <br/>
+Editing, deleting and selecting a new solar array are marked with <<extend>> because they require at least one stored solar array.<br/>
 <br/>
-Diagrammet ble laget ved hjelp av [app.diagrams.net](https://app.diagrams.net/) siden Mermaid ikke har Use case diagrammer. <br/>
+The diagram was made with the help of [app.diagrams.net](https://app.diagrams.net/) because Mermaid does not provide functionality to model Use case diagrams. <br/>
 
-## Klassediagram
-Klassediagrammet fokuserer på arkitekturen i appen vår (ViewModel - Repository - Datasource) og noen av de viktigste dataklassene. Vi inkluderer ikke composables siden de er strengt tatt funksjoner. 
+## Class Diagram
+The class diagram focuses on the architecture in our app (Viewmodel - Repositoty - Datasource) and some of the most important data classes. We do not include composables since they are strictly functions.
 
 ```mermaid
 classDiagram
@@ -507,17 +507,17 @@ classDiagram
     BuildingDataSource -- Address: serialization
 ```
 
-### Kommentarer: 
-- The class diagram does not include data classes that are only used store the responce from API 
-- We chose not to show the relationships between Coordinates and the classes FrostRepository, FrostDatasource, ElectricityRepository, and Pos. We made this decision as a trade-off between completeness and readability. Including all of these connections would have made the diagram overly cluttered, which would reduce its clarity. 
-- SolarArrayType: : In Kotlin, enum classes can contain fields and functions, which is not typically supported by standard UML enum representations. Therefore, we chose to model it as a class with fields and methods, and included the enum values as a note.
-- Data classes are red. You cannot see it in Guthub due to Guthub's limitation, but you can see this in Preview in VSCode 
-- Siden Mermaid og markdown ikke støttet to <> inni hverandre, har jeg brukt "of" i disse tilfellene. For eksempel Flow&lt;list of SolarArray&gt;. 
-- SolarArray og SunSaverRepository: Siden det allerede er en assosiasjon mellom SolarArray og ISunSaverRepository, og SunSaverRepository implementerer dette interfacet, lager vi ikke en egen assosiasjon mellom SolarArray og SunSaverRepository, da dette er underforstått gjennom arv. Det samme gjelder for SolarArrayWithRoofSections og SunSaverDatasource.
+### Comments:
+- The class diagram does not include data classes that are only used to store the response from API
+- We chose not to show the relationships between Coordinates and the following classes: FrostRepository, FrostDatasource, ElectricityRepository, and Pos. We made this decision as a trade-off between completeness and readability. Including all of these connections would have made the diagram overly cluttered, which would reduce its clarity.
+- SolarArrayType: : In Kotlin, enum classes can contain fields and functions, which is not typically supported by standard UML enum representations. Therefore, we chose to model it as a class with fields and methods, and included the enum values ​​as a note.
+- Data classes are red. You cannot see it in Guthub due to Guthub's limitation, but you can see this in Preview in VSCode
+- Since Mermaid and markdown did not support two <> inside each other, we have used "of" in these cases. For example Flow&lt;list of SolarArray&gt;.
+- SolarArray and SunSaverRepository: Since there is already an association between SolarArray and ISunSaverRepository, and SunSaverRepository implements this interface, we do not create a separate association between SolarArray and SunSaverRepository, as this is implied by inheritance. The same applies to SolarArrayWithRoofSections and SunSaverDatasource.
 
 
-## Sekvensdiagram: Se statistikk for lagret anlegg
-Bemerkning: dette er et use case i seg selv, men dette kan også sees på som en del av de andre use casene (opprett, rediger og slett). Det som er forskjellen på de ulike casene er hvilket solcelleanlegg som er i fokus. For å unngå copy-paste, vil de referere til dette diagrammet med kommentar om hvilket solcelleanlegg det hentes data for. Et av punktene i "Forenklinger/kommentarer" under diagrammet gir også en full oversikt over de ulike scenarioene. 
+## Sequence Diagram: View the statistics for a saved solar array.
+Note: this is a use case in itself, but it can also be seen as part of the other use cases (create, edit and delete). The difference between the use cases is the solar array that is in focus. To avoid repetition, they (the sequence diagrams for the other use cases) will refer to this diagram with a comment about which solar array the data is being retrieved for. One of the points in "Simplifications/Comments", situated below the diagram also gives a full overview of the different scenarios.
 
 ```mermaid
 sequenceDiagram
@@ -595,28 +595,28 @@ sequenceDiagram
     HomeViewModel -->> HomeScreen: show saving and recoup statistic 
 ```
 
-### Tekstlig beskrivelse: 
-Navn: Se statistikk for lagret anlegg<br/>
-Aktør: Bruker<br/>
-Prebetingelse: Bruker har minst et lagret anlegg. Bruker går inn på appen. <br/>
-Postbetingelse: Bruker fikk sett statistikk for sin anlegg. <br/>
-1. Appen henter lagrede anlegg fra databasen og viser dem på HomeScreen. 
-2. Appen setter i fokus et av anleggene. 
-3. Appen viser viser til brukeren at data lastes. 
-4. Samtidig gjøres det asykrone kall til HvaKosterStrømmen og Frost for å hente gjennomsnittlige verdier per måned. 
-5. Når data fra Frost er hentet, beregnes forventet gjennomsnittlig strømproduksjonen per måned. 
-6. Resultatet vises til brukeren.
-7. Etter det beregnes forventet sparing og inntjenningstid. 
-8. Resulatet av det vises også til brukeren. 
+### Textual Description: 
+**Name**: View statistics for a saved solar array<br/>
+**Actor**: User<br/>
+**Precondition**: User has at least one saved solar array. User enters the app. <br/>
+**Postcondition**: User has seen statistics for their solar array. <br/>
+1. The app retrieves saved solar arrays from the database and displays them on the HomeScreen.
+2. The app focuses on one of the solar arrays.
+3. The app shows the user that data is being loaded.
+4. At the same time, asynchronous calls are made to HvaKosterStrømmen and Frost to retrieve average values ​​per month.
+5. When data from Frost has been retrieved, the expected average electricity production per month is calculated.
+6. The result is shown to the user.
+7. After that, the expected savings and payback period are calculated.
+8. The result is also shown to the user.
 
-### Forenklinger/Kommentarer
-- Hvilket anlegg som settes i fokus, avhenger av hvilken use case det er snakk om. Hvis appen er nettopp åpnet (og brukeren har noen anlegg lagret) så vil det første anlegget settes i fokus. Hvis vi ble nettopp navigert til hjemskjermen etter å ha lagt til et nytt anlegg, så blir det nye anlegget satt i fokus. Hvis man ble navigert til hjemskjermen etter å ha oppdatert et anlegg, så vil det oppdaterte anlegget være i fokus. Hvis et anlegg blir sletta, retter vi fokus til det første anlegget (hvis det finnes)
-- Bruker "coord" for "coordinater" for å spare litt plass
-- Grunnen til at vi har mange api kall per tidsenhet til HvaKosterStrømmen er at apiet bare har en json fil for hver dag som finnes, så må man gjøre et api call per dag for å hente ut flere dager. Altså itererer loopen gjennom hver dag vi trenger å hente strømdata for, og henter strømpriser med et api-kall for hver dag. Dette blir mange kall, så noen dager blir hoppet over. Når dataen/prisene er hentet, legges det til i en liste, slik at etter loopen er ferdig, kan sitte igjen med en gjennomsnittsverdi av strømprisen for de dagene vi har hentet for.
-- Siden Frost ikke alltid har data som vi trenger (se rapport 3.2 API), så måtte vi finne en løsning på dette. Løsningen vi fikk for, var at for hver element (værkategori), finner vi først 5 nærmeste sensorer, og så sjekker vi, hvilke av de sensorene har data i den tidsperioden vi ønsker. Hvis det er flere enn en (1) sensor, bruker vi den nærmeste sensoren for å hente data i denne værkategorien. 
-- Siden diagrammet er komplisert og vi ønsker å gjenbruke det i andre use case, er alternativt flyt ikke inkludert. 
+### Simplifications/Comments
+- Which solar array is set in focus depends on the use case. If the app has just been opened (and the user has some solar arrays saved) then the first solar array will be set in focus. If we were just navigated to the home screen after adding a new solar array, then the new solar array will be set in focus. If we were navigated to the home screen after updating a solar array, then the updated solar array will be in focus. If a solar array is deleted, we direct focus to the first solar array (if it exists)
+- Used "coord" for "coordinates" to save some space
+- The reason we have many api calls per time unit to HvaKosterStrømmen is that the api only has one json file for each day that exists, so you have to make an api call per day to retrieve multiple days. So the loop iterates through each day we need to retrieve electricity data for, and retrieves electricity prices with an api call for each day. This will be a lot of calls, so some days will be skipped. When the data/prices are retrieved, it is added to a list, so that after the loop is finished, we can be left with an average value of the electricity price for the days we have retrieved for.
+- Since Frost did not always have the data that we needed (see report 3.2 API), we had to find a solution for this. The solution we came up with was that for each element (weather category), we first find the 5 closest sensors, and then we check which of those sensors have data in the time period we want. If there is more than one (1) sensor, we use the closest sensor to retrieve data in that weather category.
+- Since the diagram is complicated and we want to reuse it in other use cases, alternative flow is not included.
 
-## Sekvensdiagram: Velg et anlegg for å se statistikk for det. 
+## Sequence Diagram: Select a solar array to see its statistics 
 
 ```mermaid
 sequenceDiagram
@@ -634,19 +634,18 @@ sequenceDiagram
     end 
 ```
 
-### Tekstlig beskrivelse
-1. Bruker velger et annet anlegg 
-2. Appen viser data 
+### Textual description
+1. User selects another solar array
+2. App displays data
 
-Alternativt flyt: Dette anlegget har allerede vært i fokus siden appen ble åpnet (eller det skjedde feil ved tidligere henting av data). <br/>
+Alternative flow: This solar array has already been in focus since the app was opened (or an error occurred during previous data retrieval). <br/>
 
-2. Appen henter data som i sekvensdiagrammet ovenfor. 
+2. App retrieves data as in the sequence diagram above.
+### Comments: 
+- Can be seen as a continuation of the "View statistics for a saved solar array" sequence diagram with an alternative flow.
+- The main goal of the diagram is to show that data does not need to be retrieved again, if the previous retrieval was successful.
 
-### Kommentarer: 
-- Kan sees som et fortsettelse av sekvensdiagrammet for "Se statistikk for lagret anlegg" med et alternativt flyt. 
-- Hovedmålet med diagrammet er å vise at data ikke må hentes på nytt, hvis forrige henting var vellykket. 
-
-## Sekvensdiagram: Legg til solcelleanlegg
+## Sequence Diagrarm: Add a solar array 
 ```mermaid
 sequenceDiagram
 
@@ -747,43 +746,43 @@ sequenceDiagram
         SunSaverDatasource ->> Database: insertRoofSections(List<RoofSectionEntity>)
     end
 ```
-### Tekstlig beskrivelse: 
-Navn: Legg til et anlegg<br/>
-Aktør: Bruker<br/>
-Pre: Brukeren har trykket på +-tegnet nede i navbaren og er nå dirigert til ManageSolarArrayScreen. <br/>
-Post: Solcelleanlegget er lagret i databasen og vises på hjemskjermen. <br/>
+### Textual description: 
+**Name**: Add a solar array<br/>
+**Actor**: User<br/>
+**Precondition**: The user has pressed the + sign at the bottom of the navbar and is now directed to ManageSolarArrayScreen. <br/>
+**Postcondition**: The solar array is saved in the database and displayed on the home screen. <br/>
 
-1. Bruker trykker på +-tegnet nede for å legge til nytt solcelleanlegg. 
-2. Bruker blir navigert til ManageSolarArrayScreen. 
-3. Bruker skriver inn en adresse. 
-4. Appen gjør et kall mot GeoNorge for å hente adresseforslag. 
-5. Bruker velger noe fra forslagene. 
-6. Brukeren blir zoomet inn på stedet. 
-7. Appen gjør et kall mot Kartverket for å få cadastreId. 
-8. Appen gjør et kall mot Fjordkraft for å hente takflater. 
-9. Appen markerer takflater på skjermen. 
-10. Bruker velger et takflate. 
-11. Appen lagrer takflate som kort. Regner ut installasjonsprisen. Viser til brukeren.
-12. Bruker trykker på lagre. 
-13. Appen ber om å oppgi navn på anlegger og strømforbruk. 
-14. Bruker skriver inn navn 
-15. Bruker trykker på lagre. 
-16. Appen lagrer til databasen og navigerer til HomeScreen. 
+1. User presses the + sign at the bottom to add a new solar array.
+2. User is navigated to ManageSolarArrayScreen.
+3. User enters an address.
+4. The app makes an API call to GeoNorge to retrieve address suggestions.
+5. User selects something from the suggestions.
+6. The app zooms in on the address.
+7. The app makes an API call to the Norwegian Mapping Authority to get the cadastreId.
+8. The app makes an API call to Fjordkraft to retrieve roof sections.
+9. The app marks roof sections on the screen.
+10. User selects a roof section.
+11. The app saves the roof area as a map. It calculates the installation price and shows it to the user.
+12. User presses save.
+13. The app asks to enter the name of the solar array and their power consumption.
+14. User enters the name
+15. User presses save.
+16. The app saves the solar array to the database and navigates to the HomeScreen.
 
- <br/>**Alternativ flyt**: Brukeren velger å zoome inn på adressen manuelt.<br/>
+<br/>**Alternative flow**: The user chooses to zoom in on the address manually.<br/>
 
-3. Bruker zoomer inn på riktig adresse. <br/>
-4. Appen gjør et kall mot GeoNorge for å hente adressen. <br/>
-5. Hopp til punkt 7. <br/>
+3. User zooms in on the correct address. <br/>
+4. The app makes an API call to GeoNorge to retrieve the address. <br/>
+5. Jump to point 7. <br/>
 
-### Forenklinger/Kommentarer
-- Vi starter interaksjon med at brukeren er nettopp blitt navigert til ManageSolarArrayScreen.
-- Vi sier at adresseforslag hentes kun en gang selv de egentlig hentes for hver bokstav som skriver/slettes i søkefeltet. 
-- Utelatter å forklare alle steg i "appen gjør"-punktene, siden de kan sees i detalj på sekvensdiagrammet. 
-- Valideringer/div. brukerinteraksjon etter at adressen er satt skal vises i aktivitetsdiagrammet. Dette er fordi det er lite givende å ha det i sekvensdigrammet, da det er kun interaksjon mellom bruker og ManageSolarArrayScreen-skjermen. 
-- Etter at det nye anlegget er lagret, vil appen hente data for dette nye anlegget. Så videre på hjemskjermen får vi samme flyt som i sekvensdiagrammet for "Se statistikk for lagret anlegg" med det nye anlegget i fokus. 
+### Simplifications/Comments
+- We start the interaction with the user having just been navigated to ManageSolarArrayScreen.
+- We say that address suggestions are only retrieved once even though they are actually retrieved for each letter typed/deleted in the search field.
+- We omit explaining all the steps in the "The app.." points, since they can be seen in detail in the sequence diagram.
+- Validations and other user interactions after the address is set are shown in the activity diagram. This is because it is of little value to have it in the sequence diagram, as the interactions only occur between the user and the ManageSolarArrayScreen screen.
+- After the new solar array is saved, the app will retrieve data for it. So on the home screen we get the same flow as in the sequence diagram for "View statistics for a  saved solar array" with the new solar array in focus.
 
-## Sekvensdiagram: Redigere solcelleanlegg
+## Sequence Diagram: Edit a solar array 
 
 ```mermaid
 sequenceDiagram
@@ -838,24 +837,23 @@ sequenceDiagram
         SunSaverDatasource ->> Database: insertRoofSections(added Roof Sections)
     end
 ```
-### Tekstlig beskrivelse: 
-Navn: Redigere eksisterende anlegg <br/>
-Aktør: Bruker<br/>
-Pre: Bruker har minst ett lagret anlegg. Brukeren har trykket på redigeringsikonet og blitt navigert til ny skjerm <br/>
-Post: Det aktuelle anlegget er oppdatert<br/>
-1. Appen henter solcelleanlegget som skal redigeres vha dets id. 
-2. Appen zoomer inn på koordinter samtidig som adresse og takflater hentes. 
-3. Bruker manipulerer takflater. 
-4. Bruker trykker på lagre. 
-5. Appen navigerer brukeren til hjemskjermen og oppdaterer array. 
+### Textual description:
+**Name**: Edit an existing solar array <br/>
+**Actor**: User<br/>
+**Precondition**: User has at least one saved solar array. The user has pressed the edit icon and has been navigated to the ManageSolarArray screen <br/>
+**Postcondition**: The current solar array has been updated<br/>
+1. The app retrieves the solar array to be edited using its id.
+2. The app zooms in on its coordinates while retrieving address and roof surfaces.
+3. User edits roof sections.
+4. User presses save.
+5. The app navigates the user to the home screen and updates the array.
 
-### Forenklinger/Kommentarer
-- Med tanke på appens bruksområde, vil det være et fåtall anlegg lagret, så det er ikke så stor overheng å hente alle lagrede anlegg.
-- For å gjøre diagrammet mindre, dropppet vi noen av de delene som var vist i forrige diagrammer. 
-- Etter at brukeren er navigert til hjemskjermen, er det oppdaterte anlegget i fokus. Ingen data hentes (da adressen forblir den samme), men beregninger kjøres på nytt med oppdatert data. 
+### Simplifications/Comments
+- Considering the apps use case, there will only be a small number of solar arrays saved, so retrieving all of them is not a big concern.
+- To make the diagram smaller, we left out some of the elements that were shown in previous diagrams.
+- After the user navigates to the homescreen, the updated solar array is in focus. No data is retrieved (as the address remains the same), but calculations are rerun with the updated information.
 
-
-## Sekvensdiagram: Slette solcelleanlegg
+## Sequence diagram: Deleting a solar array
 ```mermaid
 sequenceDiagram
     actor Bruker
@@ -882,26 +880,25 @@ sequenceDiagram
         HomeScreen -->> Bruker: "Ingen solcelleanlegg er opprettet"
     end
 ```
-### Tekstlig beskrivelse: <br/>
-Navn: Slett et anlegg<br/>
-Aktør: Bruker<br/>
-Pre: Bruker har minst en (1) solcelleanlegg lagret. <br/>
-Post: Den aktuelle solcelleanlegget er slettet. <br/>
-Hovedflyt:
-1. Bruker klikker på søppelkasse ikonet et lagret solcelleanlegg. 
-2. Anlegget slettes fra databasen. 
-3. På grunn av Flow blir hjemsiden oppdatert slik at anlegget forsvinner fra lista over lagrede anlegg. 
-4. Viser data for det første anlegget som er lagret. 
+### Textual description: <br/>
+**Name**: Delete a solar array<br/>
+**Actor**: User<br/>
+**Precondition**: User has at least one solar array saved. <br/>
+**Postcondition**: The current solar array has been deleted. <br/>
+Main flow:
+1. User clicks on the trashcan icon on the solar array card.
+2. The solar array is deleted from the database.
+3. Due to Flow, the homepage is updated so that the solar array card disappears from the list of saved solar arrays.
+4. Displays data for the first solar array saved.
 
-<br/>Alternativ flyt: Bruker sletter siste anlegg<br/>
+<br/>Alternative flow: User deletes the last solar array<br/>
 
-4. Viser meldingen "Ingen solcelleanlegg er opprettet"
+4. Displays the message "No solar array has been created"
 
-
-## Aktivitetsdiagrammer
+## Activity Diagrams
 ### **Name**: Create/edit a solar array
-**Pre - conditions**: User has not created or edited a solar array before 
-**Post - conditions**: User has created the solar array, it is saved in the homescreen and they are able to edit it.
+**Precondition**: User has not added or edited a solar array before 
+**Postcondition**: User has added the solar array, it is saved in the homescreen and they are able to edit it.
 <br/>
 
 **Main flow**:<br/>
@@ -951,21 +948,26 @@ flowchart TD;
     HomeScreen(Shows homescreen)
     PlusButton(Create new solar array)
     MapAndDropdown(Shows a map and a drop-down menu)
-    Search{Search address or navigate on map?}
+    Search{Search address 
+    or navigate on map?}
 
-    EditOrCreate{Create a new solar array or edit an existing one?}
+    EditOrCreate{Create a new solar array 
+    or edit an existing one?}
     EditSolarArray(User clicks on edit button)
     AddressZoom(System zooms in on address in the map)
 
     ClickAddress(Select a house on the map)
     ShowRoofSections(Show available roof sections)
     ChooseRoofSections(Add desired roof sections)
-    AddRoofManually{Add from map or add manually?}
+    AddRoofManually{Add from map or 
+    add manually?}
 
     AddArea(Write area)
     AddDirection(Write direction)
     AddAngle(Write angle)
     AddPanels(Write number of panels)
+
+    AddRoofSection(Press the add button)
 
     ClickRoofSection(Click on chosen roof section)
     EditRoofSection{Edit roof section?}
@@ -973,6 +975,7 @@ flowchart TD;
 
     Edit(Edit)
     SaveChanges(Save)
+    Done{Done?}
 
     SelectSolarPanel{Select a solar panel type}
     ShowPriceOverview(Show price overview)
@@ -982,7 +985,11 @@ flowchart TD;
     WriteElectricity(Write electricity usage)
     Save(Save)
 
-    SavedHomeScreen(Shows homescreen with saved solar array)
+    EmptyFields{Any empty fields?}
+    NoNameOrPower(Error empty field)
+
+    SavedHomeScreen(Shows homescreen 
+    with saved solar array)
 
     Start --> HomeScreen
     HomeScreen --> EditOrCreate
@@ -1001,16 +1008,21 @@ flowchart TD;
     ShowRoofSections --> ChooseRoofSections 
     ChooseRoofSections --> AddRoofManually
 
-    AddRoofManually --From map--> ClickRoofSection
+    AddRoofManually --From map--> Done
     AddRoofManually --Manually-->AddArea
 
     AddArea --> AddDirection
     AddDirection --> AddAngle
     AddAngle --> AddPanels
-    AddPanels --> ClickRoofSection
+    AddPanels --> AddRoofSection
+    AddRoofSection --> Done
 
-    ClickRoofSection --> EditRoofSection
-    EditRoofSection --YES--> ChooseEditSegment
+    Done --YES--> EditRoofSection
+    Done --NO--> AddRoofManually
+    
+    EditRoofSection --YES--> ClickRoofSection
+    ClickRoofSection --> ChooseEditSegment
+
     EditRoofSection --NO--> SelectSolarPanel
 
     ChooseEditSegment --Area--> Edit
@@ -1029,7 +1041,11 @@ flowchart TD;
     SelectSaveButton --> WriteName
     WriteName --> WriteElectricity
     WriteElectricity --> Save
-    Save --> SavedHomeScreen
+    Save --> EmptyFields
+    
+    EmptyFields --NO--> SavedHomeScreen
+    EmptyFields --YES--> NoNameOrPower
+    NoNameOrPower --> WriteName 
 
     End((End))
 
@@ -1038,8 +1054,8 @@ flowchart TD;
 ```
 
 ### **Name**: Navigating between solar arrays and deleting them
-**Pre - conditions**: User opens the app to the homescreen with two existing solar arrays <br/>
-**Post - conditions**: User has successfully navigated between the solar arrays and deleted one.<br/>
+**Precondition**: User opens the app to the homescreen with two existing solar arrays <br/>
+**Postcondition**: User has successfully navigated between the solar arrays and deleted one.<br/>
 
 **Main flow**:<br/>
 1. User clicks on the second solar array 
@@ -1063,8 +1079,10 @@ flowchart TD;
 
     Start((Start))
     SelectSecond(User clicks on the second solar array)
-    RetrievedData{Has the system retrieved data?}
-    DisplayComponents(System displays graph, savings and price recoup components)
+    RetrievedData{Has the system 
+    retrieved data?}
+    DisplayComponents(System displays graph, 
+    savings and price recoup components)
 
     ShowError(System shows error)
     Wait(User waits til data is retrieved)
