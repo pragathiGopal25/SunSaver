@@ -11,8 +11,8 @@ private const val MAXIMUM_OPTIMAL_INCLINE_ANGLE = 45.0 //Degrees
 private const val INCLINE_ANGLE_EFFICIENCY_DECREASE_PER_DEGREE = 0.05
 private const val DIRECTION_EFFICIENCY_DECREASE_PER_DEGREE = 0.002
 private const val DEFAULT_PANEL_TEMPERATURE_CELSIUS = 25.0
-private const val TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS = 0.25 // Percentage loss per degree Celsius
-private const val TEMPERATURE_EFFICIENCY_GAIN_PER_CELSIUS = 0.4
+private const val TEMPERATURE_EFFICIENCY_LOSS_PER_CELSIUS = 0.3 // Percentage loss per degree Celsius, aka temperature coefficient
+private const val TEMPERATURE_EFFICIENCY_GAIN_PER_CELSIUS = 0.3
 
 
 //Calculates the monthly electricity production for a solar array based on set factors
@@ -44,7 +44,8 @@ fun calculateMonthlyElectricityProduction(
 }
 
 //Calculate the efficiency of the solar panel based on temperature in celsius
-// temperature gain: https://www.bostonsolar.us/solar-blog-resource-center/blog/how-do-temperature-and-shade-affect-solar-panel-efficiency/
+// temperature coefficient
+// https://snl.no/solceller
 private fun calculatePanelEfficiency(temperature: Double, solarArray: SolarArray): Double {
     // Efficiency: https://www.photonicuniverse.com/en/resources/articles/full/7.html
     val panelArea = solarArray.panelType.length.times(solarArray.panelType.width)
