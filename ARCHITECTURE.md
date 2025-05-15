@@ -48,6 +48,7 @@ The project uses the following libraries:
 - [Lottiefiles](https://lottiefiles.com/blog/working-with-lottie-animations/getting-started-with-lottie-animations-in-android-app)
 - [Vico](https://github.com/patrykandpatrick/vico) \*
 - [Jetpack Compose](https://developer.android.com/compose)
+- [JUnit](https://developer.android.com/training/testing/instrumented-tests/androidx-test-libraries/runner)
 
 ### Fjordkraft
 
