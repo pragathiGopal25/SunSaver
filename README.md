@@ -35,6 +35,8 @@ In order to run the application, do the following steps:
     - We used Ktor for making HTTP connections/requests for API calls to Frost, Fjordkraft, Kartverket, Geonorge and HvaKosterStrommen.
 - [Jetpack Compose](https://developer.android.com/develop/ui/compose/documentation)
     - We used Jetpack Compose to design and build the UI components in our app.
+- [JUnit](https://developer.android.com/training/testing/instrumented-tests/androidx-test-libraries/runner)
+    - We used JUnit for testing. 
 
 ## Calculations 
 - Our calculation of the solar energy produced was based on the following formula:
