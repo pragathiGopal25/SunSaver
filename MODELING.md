@@ -114,8 +114,8 @@ classDiagram
 
     class HomeViewModel {
         - networkObserver: NetworkObserver
-        - _repository: FrostRepository
-        - _sunSaverRepository: SunSaverRepository
+        - frostRepository: FrostRepository
+        - sunSaverRepository: SunSaverRepository
         - electricityPriceRepository: ElectricityPriceRepository
 
         - _priceLoadingState: MutableStateFlow~LoadingState~
@@ -373,8 +373,8 @@ classDiagram
     }
 
     class ManageSolarArrayViewModel {
-        - repository: BuildingRepository
-        - _sunSaverRepository: SunSaverRepository
+        - buildingRepository: BuildingRepository
+        - sunSaverRepository: SunSaverRepository
 
         - _currentSolarArray: MutableStateFlow~SolarArray~
         + currentSolarArray: StateFlow~SolarArray~
