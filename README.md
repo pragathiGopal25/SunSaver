@@ -4,7 +4,7 @@
 - Antonina Bukhantsova 
 - Hani Hussein Ali
 - Pragathi Gopalakrishnan
-- Radwa Ayanle Godor
+- Radwa Ayanle Godor 
 
 ## Requirements and notices before running the application: 
 - The application runs on the Android studio versions Ladybug/Meerkat
